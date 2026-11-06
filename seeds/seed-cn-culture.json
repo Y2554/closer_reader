@@ -1,0 +1,526 @@
+{
+ "id": "cn-culture",
+ "type": "trans",
+ "title": "Chinese Cultural Products Go Global",
+ "zh": "中国文化产品走向世界",
+ "source": "CET-6 · Part IV Translation 汉译英（集训刷题卷）",
+ "createdAt": 1791900000000,
+ "paragraphs": [
+  {
+   "sentences": [
+    {
+     "zh": "近年来，越来越多的中国文化产品走向全球市场，日益受到海外消费者的青睐。",
+     "en": "In recent years, a growing number of Chinese cultural products have entered the global market and become increasingly popular with overseas consumers."
+    },
+    {
+     "zh": "随着中国对外文化贸易的快速发展，中国文化产品出口额已持续多年位居世界前列，形成了一批具有国际影响力的文化企业、产品和品牌。",
+     "en": "With the rapid development of China's foreign cultural trade, the export value of Chinese cultural products has ranked among the highest in the world for many consecutive years, and a number of internationally influential cultural enterprises, products and brands have emerged."
+    },
+    {
+     "zh": "数据显示，中国的出版物、影视作品、网络文学与动漫作品等在海外的销售量连年攀升。",
+     "en": "Statistics show that overseas sales of Chinese publications, films and TV dramas, online literature, animations and comics have been rising year after year."
+    },
+    {
+     "zh": "中国政府出台了一系列政策鼓励和支持更多具有中国元素的优秀文化产品走出国门，扩大海外市场份额，进一步提升中国文化的世界影响力。",
+     "en": "The Chinese government has introduced a series of policies to encourage and support more excellent cultural products with Chinese elements to go global, expand their overseas market share and further enhance the global influence of Chinese culture."
+    }
+   ]
+  }
+ ],
+ "options": {},
+ "blanks": {},
+ "expr": [
+  {
+   "zh": "近年来",
+   "en": "in recent years",
+   "n": "提示全文用现在完成时（have entered / has ranked / has introduced）。"
+  },
+  {
+   "zh": "越来越多的",
+   "en": "a growing number of",
+   "alt": "more and more / an increasing number of",
+   "n": "a growing number of + 复数名词，谓语用复数。"
+  },
+  {
+   "zh": "走向全球市场",
+   "en": "enter the global market",
+   "alt": "go global / reach the global market"
+  },
+  {
+   "zh": "受到海外消费者的青睐",
+   "en": "become popular with overseas consumers",
+   "alt": "be favored by overseas consumers",
+   "n": "“受到……青睐”不必直译，be popular with / be favored by 最自然。"
+  },
+  {
+   "zh": "对外文化贸易",
+   "en": "foreign cultural trade",
+   "alt": "cultural trade with other countries"
+  },
+  {
+   "zh": "出口额",
+   "en": "export value",
+   "alt": "exports"
+  },
+  {
+   "zh": "位居世界前列",
+   "en": "rank among the highest in the world",
+   "alt": "rank among the top in the world / be one of the world's leading",
+   "n": "“前列”译成 among the top / highest，不要译成 front。"
+  },
+  {
+   "zh": "持续多年",
+   "en": "for many consecutive years",
+   "alt": "for many years in a row"
+  },
+  {
+   "zh": "具有国际影响力的",
+   "en": "internationally influential",
+   "alt": "with international influence",
+   "n": "“具有……的”常用形容词或 with 结构，避免 which have 的长定语从句。"
+  },
+  {
+   "zh": "形成了一批",
+   "en": "a number of … have emerged",
+   "alt": "a number of … have taken shape",
+   "n": "无主句：把“一批企业、产品和品牌”变成主语，谓语用 emerge / take shape。"
+  },
+  {
+   "zh": "数据显示",
+   "en": "statistics show that",
+   "alt": "data show that / according to statistics"
+  },
+  {
+   "zh": "出版物",
+   "en": "publications"
+  },
+  {
+   "zh": "影视作品",
+   "en": "films and TV dramas",
+   "alt": "film and television works"
+  },
+  {
+   "zh": "网络文学",
+   "en": "online literature",
+   "alt": "web literature"
+  },
+  {
+   "zh": "动漫作品",
+   "en": "animations and comics",
+   "alt": "anime and comics"
+  },
+  {
+   "zh": "连年攀升",
+   "en": "have been rising year after year",
+   "alt": "increase year by year",
+   "n": "现在完成进行时强调“一直在涨”；year after year / year by year 都可以。"
+  },
+  {
+   "zh": "出台了一系列政策",
+   "en": "introduce a series of policies",
+   "alt": "issue / roll out a series of policies"
+  },
+  {
+   "zh": "中国元素",
+   "en": "Chinese elements"
+  },
+  {
+   "zh": "走出国门",
+   "en": "go global",
+   "alt": "go abroad / go overseas"
+  },
+  {
+   "zh": "市场份额",
+   "en": "market share"
+  },
+  {
+   "zh": "提升中国文化的世界影响力",
+   "en": "enhance the global influence of Chinese culture",
+   "alt": "increase the worldwide influence of Chinese culture"
+  }
+ ],
+ "keys": [
+  {
+   "t": "a growing number of",
+   "k": "phrase",
+   "n": "越来越多的"
+  },
+  {
+   "t": "entered the global market",
+   "k": "phrase",
+   "n": "走向全球市场"
+  },
+  {
+   "t": "increasingly popular with",
+   "k": "phrase",
+   "n": "日益受到……青睐"
+  },
+  {
+   "t": "export value",
+   "k": "phrase",
+   "n": "出口额"
+  },
+  {
+   "t": "ranked among the highest in the world",
+   "k": "phrase",
+   "n": "位居世界前列"
+  },
+  {
+   "t": "for many consecutive years",
+   "k": "phrase",
+   "n": "持续多年"
+  },
+  {
+   "t": "internationally influential",
+   "k": "phrase",
+   "n": "具有国际影响力的"
+  },
+  {
+   "t": "have emerged",
+   "k": "phrase",
+   "n": "形成了；涌现出"
+  },
+  {
+   "t": "year after year",
+   "k": "phrase",
+   "n": "连年；一年又一年"
+  },
+  {
+   "t": "a series of",
+   "k": "phrase",
+   "n": "一系列"
+  },
+  {
+   "t": "go global",
+   "k": "phrase",
+   "n": "走出国门；走向世界"
+  },
+  {
+   "t": "market share",
+   "k": "phrase",
+   "n": "市场份额"
+  },
+  {
+   "t": "enhance the global influence",
+   "k": "phrase",
+   "n": "提升世界影响力"
+  }
+ ],
+ "tips": [
+  "时态：“近年来”“已持续多年”“连年攀升”都表示从过去延续到现在，用现在完成时或现在完成进行时（have entered / has ranked / have been rising）。",
+  "长句拆分与合并：第 2 句前半讲出口额、后半讲形成品牌，用 and 连接两个分句；第 1 句“走向……，日益受到……”共用主语，用 have entered … and become … 并列。",
+  "无主句换主语：“形成了一批……企业、产品和品牌”没有主语，把宾语变成主语：a number of … enterprises, products and brands have emerged。",
+  "定语前置：“具有国际影响力的”“具有中国元素的”用副词 + 形容词（internationally influential）或 with 短语，比 which have 定语从句更简洁。",
+  "并列动词：“鼓励和支持……走出国门，扩大……，进一步提升……”用 encourage and support … to go global, expand … and further enhance …，三个并列不定式共用一个 to。"
+ ],
+ "lex": {
+  "a": [
+   "art.",
+   "一（个）"
+  ],
+  "after": [
+   "prep.",
+   "（year after year）一年又一年"
+  ],
+  "among": [
+   "prep.",
+   "在……之中（rank among 位列）"
+  ],
+  "and": [
+   "conj.",
+   "和"
+  ],
+  "animations": [
+   "n.（复数）",
+   "动画（animation）"
+  ],
+  "become": [
+   "v.（过去分词）",
+   "变得（become）"
+  ],
+  "been": [
+   "v.（过去分词）",
+   "（have been rising）一直在（上升）"
+  ],
+  "brands": [
+   "n.（复数）",
+   "品牌（brand）"
+  ],
+  "china's": [
+   "n.（所有格）",
+   "中国的"
+  ],
+  "chinese": [
+   "adj.",
+   "中国的"
+  ],
+  "comics": [
+   "n.（复数）",
+   "漫画（comic）"
+  ],
+  "consecutive": [
+   "adj.",
+   "连续的",
+   "following one after another without a break"
+  ],
+  "consumers": [
+   "n.（复数）",
+   "消费者（consumer）"
+  ],
+  "cultural": [
+   "adj.",
+   "文化的"
+  ],
+  "culture": [
+   "n.",
+   "文化"
+  ],
+  "development": [
+   "n.",
+   "发展"
+  ],
+  "dramas": [
+   "n.（复数）",
+   "（TV dramas）电视剧（drama）"
+  ],
+  "elements": [
+   "n.（复数）",
+   "元素（element）"
+  ],
+  "emerged": [
+   "v.（过去分词）",
+   "出现；涌现（emerge）",
+   "appeared or came into existence"
+  ],
+  "encourage": [
+   "v.",
+   "鼓励"
+  ],
+  "enhance": [
+   "v.",
+   "提升；增强",
+   "to improve or increase"
+  ],
+  "entered": [
+   "v.（过去分词）",
+   "进入（enter）"
+  ],
+  "enterprises": [
+   "n.（复数）",
+   "企业（enterprise）"
+  ],
+  "excellent": [
+   "adj.",
+   "优秀的"
+  ],
+  "expand": [
+   "v.",
+   "扩大"
+  ],
+  "export": [
+   "n.",
+   "出口（export value 出口额）"
+  ],
+  "films": [
+   "n.（复数）",
+   "电影（film）"
+  ],
+  "for": [
+   "prep.",
+   "（for many years）……年来"
+  ],
+  "foreign": [
+   "adj.",
+   "对外的；外国的（foreign trade 对外贸易）"
+  ],
+  "further": [
+   "adv.",
+   "进一步地"
+  ],
+  "global": [
+   "adj.",
+   "全球的（go global 走向世界）"
+  ],
+  "go": [
+   "v.",
+   "（go global）走向世界"
+  ],
+  "government": [
+   "n.",
+   "政府"
+  ],
+  "growing": [
+   "adj.",
+   "越来越多的（a growing number of）"
+  ],
+  "has": [
+   "aux.",
+   "（现在完成时）"
+  ],
+  "have": [
+   "aux.",
+   "（现在完成时）"
+  ],
+  "highest": [
+   "adj.（最高级）",
+   "最高的（high）"
+  ],
+  "in": [
+   "prep.",
+   "在……中"
+  ],
+  "increasingly": [
+   "adv.",
+   "越来越；日益"
+  ],
+  "influence": [
+   "n.",
+   "影响力"
+  ],
+  "influential": [
+   "adj.",
+   "有影响力的"
+  ],
+  "internationally": [
+   "adv.",
+   "国际上（internationally influential 具有国际影响力的）"
+  ],
+  "introduced": [
+   "v.（过去分词）",
+   "出台；推出（introduce）",
+   "brought in a new law or policy"
+  ],
+  "literature": [
+   "n.",
+   "文学（online literature 网络文学）"
+  ],
+  "many": [
+   "det.",
+   "许多"
+  ],
+  "market": [
+   "n.",
+   "市场（market share 市场份额）"
+  ],
+  "more": [
+   "det.",
+   "更多的"
+  ],
+  "number": [
+   "n.",
+   "（a number of）一些；一批"
+  ],
+  "of": [
+   "prep.",
+   "……的"
+  ],
+  "online": [
+   "adj.",
+   "网络的；在线的"
+  ],
+  "overseas": [
+   "adj.",
+   "海外的"
+  ],
+  "policies": [
+   "n.（复数）",
+   "政策（policy）"
+  ],
+  "popular": [
+   "adj.",
+   "受欢迎的（popular with 受……青睐）"
+  ],
+  "products": [
+   "n.（复数）",
+   "产品（product）"
+  ],
+  "publications": [
+   "n.（复数）",
+   "出版物（publication）"
+  ],
+  "ranked": [
+   "v.（过去分词）",
+   "排名；位列（rank）"
+  ],
+  "rapid": [
+   "adj.",
+   "快速的"
+  ],
+  "recent": [
+   "adj.",
+   "最近的（in recent years 近年来）"
+  ],
+  "rising": [
+   "v.（现在分词）",
+   "上升（rise）"
+  ],
+  "sales": [
+   "n.（复数）",
+   "销售量（sale）"
+  ],
+  "series": [
+   "n.",
+   "（a series of）一系列"
+  ],
+  "share": [
+   "n.",
+   "份额（market share 市场份额）"
+  ],
+  "show": [
+   "v.",
+   "显示；表明"
+  ],
+  "statistics": [
+   "n.（复数）",
+   "统计数据"
+  ],
+  "support": [
+   "v.",
+   "支持"
+  ],
+  "that": [
+   "conj.",
+   "（引导宾语从句）"
+  ],
+  "the": [
+   "art.",
+   "（定冠词）"
+  ],
+  "their": [
+   "pron.",
+   "它们的"
+  ],
+  "to": [
+   "prep.",
+   "（不定式）"
+  ],
+  "trade": [
+   "n.",
+   "贸易"
+  ],
+  "tv": [
+   "n.",
+   "电视（TV dramas 电视剧）"
+  ],
+  "value": [
+   "n.",
+   "价值；金额（export value 出口额）"
+  ],
+  "with": [
+   "prep.",
+   "随着；具有"
+  ],
+  "world": [
+   "n.",
+   "世界"
+  ],
+  "year": [
+   "n.",
+   "年（year after year 连年）"
+  ],
+  "years": [
+   "n.（复数）",
+   "年（year）"
+  ]
+ }
+}

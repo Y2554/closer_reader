@@ -1,0 +1,1010 @@
+{
+ "id": "dog-cognition",
+ "title": "Are Dogs Really That Smart?",
+ "zh": "狗真的有那么聪明吗？",
+ "source": "CET-6 · Part III Reading · Section A 选词填空",
+ "createdAt": 1791545400000,
+ "paragraphs": [
+  {
+   "sentences": [
+    {
+     "en": "Scientists recently examined studies on dog intelligence and compared them with research into the minds of other intelligent animals.",
+     "zh": "科学家们最近审视了有关狗的智力的研究，并将其与针对其他聪明动物心智的研究进行了比较。"
+    },
+    {
+     "en": "The researchers found that dogs are among the more intelligent carnivores (食肉动物), social hunters, and domestic animals, but that their intelligence does not {{26}} other intelligent animals in any of those categories.",
+     "zh": "研究人员发现，在食肉动物、群居猎手和家养动物中，狗属于较聪明的一类，但在上述任何一个类别里，它们的智力都没有超过其他聪明的动物。"
+    },
+    {
+     "en": "Though a significant body of research has examined dog cognition {{27}}, the authors of this new study found little to warrant the {{28}} of work that has been devoted to the topic.",
+     "zh": "尽管此前已有大量研究考察过狗的认知，但这项新研究的作者几乎找不到理由证明，在这一课题上投入如此大量的研究是合理的。"
+    }
+   ]
+  },
+  {
+   "sentences": [
+    {
+     "en": "Stephen Lea, lead author of the new study, argues that many researchers seem to have designed their studies to {{29}} how clever dogs are, rather than simply to study dogs' brains.",
+     "zh": "这项新研究的第一作者斯蒂芬·李认为，许多研究者设计研究时，似乎是为了证明狗有多聪明，而不是单纯地研究狗的大脑。"
+    },
+    {
+     "en": "Lea and a colleague examined more than 300 studies of dog cognition, comparing the studies' results with those from research into other animals.",
+     "zh": "李和一位同事审阅了 300 多项关于狗认知的研究，并把这些研究的结果与针对其他动物的研究结果进行了对比。"
+    },
+    {
+     "en": "The researchers made specific comparisons between the different species in different categories of intelligence.",
+     "zh": "研究人员在不同的智力类别中，对不同物种进行了具体比较。"
+    },
+    {
+     "en": "These comparisons {{30}} that dogs are intelligent, but their intelligence is not as {{31}} as some researchers might have believed.",
+     "zh": "这些比较证实了狗是聪明的，但它们的智力并不像一些研究者曾经以为的那样惊人。"
+    }
+   ]
+  },
+  {
+   "sentences": [
+    {
+     "en": "In many areas, though, comparisons were not possible.",
+     "zh": "不过，在许多方面，比较根本无法进行。"
+    },
+    {
+     "en": "For example, the researchers noted that both dogs and cats are known to be able to recognize and {{32}} human voices.",
+     "zh": "例如，研究人员指出，众所周知，狗和猫都能识别并区分人类的声音。"
+    },
+    {
+     "en": "But the investigators could not find any data to indicate which species can remember a greater number of {{33}} human voices, so it was impossible to compare the two on that front.",
+     "zh": "但研究者找不到任何数据来表明哪个物种能记住更多不同的人声，因此无法在这一方面对二者进行比较。"
+    },
+    {
+     "en": "However, not all researchers agree {{34}} with the findings of this study.",
+     "zh": "然而，并非所有研究者都完全认同这项研究的结论。"
+    },
+    {
+     "en": "Zachary Silver, an American researcher, believes the authors of the new study {{35}} the idea that an excessive amount of research has been devoted to dogs, as the field of dog cognition is young, and there is much to be learned about how dogs think.",
+     "zh": "美国研究员扎卡里·西尔弗认为，新研究的作者夸大了“在狗身上投入的研究过多”这一观点，因为狗认知领域还很年轻，关于狗如何思考，仍有很多有待了解。"
+    }
+   ]
+  }
+ ],
+ "options": {
+  "A": {
+   "w": "affirmed",
+   "pos": "v.（过去式）",
+   "zh": "证实；断言（affirm）",
+   "en": "stated or showed that something is true"
+  },
+  "B": {
+   "w": "approximately",
+   "pos": "adv.",
+   "zh": "大约；近似地",
+   "en": "close to an exact number or amount"
+  },
+  "C": {
+   "w": "completely",
+   "pos": "adv.",
+   "zh": "完全地；彻底地",
+   "en": "totally; in every way"
+  },
+  "D": {
+   "w": "differentiate",
+   "pos": "v.（原形）",
+   "zh": "区分；辨别",
+   "en": "to see or show the difference between things"
+  },
+  "E": {
+   "w": "distinct",
+   "pos": "adj.",
+   "zh": "不同的；明显的；独特的",
+   "en": "clearly different or separate"
+  },
+  "F": {
+   "w": "domain",
+   "pos": "n.",
+   "zh": "领域；范围",
+   "en": "an area of knowledge or activity"
+  },
+  "G": {
+   "w": "formidable",
+   "pos": "adj.",
+   "zh": "令人惊叹的；强大的；难对付的",
+   "en": "very impressive or powerful, often causing fear or respect"
+  },
+  "H": {
+   "w": "outperformed",
+   "pos": "v.（过去式）",
+   "zh": "胜过；表现优于（outperform）",
+   "en": "did better than someone or something"
+  },
+  "I": {
+   "w": "overstated",
+   "pos": "v.（过去式）",
+   "zh": "夸大；言过其实（overstate）",
+   "en": "described something as larger or more important than it really is"
+  },
+  "J": {
+   "w": "pledge",
+   "pos": "v.（原形）",
+   "zh": "保证；发誓（也可作 n. 誓言）",
+   "en": "to make a formal, serious promise"
+  },
+  "K": {
+   "w": "previously",
+   "pos": "adv.",
+   "zh": "以前；先前",
+   "en": "before the time being discussed"
+  },
+  "L": {
+   "w": "prospective",
+   "pos": "adj.",
+   "zh": "预期的；未来的",
+   "en": "likely to happen or become something in the future"
+  },
+  "M": {
+   "w": "prove",
+   "pos": "v.（原形）",
+   "zh": "证明",
+   "en": "to show that something is true"
+  },
+  "N": {
+   "w": "surpass",
+   "pos": "v.（原形）",
+   "zh": "超过；胜过",
+   "en": "to be better or greater than"
+  },
+  "O": {
+   "w": "volume",
+   "pos": "n.",
+   "zh": "量；体积；（书的）卷",
+   "en": "the amount or quantity of something"
+  }
+ },
+ "blanks": {
+  "26": {
+   "ans": "N",
+   "need": "动词原形（及物）",
+   "cands": [
+    "D",
+    "J",
+    "M",
+    "N"
+   ],
+   "why": "does not 是助动词否定结构，后面只能接动词原形，而且要能直接带宾语 other intelligent animals。四个原形动词里，只有 surpass（超过）能和前半句 among the more intelligent 构成转折：狗算聪明，但并没有超过其他聪明动物。",
+   "trap": "outperformed 意思也对得上，但它是过去式，放在 does not 后面语法错误。这是本篇最典型的陷阱。",
+   "tip": "先看空格前的功能词：do / does / did、情态动词、不定式 to 之后，一律用动词原形。"
+  },
+  "27": {
+   "ans": "K",
+   "need": "副词",
+   "cands": [
+    "B",
+    "C",
+    "K"
+   ],
+   "why": "a significant body of research has examined dog cognition 已经是完整的主谓宾，空格在句末，只能填修饰动词的副词。现在完成时 has examined 常和 previously 搭配，表示“此前已有大量研究”。",
+   "trap": "approximately 通常修饰数字，completely 修饰程度，都和“研究过狗的认知”接不上。",
+   "tip": "句子成分已经完整、空格在句末 → 优先考虑副词。"
+  },
+  "28": {
+   "ans": "O",
+   "need": "名词",
+   "cands": [
+    "F",
+    "O"
+   ],
+   "why": "the ___ of work，冠词和 of 之间需要名词。the volume of work 指“大量的研究工作”，正好呼应前文的 a significant body of research：作者觉得研究数量过多、不值得。",
+   "trap": "domain 是“领域”，the domain of work 语义不通，也无法呼应前文的“数量”。",
+   "tip": "留意同义复现：a significant body of research ↔ the volume of work。"
+  },
+  "29": {
+   "ans": "M",
+   "need": "动词原形（to 之后）",
+   "cands": [
+    "D",
+    "J",
+    "M",
+    "N"
+   ],
+   "why": "designed their studies to ___ how clever dogs are，to 后接动词原形，宾语是 how 引导的从句。rather than simply to study 构成对比：研究者不是单纯在研究，而是想“证明”狗有多聪明，暗示他们预设了立场。",
+   "trap": "differentiate 一般接 A from B 或 between，不接 how 从句；pledge how 也不成立。",
+   "tip": "rather than 两边结构对等：to prove … rather than to study …。"
+  },
+  "30": {
+   "ans": "A",
+   "need": "谓语动词（过去式）",
+   "cands": [
+    "A",
+    "H",
+    "I"
+   ],
+   "why": "These comparisons ___ that dogs are intelligent，主语后缺谓语，后面接 that 从句。affirm that 表示“证实”；后半句 but 转折说智力没那么惊人，说明前半句是肯定性的。",
+   "trap": "outperformed 不能接 that 从句；overstated 语义变成否定，和 but 之后的转折矛盾。",
+   "tip": "判断动词能否接 that 从句：affirm / prove / indicate that … 都可以。"
+  },
+  "31": {
+   "ans": "G",
+   "need": "形容词原级",
+   "cands": [
+    "E",
+    "G",
+    "L"
+   ],
+   "why": "not as ___ as 中间填形容词原级。formidable 意为“令人惊叹的、强大的”，整句是“狗的智力并不像一些研究者认为的那么惊人”，和全文“狗没那么特别”的主旨一致。",
+   "trap": "not as distinct as 语义含糊，distinct 留给 33 题更合适；prospective（预期的）明显不符。",
+   "tip": "as … as 结构中间一定是形容词或副词的原级。"
+  },
+  "32": {
+   "ans": "D",
+   "need": "动词原形（and 并列）",
+   "cands": [
+    "D",
+    "J",
+    "M",
+    "N"
+   ],
+   "why": "recognize and ___ human voices，and 连接两个并列动词，形式要和 recognize 一致（原形）。differentiate 意为“区分”，“识别并区分人的声音”搭配自然。",
+   "trap": "prove / surpass / pledge human voices 搭配都不成立。",
+   "tip": "and / or 是并列信号：两边词性和形式相同。"
+  },
+  "33": {
+   "ans": "E",
+   "need": "形容词（修饰名词）",
+   "cands": [
+    "E",
+    "G",
+    "L"
+   ],
+   "why": "a greater number of ___ human voices，名词 voices 前缺修饰语，需要形容词。distinct 意为“不同的、各不相同的”，“记住更多不同的人声”，和 32 题的 differentiate 语义呼应。",
+   "trap": "formidable human voices（强大的人声）不合逻辑；prospective 同样不通。",
+   "tip": "形容词题可以用前后呼应来验证：区分 → 不同的。"
+  },
+  "34": {
+   "ans": "C",
+   "need": "副词（修饰动词）",
+   "cands": [
+    "B",
+    "C",
+    "K"
+   ],
+   "why": "not all researchers agree ___ with the findings，修饰动词 agree，填副词。agree completely with 意为“完全同意”，not all … completely 构成部分否定。",
+   "trap": "previously 与现在时 agree 时间不符；approximately 不能修饰 agree。",
+   "tip": "agree 常见的修饰语：completely / fully / entirely。"
+  },
+  "35": {
+   "ans": "I",
+   "need": "谓语动词（过去式，及物）",
+   "cands": [
+    "A",
+    "H",
+    "I"
+   ],
+   "why": "believes (that) the authors ___ the idea …，从句缺谓语，并且要带宾语 the idea。后文说狗认知领域还很年轻、有很多需要了解，可见 Silver 反对新研究，认为作者“夸大了”研究过多这一观点。",
+   "trap": "affirmed 意思正好相反；outperformed the idea 搭配不成立。",
+   "tip": "However 之后通常是反方观点，空格往往带负面色彩。"
+  }
+ },
+ "keys": [
+  {
+   "t": "examined",
+   "k": "word",
+   "n": "examine v. 审视；仔细研究 · examine studies 审阅研究"
+  },
+  {
+   "t": "carnivores",
+   "k": "word",
+   "n": "carnivore n. 食肉动物（herbivore 食草动物，omnivore 杂食动物）"
+  },
+  {
+   "t": "domestic",
+   "k": "word",
+   "n": "adj. 家养的；国内的 · domestic animals 家畜"
+  },
+  {
+   "t": "a significant body of",
+   "k": "phrase",
+   "n": "大量的…，相当于 a large amount of"
+  },
+  {
+   "t": "cognition",
+   "k": "word",
+   "n": "n. 认知 · 学术类文章高频词，形容词 cognitive"
+  },
+  {
+   "t": "warrant",
+   "k": "word",
+   "n": "v. 使有必要；证明…合理 · nothing warrants … 没有理由…"
+  },
+  {
+   "t": "devoted to",
+   "k": "phrase",
+   "n": "be devoted to … 被投入到…；致力于…"
+  },
+  {
+   "t": "lead author",
+   "k": "phrase",
+   "n": "第一作者；首席作者"
+  },
+  {
+   "t": "rather than",
+   "k": "phrase",
+   "n": "而不是 · 连接两个结构对等的成分"
+  },
+  {
+   "t": "made specific comparisons between",
+   "k": "phrase",
+   "n": "make comparisons between A and B 对 A 和 B 进行比较"
+  },
+  {
+   "t": "indicate",
+   "k": "word",
+   "n": "v. 表明；显示 · data indicate that … 数据表明…"
+  },
+  {
+   "t": "on that front",
+   "k": "phrase",
+   "n": "在那一方面（front 此处指“方面”）"
+  },
+  {
+   "t": "findings",
+   "k": "word",
+   "n": "n. 研究结果；发现（常用复数）"
+  },
+  {
+   "t": "an excessive amount of",
+   "k": "phrase",
+   "n": "过量的…（amount 修饰不可数名词）"
+  },
+  {
+   "t": "field",
+   "k": "word",
+   "n": "n. 领域 · the field of … ……领域"
+  }
+ ],
+ "tips": [
+  "先把 15 个选项按词性分组，再判断每个空需要的词性，候选通常只剩 2–4 个。",
+  "盯住空格前后的功能词：does not / to 之后用原形；the ___ of 之间用名词；as ___ as 之间用形容词。",
+  "转折与对比信号 but、rather than、however 决定空格的感情色彩。",
+  "用同义复现和前后呼应来验证：body ↔ volume，differentiate ↔ distinct。",
+  "最后核对形式：过去式、过去分词不能放在助动词 do / does 之后。"
+ ],
+ "lex": {
+  "scientists": [
+   "n.（复数）",
+   "科学家",
+   "people who are trained in a science and do research"
+  ],
+  "recently": [
+   "adv.",
+   "最近；近来",
+   "not long ago"
+  ],
+  "examined": [
+   "v.（过去式）",
+   "审视；研究（examine）",
+   "looked at or studied something carefully in order to understand it"
+  ],
+  "studies": [
+   "n.（复数）",
+   "研究（study）",
+   "pieces of research on a particular subject"
+  ],
+  "on": [
+   "prep.",
+   "关于"
+  ],
+  "dog": [
+   "n.",
+   "狗",
+   "an animal kept by people as a pet or for work"
+  ],
+  "intelligence": [
+   "n.",
+   "智力；智能",
+   "the ability to learn, understand and think"
+  ],
+  "and": [
+   "conj.",
+   "和；并且"
+  ],
+  "compared": [
+   "v.（过去式）",
+   "比较（compare）",
+   "examined things to see how they are similar or different"
+  ],
+  "them": [
+   "pron.",
+   "它们（指这些研究）"
+  ],
+  "with": [
+   "prep.",
+   "与…；和…"
+  ],
+  "research": [
+   "n.",
+   "研究（不可数）",
+   "careful study of a subject in order to discover new facts"
+  ],
+  "into": [
+   "prep.",
+   "对…（research into 对…的研究）"
+  ],
+  "the": [
+   "art.",
+   "定冠词，这；那"
+  ],
+  "minds": [
+   "n.（复数）",
+   "心智；头脑（mind）",
+   "the part of a person or animal that thinks, feels and understands"
+  ],
+  "of": [
+   "prep.",
+   "…的"
+  ],
+  "other": [
+   "adj.",
+   "其他的",
+   "additional; different from the one already mentioned"
+  ],
+  "intelligent": [
+   "adj.",
+   "聪明的；有智力的",
+   "able to learn and understand things quickly"
+  ],
+  "animals": [
+   "n.（复数）",
+   "动物",
+   "living creatures that can move and feel, other than plants"
+  ],
+  "researchers": [
+   "n.（复数）",
+   "研究人员",
+   "people who study a subject in detail to discover new facts"
+  ],
+  "found": [
+   "v.（过去式）",
+   "发现（find）",
+   "discovered or learned something as a result of research"
+  ],
+  "that": [
+   "conj. / pron.",
+   "引导从句（无实义）；那，那个"
+  ],
+  "dogs": [
+   "n.（复数）",
+   "狗",
+   "animals kept by people as pets or for work"
+  ],
+  "are": [
+   "v.",
+   "是（be）"
+  ],
+  "among": [
+   "prep.",
+   "在…之中；属于…之列",
+   "being one member of a particular group"
+  ],
+  "more": [
+   "adv. / det.",
+   "更，较为；（more than）超过",
+   "to a greater degree; (more than) over a number"
+  ],
+  "carnivores": [
+   "n.（复数）",
+   "食肉动物（carnivore）",
+   "animals that eat meat"
+  ],
+  "social": [
+   "adj.",
+   "群居的；社会性的",
+   "living naturally together in groups"
+  ],
+  "hunters": [
+   "n.（复数）",
+   "猎手；捕猎者",
+   "animals that catch and kill other animals for food"
+  ],
+  "domestic": [
+   "adj.",
+   "家养的；驯养的",
+   "kept by people, not wild"
+  ],
+  "but": [
+   "conj.",
+   "但是"
+  ],
+  "their": [
+   "pron.",
+   "它们的；他们的"
+  ],
+  "does": [
+   "aux.",
+   "助动词（do 的三单形式）"
+  ],
+  "not": [
+   "adv.",
+   "不"
+  ],
+  "in": [
+   "prep.",
+   "在…方面；在…中"
+  ],
+  "any": [
+   "det.",
+   "任何"
+  ],
+  "those": [
+   "det. / pron.",
+   "那些"
+  ],
+  "categories": [
+   "n.（复数）",
+   "类别；范畴（category）",
+   "groups of things that share particular qualities"
+  ],
+  "though": [
+   "conj. / adv.",
+   "虽然；（插在句中）不过",
+   "despite the fact that; (in the middle of a sentence) however"
+  ],
+  "a": [
+   "art.",
+   "一（个）"
+  ],
+  "significant": [
+   "adj.",
+   "大量的；重要的",
+   "large enough to be noticed or to have an effect"
+  ],
+  "body": [
+   "n.",
+   "大量；主体（a body of 大量的）",
+   "a large amount or collection of something (a body of research)"
+  ],
+  "has": [
+   "aux.",
+   "已经（现在完成时助动词）"
+  ],
+  "cognition": [
+   "n.",
+   "认知",
+   "the mental process of knowing, learning and understanding"
+  ],
+  "authors": [
+   "n.（复数）",
+   "作者",
+   "the people who wrote a book, article or study"
+  ],
+  "this": [
+   "det.",
+   "这个"
+  ],
+  "new": [
+   "adj.",
+   "新的",
+   "recently made or published"
+  ],
+  "study": [
+   "n. / v.",
+   "研究",
+   "a piece of research on a particular subject; (verb) to examine carefully"
+  ],
+  "little": [
+   "pron.",
+   "很少；几乎没有",
+   "not much; hardly any"
+  ],
+  "to": [
+   "prep. / 不定式",
+   "不定式标志；到，向"
+  ],
+  "warrant": [
+   "v.",
+   "使有必要；证明…合理",
+   "to make an action necessary or reasonable; to justify"
+  ],
+  "work": [
+   "n.",
+   "工作；研究成果",
+   "research activity, or the results of it"
+  ],
+  "been": [
+   "v.（过去分词）",
+   "be 的过去分词"
+  ],
+  "devoted": [
+   "v.（过去分词）",
+   "投入；奉献（devote … to）",
+   "(of time or effort) given to a particular purpose"
+  ],
+  "topic": [
+   "n.",
+   "话题；课题",
+   "a subject that people discuss or study"
+  ],
+  "stephen": [
+   "n.（人名）",
+   "斯蒂芬"
+  ],
+  "lea": [
+   "n.（人名）",
+   "李（姓）"
+  ],
+  "lead": [
+   "adj.",
+   "首要的；牵头的（lead author 第一作者）",
+   "most important; in charge (lead author: the main writer of a study)"
+  ],
+  "author": [
+   "n.",
+   "作者",
+   "the person who wrote a book, article or study"
+  ],
+  "argues": [
+   "v.（三单）",
+   "认为；主张（argue）",
+   "states an opinion and gives reasons for it"
+  ],
+  "many": [
+   "adj.",
+   "许多",
+   "a large number of"
+  ],
+  "seem": [
+   "v.",
+   "似乎；看来",
+   "to appear to be, or to give the impression of being"
+  ],
+  "have": [
+   "aux.",
+   "已经（完成时助动词）"
+  ],
+  "designed": [
+   "v.（过去分词）",
+   "设计（design）",
+   "planned and made for a particular purpose"
+  ],
+  "how": [
+   "adv.",
+   "多么；如何"
+  ],
+  "clever": [
+   "adj.",
+   "聪明的",
+   "quick at learning and understanding things"
+  ],
+  "rather": [
+   "adv.",
+   "（rather than）而不是",
+   "(rather than) instead of"
+  ],
+  "than": [
+   "conj. / prep.",
+   "（rather than）而不是；比"
+  ],
+  "simply": [
+   "adv.",
+   "仅仅；单纯地",
+   "only; just"
+  ],
+  "brains": [
+   "n.（复数）",
+   "大脑（brain）",
+   "the organs inside the head that control thinking and feeling"
+  ],
+  "colleague": [
+   "n.",
+   "同事",
+   "a person that you work with"
+  ],
+  "300": [
+   "num.",
+   "三百"
+  ],
+  "comparing": [
+   "v.（现在分词）",
+   "比较（compare）",
+   "examining things to see how they are similar or different"
+  ],
+  "results": [
+   "n.（复数）",
+   "结果",
+   "the information that a study produces"
+  ],
+  "from": [
+   "prep.",
+   "来自；从"
+  ],
+  "made": [
+   "v.（过去式）",
+   "做；进行（make）",
+   "carried out (make comparisons: compare things)"
+  ],
+  "specific": [
+   "adj.",
+   "具体的；特定的",
+   "clearly defined; particular"
+  ],
+  "comparisons": [
+   "n.（复数）",
+   "比较；对比",
+   "the act of examining how things are similar or different"
+  ],
+  "between": [
+   "prep.",
+   "在…之间"
+  ],
+  "different": [
+   "adj.",
+   "不同的",
+   "not the same as each other"
+  ],
+  "species": [
+   "n.",
+   "物种（单复同形）",
+   "a group of animals or plants of the same type that can breed together"
+  ],
+  "these": [
+   "det.",
+   "这些"
+  ],
+  "is": [
+   "v.",
+   "是（be）"
+  ],
+  "as": [
+   "adv. / conj.",
+   "（as…as）和…一样；因为"
+  ],
+  "some": [
+   "det.",
+   "一些"
+  ],
+  "might": [
+   "modal",
+   "可能；也许"
+  ],
+  "believed": [
+   "v.（过去分词）",
+   "相信；认为（believe）",
+   "thought that something was true"
+  ],
+  "areas": [
+   "n.（复数）",
+   "领域；方面",
+   "particular subjects or fields of activity"
+  ],
+  "were": [
+   "v.",
+   "是（be 的过去式）"
+  ],
+  "possible": [
+   "adj.",
+   "可能的",
+   "able to be done"
+  ],
+  "for": [
+   "prep.",
+   "为了；对于（for example 例如）"
+  ],
+  "example": [
+   "n.",
+   "例子",
+   "something that shows what others of its kind are like"
+  ],
+  "noted": [
+   "v.（过去式）",
+   "指出；注意到（note）",
+   "mentioned or pointed out"
+  ],
+  "both": [
+   "det.",
+   "两者都"
+  ],
+  "cats": [
+   "n.（复数）",
+   "猫"
+  ],
+  "known": [
+   "v.（过去分词）",
+   "知道（be known to 众所周知能…）",
+   "generally recognized as being true"
+  ],
+  "be": [
+   "v.",
+   "是；存在"
+  ],
+  "able": [
+   "adj.",
+   "能够的（be able to）",
+   "having the power or skill to do something"
+  ],
+  "recognize": [
+   "v.",
+   "识别；认出",
+   "to know someone or something because you have seen or heard them before"
+  ],
+  "human": [
+   "adj.",
+   "人类的",
+   "of or relating to people"
+  ],
+  "voices": [
+   "n.（复数）",
+   "声音（voice）",
+   "the sounds people make when they speak"
+  ],
+  "investigators": [
+   "n.（复数）",
+   "研究者；调查人员",
+   "people who carefully examine facts to discover the truth"
+  ],
+  "could": [
+   "modal",
+   "能够（can 的过去式）"
+  ],
+  "find": [
+   "v.",
+   "找到；发现",
+   "to discover something by searching or studying"
+  ],
+  "data": [
+   "n.",
+   "数据（datum 的复数）",
+   "facts or information collected for analysis"
+  ],
+  "indicate": [
+   "v.",
+   "表明；显示",
+   "to show that something is true or exists"
+  ],
+  "which": [
+   "det.",
+   "哪一个"
+  ],
+  "can": [
+   "modal",
+   "能够"
+  ],
+  "remember": [
+   "v.",
+   "记住",
+   "to keep information in your mind"
+  ],
+  "greater": [
+   "adj.（比较级）",
+   "更多的；更大的（great）",
+   "larger in amount or number"
+  ],
+  "number": [
+   "n.",
+   "数量；数目",
+   "an amount or quantity"
+  ],
+  "so": [
+   "conj.",
+   "所以；因此"
+  ],
+  "it": [
+   "pron.",
+   "它（此处作形式主语）"
+  ],
+  "was": [
+   "v.",
+   "是（be 的过去式）"
+  ],
+  "impossible": [
+   "adj.",
+   "不可能的",
+   "not able to be done"
+  ],
+  "compare": [
+   "v.",
+   "比较",
+   "to examine things to see how they are similar or different"
+  ],
+  "two": [
+   "num. / pron.",
+   "两个；二者",
+   "both of the things just mentioned"
+  ],
+  "front": [
+   "n.",
+   "方面；前线（on that front 在那方面）",
+   "a particular area of activity (on that front: in that respect)"
+  ],
+  "however": [
+   "adv.",
+   "然而",
+   "used to introduce a contrasting statement"
+  ],
+  "all": [
+   "det.",
+   "所有的"
+  ],
+  "agree": [
+   "v.",
+   "同意；认同",
+   "to have the same opinion as someone"
+  ],
+  "findings": [
+   "n.（复数）",
+   "研究结果；发现",
+   "information discovered as the result of research"
+  ],
+  "zachary": [
+   "n.（人名）",
+   "扎卡里"
+  ],
+  "silver": [
+   "n.（人名）",
+   "西尔弗（姓）"
+  ],
+  "an": [
+   "art.",
+   "一（个），用于元音音素前"
+  ],
+  "american": [
+   "adj.",
+   "美国的",
+   "from the United States"
+  ],
+  "researcher": [
+   "n.",
+   "研究人员",
+   "a person who studies a subject in detail"
+  ],
+  "believes": [
+   "v.（三单）",
+   "认为；相信（believe）",
+   "thinks that something is true"
+  ],
+  "idea": [
+   "n.",
+   "观点；想法",
+   "an opinion or belief"
+  ],
+  "excessive": [
+   "adj.",
+   "过度的；过多的",
+   "more than is necessary, reasonable or acceptable"
+  ],
+  "amount": [
+   "n.",
+   "数量（修饰不可数名词）",
+   "a quantity of something"
+  ],
+  "field": [
+   "n.",
+   "领域",
+   "an area of study or activity"
+  ],
+  "young": [
+   "adj.",
+   "年轻的；新兴的",
+   "having existed for only a short time; new"
+  ],
+  "there": [
+   "adv.",
+   "（there is 结构）有"
+  ],
+  "much": [
+   "pron.",
+   "许多；大量",
+   "a large amount"
+  ],
+  "learned": [
+   "v.（过去分词）",
+   "学习；了解（learn）",
+   "come to know or understand"
+  ],
+  "about": [
+   "prep.",
+   "关于"
+  ],
+  "think": [
+   "v.",
+   "思考；思维",
+   "to use the mind to form ideas and make judgments"
+  ]
+ }
+}

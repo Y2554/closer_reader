@@ -1,0 +1,1373 @@
+<title>The Close Reader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Kalam:wght@400;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Noto+Serif+SC:wght@400;600;900&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+<style>
+/* Layout: a newspaper reading page. Article column + proof-reader's margin rail.
+   Keywords and answers are marked in blue editor's pencil; wrong picks are corrected in red. */
+:root{
+  --paper:#edf0ea; --sheet:#f8f9f6; --paper-2:#e1e5de;
+  --ink:#14181b; --ink-2:#434d55; --ink-3:#77828a; --rule:#bfc6be;
+  --pencil:#2340b0; --pencil-wash:rgba(35,64,176,.09); --marker:rgba(236,190,52,.42);
+  --red:#b3302a; --red-wash:rgba(179,48,42,.08); --ok:#1d7548; --ok-wash:rgba(29,117,72,.10);
+  --pos-n:#1d6b74; --pos-v:#86338c; --pos-adj:#8f6208; --pos-adv:#3d5c9e; --pos-f:#77828a;
+  --shadow:0 -10px 30px rgba(20,24,27,.14);
+  --sb:rgba(20,24,27,.16); --sb-hover:rgba(20,24,27,.34); --sb-active:rgba(35,64,176,.55);
+  --f-mast:"UnifrakturMaguntia","Old Standard TT",Georgia,serif;
+  --f-head:"Old Standard TT","Noto Serif SC",Georgia,serif;
+  --f-body:"Newsreader",Georgia,"Noto Serif SC","Songti SC",serif;
+  --f-zh:"Noto Serif SC","Songti SC","STSong",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --f-hand:"Kalam","Segoe Print","Bradley Hand",cursive;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#11151a; --sheet:#171c22; --paper-2:#1f262d;
+    --ink:#e4e7e1; --ink-2:#a9b1b6; --ink-3:#7f8a91; --rule:#2e373f;
+    --pencil:#93abff; --pencil-wash:rgba(147,171,255,.13); --marker:rgba(236,190,52,.30);
+    --red:#ff8476; --red-wash:rgba(255,132,118,.12); --ok:#62d29a; --ok-wash:rgba(98,210,154,.12);
+    --pos-n:#6fc7cf; --pos-v:#d99ee2; --pos-adj:#e2b65c; --pos-adv:#a6bbef; --pos-f:#7f8a91;
+    --shadow:0 -10px 30px rgba(0,0,0,.5);
+    --sb:rgba(228,231,225,.16); --sb-hover:rgba(228,231,225,.34); --sb-active:rgba(147,171,255,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#11151a; --sheet:#171c22; --paper-2:#1f262d;
+  --ink:#e4e7e1; --ink-2:#a9b1b6; --ink-3:#7f8a91; --rule:#2e373f;
+  --pencil:#93abff; --pencil-wash:rgba(147,171,255,.13); --marker:rgba(236,190,52,.30);
+  --red:#ff8476; --red-wash:rgba(255,132,118,.12); --ok:#62d29a; --ok-wash:rgba(98,210,154,.12);
+  --pos-n:#6fc7cf; --pos-v:#d99ee2; --pos-adj:#e2b65c; --pos-adv:#a6bbef; --pos-f:#7f8a91;
+  --shadow:0 -10px 30px rgba(0,0,0,.5);
+  --sb:rgba(228,231,225,.16); --sb-hover:rgba(228,231,225,.34); --sb-active:rgba(147,171,255,.6);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--pencil);outline-offset:2px}
+.wrap{max-width:1200px;margin:0 auto;padding-inline:clamp(16px,4vw,40px);padding-block:10px 56px}
+
+/* ---------- masthead ---------- */
+.mast-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;font:500 11px/1.4 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);padding-block:6px;border-bottom:1px solid var(--rule)}
+.mast-name{font-family:var(--f-mast);font-weight:400;font-size:clamp(2.5rem,8.5vw,5.4rem);line-height:1;text-align:center;margin:.18em 0 .05em;letter-spacing:.01em}
+.mast-sub{text-align:center;font:600 13px/1.6 var(--f-zh);letter-spacing:.45em;color:var(--ink-2);margin-bottom:10px;padding-left:.45em}
+.tabs{display:flex;justify-content:safe center;gap:2px;border-top:3px double var(--ink);border-bottom:1px solid var(--ink);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:none;border:0;padding:10px 14px;font:500 14px/1.2 var(--f-zh);color:var(--ink-2);cursor:pointer;white-space:nowrap;position:relative}
+.tab[aria-current="page"]{color:var(--ink);font-weight:600}
+.tab[aria-current="page"]::after{content:"";position:absolute;left:14px;right:14px;bottom:4px;height:2px;background:var(--pencil);border-radius:2px}
+.tab .ct{font:500 11px var(--f-mono);color:var(--pencil);margin-left:4px}
+
+/* ---------- layout ---------- */
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:40px;margin-top:28px}
+@media (min-width:1040px){.layout.has-rail{grid-template-columns:minmax(0,1fr) 340px}}
+.view{min-width:0}
+.story{max-width:43rem;margin-inline:auto}
+.kicker{font:600 11px/1.4 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--pencil)}
+.headline{font:700 clamp(2rem,5.2vw,3.15rem)/1.08 var(--f-head);text-wrap:balance;margin:.22em 0 .2em;letter-spacing:-.005em}
+.headline.sm{font-size:clamp(1.7rem,4vw,2.4rem)}
+.dek{font:400 1.05rem/1.7 var(--f-zh);color:var(--ink-2);margin:0 0 14px}
+.byline{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;font:500 12px/1.5 var(--f-mono);color:var(--ink-3);border-block:1px solid var(--rule);padding-block:8px;font-variant-numeric:tabular-nums}
+.byline b{color:var(--ink);font-weight:600}
+.toolbar{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 26px}
+.tbtn{font:500 13px/1.2 var(--f-zh);padding:7px 11px;border:1px solid var(--rule);border-radius:999px;background:transparent;color:var(--ink-2);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.tbtn:hover{border-color:var(--ink-2);color:var(--ink)}
+.tbtn[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tbtn.warn{border-color:var(--red);color:var(--red)}
+
+/* ---------- article body ---------- */
+.para{display:grid;grid-template-columns:3rem minmax(0,1fr);gap:0 14px;margin-bottom:1.35em}
+.gut{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding-top:.45em}
+.pnum{font:500 11px var(--f-mono);color:var(--ink-3)}
+.ptr{font:500 12px/1 var(--f-zh);color:var(--pencil);border:1px solid currentColor;background:none;padding:4px 6px;border-radius:3px;cursor:pointer}
+.ptr[aria-pressed="true"]{background:var(--pencil);color:var(--sheet)}
+.ptext{font-size:1.17rem;line-height:1.88;margin:0;min-width:0;overflow-wrap:break-word}
+.para:first-child .ptext::first-letter{font-family:var(--f-head);font-weight:700;font-size:3.7em;float:left;line-height:.8;padding:.07em .09em 0 0}
+.para-zh{grid-column:2;font:400 .98rem/1.95 var(--f-zh);color:var(--ink-2);border-left:2px solid var(--pencil);padding:.55em 0 .55em 1em;margin-top:.5em;background:linear-gradient(90deg,var(--pencil-wash),transparent 75%)}
+@media (max-width:620px){
+  .para{grid-template-columns:minmax(0,1fr)}
+  .gut{flex-direction:row;align-items:center;padding:0;margin-bottom:4px}
+  .para-zh{grid-column:1}
+  .ptext{font-size:1.1rem}
+}
+.s{border-radius:3px;-webkit-box-decoration-break:clone;box-decoration-break:clone;transition:background .2s}
+.s.on{background:var(--pencil-wash)}
+.s.flash{animation:flash 2.6s ease-out}
+@keyframes flash{0%,30%{background:var(--marker)}100%{background:transparent}}
+.w{cursor:pointer;border-radius:2px}
+.w:hover{background:var(--pencil-wash)}
+.w.on{background:var(--marker)}
+.show-kw .kw{text-decoration:underline;text-decoration-color:var(--pencil);text-decoration-thickness:2px;text-underline-offset:5px;text-decoration-skip-ink:none}
+.show-kw .kw.ph{text-decoration-style:wavy;text-decoration-thickness:1.4px;text-underline-offset:6px}
+.show-kw .kw .w{text-decoration:inherit}
+.show-pos .ptext{line-height:2.85}
+.show-pos .para:first-child .ptext::first-letter{font:inherit;float:none;padding:0}
+.show-pos .w{position:relative;display:inline-block;line-height:1.35}
+.show-pos .w::after{content:attr(data-pos);position:absolute;left:50%;top:100%;transform:translateX(-50%);font:600 9.5px/1 var(--f-mono);color:var(--pc,var(--pos-f));white-space:nowrap;margin-top:1px;letter-spacing:0;pointer-events:none}
+.pn{--pc:var(--pos-n)} .pv{--pc:var(--pos-v)} .pa{--pc:var(--pos-adj)} .pd{--pc:var(--pos-adv)} .pf{--pc:var(--pos-f)}
+
+.blank{display:inline-flex;align-items:baseline;gap:.35em;border:0;border-bottom:1.5px solid var(--ink);background:none;padding:0 .25em;margin:0 .1em;min-width:5.6em;cursor:pointer;color:var(--ink);line-height:1.3;border-radius:2px 2px 0 0;vertical-align:baseline}
+.blank:hover{background:var(--pencil-wash)}
+.blank.on{background:var(--marker)}
+.bn{font:600 .68em var(--f-mono);color:var(--ink-3)}
+.bw{font:400 1.08em var(--f-hand);color:var(--pencil);white-space:nowrap}
+.blank.ok{border-bottom-color:var(--pencil)}
+.blank.ok .bw::after{content:" \2713";font-family:var(--f-body);font-size:.85em}
+.blank.bad{border-bottom-color:var(--red)}
+.blank.bad s{color:var(--red);text-decoration-thickness:2px}
+.blank.shown .bw{color:var(--ink-2)}
+
+.guard{display:block;width:100%;text-align:left;font:400 13px/1.5 var(--f-zh);color:var(--ink-3);background:none;border:1px dashed var(--rule);border-radius:3px;padding:8px 10px;cursor:pointer}
+.guard:hover{color:var(--ink);border-color:var(--ink-3)}
+
+/* ---------- word bank ---------- */
+.bank{margin-top:2.6rem;border:1.5px solid var(--ink);padding:16px 18px 14px;background:var(--sheet)}
+.bank>header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.bank h3{margin:0;font:700 1.3rem/1.2 var(--f-head)}
+.bank h3 span{font:500 13px var(--f-zh);color:var(--ink-3);margin-left:8px}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:2px 12px}
+.opt{display:flex;align-items:baseline;gap:.5em;text-align:left;background:none;border:0;padding:6px 6px;border-radius:3px;cursor:pointer;font:400 1.03rem/1.3 var(--f-body);color:var(--ink);min-width:0}
+.opt:hover{background:var(--pencil-wash)}
+.opt.on{background:var(--marker)}
+.opt b{font:600 .78rem var(--f-mono);color:var(--ink-3);min-width:1.7em}
+.opt.used{color:var(--ink-3)}
+.opt .u{margin-left:auto;font:600 .72rem var(--f-mono);color:var(--pencil)}
+.grp+.grp{margin-top:10px}
+.grp h4{margin:0 0 4px;font:600 11px/1.6 var(--f-mono);letter-spacing:.08em;color:var(--ink-2);border-bottom:1px solid var(--rule)}
+.grp h4 span{color:var(--ink-3);font-weight:400}
+.bank-note{margin:10px 0 0;font:400 13px/1.6 var(--f-zh);color:var(--ink-3)}
+
+.tips{margin-top:2.2rem;border-top:3px double var(--ink);padding-top:12px}
+.tips h3{margin:0 0 8px;font:700 1.25rem var(--f-head)}
+.tips h3 span{font:500 13px var(--f-zh);color:var(--ink-3);margin-left:8px}
+.tips ol{margin:0;padding:0;list-style:none;counter-reset:t;display:grid;gap:8px}
+.tips li{counter-increment:t;display:grid;grid-template-columns:2rem minmax(0,1fr);font:400 .98rem/1.75 var(--f-zh)}
+.tips li::before{content:counter(t);font:600 .8rem/1.9 var(--f-mono);color:var(--pencil)}
+
+/* ---------- side rail / sheet ---------- */
+.panel{display:none}
+.layout.has-rail .panel{display:block}
+.grab{display:none}
+@media (min-width:1040px){
+  .layout.has-rail .panel{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);align-self:start;max-height:calc(100vh - 32px);overflow:auto;background:var(--sheet);border:1px solid var(--rule);border-top:3px solid var(--ink);padding:16px 18px 22px}
+  .p-close{display:none}
+}
+.grab-zone{display:none}
+@media (max-width:1039.98px){
+  .layout.has-rail .panel{position:fixed;left:0;right:0;bottom:0;z-index:20;height:62vh;overflow:auto;overscroll-behavior:contain;background:var(--sheet);border:2px solid var(--ink);border-bottom:0;border-radius:20px 20px 0 0;box-shadow:var(--shadow);padding:0 18px calc(22px + env(safe-area-inset-bottom,0px));transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1),height .28s cubic-bezier(.2,.8,.2,1)}
+  .layout.has-rail .panel.full{height:92vh}
+  .layout.has-rail .panel.open{transform:none}
+  .layout.has-rail .panel.dragging{transition:none}
+  .grab-zone{display:block;position:sticky;top:0;z-index:2;margin:0 -18px 4px;padding:10px 0 10px;background:var(--sheet);cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none}
+  .grab{display:block;width:44px;height:5px;border-radius:5px;background:var(--ink-3);opacity:.55;margin:0 auto}
+  .grab-zone:active .grab{opacity:.9}
+}
+.p-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.p-eyebrow{font:600 11px/1.4 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--pencil)}
+.p-close{background:none;border:1px solid var(--rule);border-radius:999px;width:30px;height:30px;cursor:pointer;color:var(--ink-2);font:400 16px/1 var(--f-mono)}
+.p-head{display:flex;align-items:center;gap:10px;margin-top:4px}
+.p-word{font:700 2.1rem/1.15 var(--f-head);margin:0;overflow-wrap:anywhere}
+.p-meta{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}
+.chip{display:inline-block;font:600 12px/1.4 var(--f-mono);padding:2px 7px;border-radius:3px;border:1px solid var(--pc,var(--ink-3));color:var(--pc,var(--ink-2))}
+.p-zh{font:600 1.15rem/1.6 var(--f-zh);margin:6px 0 0}
+.p-miss{font:400 .95rem/1.6 var(--f-zh);color:var(--ink-3);margin:6px 0}
+.note{margin-top:12px;background:var(--pencil-wash);border-left:3px solid var(--pencil);padding:8px 11px;font:400 .93rem/1.7 var(--f-zh)}
+.note b{font-weight:600;color:var(--pencil)}
+.p-sec{margin:18px 0 6px;padding-top:10px;border-top:1px solid var(--rule);font:600 10.5px/1.4 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.p-en{font:400 1.02rem/1.7 var(--f-body);margin:0 0 8px}
+.p-en mark{background:var(--marker);color:inherit;border-radius:2px;padding:0 1px}
+.p-en .fill{font:400 1.05em var(--f-hand);color:var(--pencil)}
+.p-en .gap{font:600 .85em var(--f-mono);color:var(--ink-3)}
+.p-zht{font:400 .95rem/1.85 var(--f-zh);color:var(--ink-2);margin:0}
+.p-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.pbtn{font:500 13.5px/1.2 var(--f-zh);padding:8px 13px;border-radius:3px;border:1px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer}
+.pbtn:hover{background:var(--pencil-wash)}
+.pbtn.primary{background:var(--ink);color:var(--paper)}
+.pbtn.primary:hover{background:var(--ink-2);border-color:var(--ink-2)}
+.pbtn.ghost{border-color:var(--rule);color:var(--ink-2)}
+.pbtn:disabled{opacity:.45;cursor:default}
+.ibtn{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:999px;border:1px solid var(--rule);background:none;color:var(--ink-2);cursor:pointer;flex:none}
+.ibtn:hover{color:var(--pencil);border-color:var(--pencil)}
+.ibtn svg{width:16px;height:16px}
+
+.phon{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:6px}
+.phon .ipa{font:400 1rem var(--f-body);color:var(--ink-2)}
+.tag{font:600 10.5px/1.5 var(--f-mono);letter-spacing:.04em;padding:1px 6px;border-radius:3px;background:var(--paper-2);color:var(--ink-2)}
+.tag.hot{background:var(--pencil-wash);color:var(--pencil)}
+.stars{font:400 12px var(--f-mono);color:var(--pos-adj);letter-spacing:1px}
+.lemma-note{font:400 .92rem/1.6 var(--f-zh);color:var(--ink-2);margin:8px 0 0}
+.lemma-note b{font:600 1.02rem var(--f-body);color:var(--ink)}
+.ctxbox{margin-top:12px;border:1.5px solid var(--ink);padding:9px 12px 10px;position:relative}
+.ctxbox .lbl{display:block;font:600 10.5px/1.4 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--pencil);margin-bottom:5px}
+.ctxbox .row{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 8px}
+.ctxbox .zh{font:600 1.12rem/1.55 var(--f-zh)}
+.ctxbox .cen{margin:6px 0 0;font:italic 400 1rem/1.5 var(--f-body);color:var(--ink-2)}
+.dl{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.dl li{display:grid;grid-template-columns:2.9rem minmax(0,1fr);gap:6px;align-items:baseline}
+.dl .tp{font:600 11.5px var(--f-mono);color:var(--pc,var(--ink-3))}
+.dl .zh{font:400 .97rem/1.65 var(--f-zh)}
+.dl .en{font:400 .98rem/1.55 var(--f-body)}
+.dl li.hit .zh,.dl li.hit .en{color:var(--ink)}
+.dl li:not(.hit) .zh,.dl li:not(.hit) .en{color:var(--ink-2)}
+.dl.en-list{counter-reset:d}
+.dl.en-list li{grid-template-columns:1.4rem 2.6rem minmax(0,1fr)}
+.dl.en-list li::before{counter-increment:d;content:counter(d);font:500 11px var(--f-mono);color:var(--ink-3)}
+.exm{display:block;font-style:italic;font-size:.9em;color:var(--ink-3);margin-top:2px}
+.exm::before{content:"e.g. ";font:600 10px var(--f-mono);font-style:normal;color:var(--ink-3)}
+.more{background:none;border:0;padding:6px 0 0;font:500 12.5px var(--f-zh);color:var(--pencil);cursor:pointer}
+.dsrc{margin-top:16px;font:500 10.5px/1.5 var(--f-mono);color:var(--ink-3)}
+.dload{font:400 .92rem var(--f-zh);color:var(--ink-3);margin-top:12px}
+.xbtn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;margin-top:18px;padding:11px 14px;background:var(--paper);border:1.5px dashed var(--ink-3);border-radius:4px;cursor:pointer;text-align:left}
+.xbtn span{font:600 14.5px var(--f-zh);color:var(--ink)}
+.xbtn small{font:500 11.5px var(--f-mono);color:var(--ink-3)}
+.xbtn:hover{border-color:var(--pencil);background:var(--pencil-wash)}
+.xsec{margin-top:18px;border-top:3px double var(--ink);padding-top:6px}
+.xh{margin:8px 0 0;font:700 1.15rem var(--f-head)}
+.ety{font:400 .98rem/1.7 var(--f-body);margin:0}
+.ai{margin-top:12px;background:var(--pencil-wash);border-left:3px solid var(--pencil);padding:9px 12px}
+.ai .lbl{display:block;font:600 10.5px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--pencil);margin-bottom:4px}
+.ai p{margin:6px 0 0;font:400 .93rem/1.75 var(--f-zh)}
+.ai p b{font-weight:600;color:var(--pencil);margin-right:6px}
+.ai ul{margin:4px 0 0;padding-left:1.1em;font:400 .92rem/1.7 var(--f-zh)}
+.ai .exl li{font-family:var(--f-body)}
+.ai .exl span{display:block;font:400 .88rem/1.6 var(--f-zh);color:var(--ink-2)}
+.roots{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.roots li{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;font:400 .95rem var(--f-body)}
+.roots b{font:600 1rem var(--f-mono);color:var(--pencil)}
+.roots .rm{color:var(--ink)} .roots .ro{font:400 12px var(--f-zh);color:var(--ink-3)}
+.rel{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.rel li{display:grid;grid-template-columns:minmax(6.5rem,auto) auto minmax(0,1fr);gap:8px;align-items:baseline}
+.rw{background:none;border:0;padding:2px 0;font:500 1.02rem var(--f-body);color:var(--ink);text-align:left;cursor:pointer;text-decoration:underline dotted var(--ink-3);text-underline-offset:4px}
+.rw:hover{color:var(--pencil)}
+.rw u{text-decoration:none;color:var(--red);font-weight:700;background:var(--red-wash);border-radius:2px}
+.rz{font:400 .9rem/1.5 var(--f-zh);color:var(--ink-2);min-width:0}
+.disc-h{font:400 .9rem/1.6 var(--f-zh);color:var(--ink-2);margin:0 0 6px}
+.disc{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.disc li{font:400 .9rem/1.7 var(--f-zh);color:var(--ink-2)}
+.disc li b{font:600 .98rem var(--f-body);color:var(--ink);margin-right:6px}
+.disc li.me b{background:var(--marker);padding:0 3px;border-radius:2px}
+.backb{background:none;border:0;padding:4px 0;font:500 13px var(--f-zh);color:var(--pencil);cursor:pointer;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vipa{font:400 .9rem var(--f-body);color:var(--ink-3)}
+.ven{font:italic 400 .93rem/1.5 var(--f-body);color:var(--ink-2);margin:0}
+.need{font:400 .95rem/1.6 var(--f-zh);margin:8px 0 2px}
+.need b{color:var(--pencil);font-weight:600}
+.pick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:6px;margin-top:10px}
+.pick{display:flex;gap:6px;align-items:baseline;border:1px solid var(--rule);background:var(--paper);padding:7px 8px;border-radius:3px;font:400 .95rem/1.25 var(--f-body);cursor:pointer;color:var(--ink);text-align:left;min-width:0;overflow-wrap:anywhere}
+.pick b{font:600 .75rem var(--f-mono);color:var(--ink-3)}
+.pick:hover{border-color:var(--ink)}
+.pick.cand{border-color:var(--pencil);background:var(--pencil-wash)}
+.pick.taken{opacity:.5}
+.verdict{font:700 1.5rem/1.2 var(--f-hand);margin:10px 0 4px}
+.verdict.ok{color:var(--ok)} .verdict.bad{color:var(--red)} .verdict.shown{color:var(--ink-2)}
+.ans-big{display:flex;align-items:baseline;gap:10px;margin:2px 0 6px}
+.ans-big b{font:600 1rem var(--f-mono);color:var(--ink-3)}
+.ans-big span{font:700 1.9rem/1.1 var(--f-hand);color:var(--pencil)}
+.ans-big i{font:400 .95rem var(--f-zh);font-style:normal;color:var(--ink-2)}
+.ex{font:400 .95rem/1.85 var(--f-zh);margin:0}
+.ex.trap{color:var(--ink-2)}
+.cands{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.cands span{font:500 12.5px/1.4 var(--f-mono);border:1px solid var(--rule);padding:2px 7px;border-radius:3px;color:var(--ink-2)}
+.cands span.hit{border-color:var(--pencil);color:var(--pencil);background:var(--pencil-wash)}
+
+.idle h3{font:700 1.3rem/1.2 var(--f-head);margin:.2em 0 .5em}
+.idle ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.idle li{display:grid;grid-template-columns:5.4rem minmax(0,1fr);gap:8px;font:400 .92rem/1.6 var(--f-zh);color:var(--ink-2)}
+.idle li b{font:600 11px/1.9 var(--f-mono);color:var(--ink);letter-spacing:.04em}
+.legend{display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:12px;font:400 .9rem/1.5 var(--f-body)}
+.legend .l1{text-decoration:underline 2px var(--pencil);text-underline-offset:4px}
+.legend .l2{text-decoration:underline wavy 1.4px var(--pencil);text-underline-offset:5px}
+.posleg{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+
+/* ---------- archive ---------- */
+.sect-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;border-bottom:1px solid var(--ink);padding-bottom:8px;margin-bottom:18px}
+.sect-head h2{font:700 clamp(1.7rem,4vw,2.3rem)/1.1 var(--f-head);margin:0}
+.sect-head p{margin:0;font:500 12px var(--f-mono);color:var(--ink-3)}
+.issues{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:0 28px}
+.issue{border-top:1.5px solid var(--ink);padding:14px 0 22px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.issue .no{display:flex;justify-content:space-between;font:500 11px var(--f-mono);color:var(--ink-3);letter-spacing:.06em}
+.issue h3{margin:0;font:700 1.45rem/1.15 var(--f-head);text-wrap:balance}
+.issue h3 button{all:unset;cursor:pointer}
+.issue h3 button:hover{color:var(--pencil)}
+.issue h3 button:focus-visible{outline:2px solid var(--pencil)}
+.issue .izh{font:400 .95rem var(--f-zh);color:var(--ink-2);margin:0}
+.bar{height:4px;background:var(--paper-2);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pencil)}
+.imeta{display:flex;flex-wrap:wrap;gap:4px 12px;font:500 12px var(--f-mono);color:var(--ink-3);font-variant-numeric:tabular-nums}
+.iact{display:flex;gap:8px;margin-top:2px}
+
+/* ---------- vocab ---------- */
+.vtools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:18px}
+.vtools select{font:500 13px var(--f-zh);padding:6px 10px;border:1px solid var(--rule);border-radius:999px;background:var(--sheet);color:var(--ink);max-width:100%}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.vitem{background:var(--sheet);border:1px solid var(--rule);padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.vitem.done{opacity:.66}
+.vhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.vhead b{font:700 1.45rem/1.1 var(--f-head);overflow-wrap:anywhere}
+.vzh{font:600 1rem/1.6 var(--f-zh);margin:0;border-radius:3px;transition:filter .2s}
+.vzh.blur{filter:blur(6px);cursor:pointer;user-select:none}
+.vctx{font:400 .95rem/1.65 var(--f-body);color:var(--ink-2);margin:0}
+.vctx mark{background:var(--marker);color:var(--ink);border-radius:2px;padding:0 1px}
+.vsrc{font:500 11.5px var(--f-mono);color:var(--ink-3)}
+.vact{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.vact .pbtn{padding:6px 10px;font-size:12.5px}
+
+/* ---------- import ---------- */
+.imp{max-width:46rem}
+.seg{display:inline-flex;border:1px solid var(--ink);border-radius:999px;overflow:hidden;margin:6px 0 18px}
+.seg button{background:none;border:0;padding:7px 14px;font:500 13px var(--f-zh);cursor:pointer;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field label{font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.field label span{text-transform:none;letter-spacing:0;font:400 12px var(--f-zh);color:var(--ink-3);margin-left:6px}
+.field input[type=text],.field textarea{width:100%;font:400 1rem/1.6 var(--f-body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:3px;padding:10px 12px}
+.field textarea{min-height:8rem;resize:vertical}
+.field textarea#impText{min-height:14rem}
+.drop{border:1.5px dashed var(--rule);border-radius:4px;padding:18px;text-align:center;font:400 .95rem/1.6 var(--f-zh);color:var(--ink-2);background:var(--sheet)}
+.drop img{display:block;max-height:220px;margin:10px auto 0;border:1px solid var(--rule)}
+.imp-status{margin-top:14px;font:400 .95rem/1.6 var(--f-zh);min-height:1.6em}
+.imp-status .err{color:var(--red)}
+.imp-status .done{color:var(--ok)}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid var(--rule);border-top-color:var(--pencil);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-1px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.imp-alt{margin-top:22px;padding-top:12px;border-top:1px solid var(--rule);font:400 .92rem/1.7 var(--f-zh);color:var(--ink-3)}
+
+.empty{max-width:34rem;margin:40px auto;text-align:center}
+.empty h2{font:700 1.8rem var(--f-head);margin:.2em 0}
+.empty p{font:400 1rem/1.8 var(--f-zh);color:var(--ink-2)}
+.skel{height:14px;background:var(--paper-2);border-radius:3px;margin:12px 0;animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.5}}
+
+.foot{margin-top:56px;border-top:1px solid var(--rule);padding-top:12px;text-align:center;font:500 11px/1.6 var(--f-mono);color:var(--ink-3);letter-spacing:.04em}
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);font:500 14px/1.4 var(--f-zh);padding:10px 16px;border-radius:4px;z-index:40;max-width:calc(100% - 32px)}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="mast-top"><span id="dateLine"></span><span>CET-6 · Intensive Reading</span><span id="issueLine">第 — 期</span></div>
+    <h1 class="mast-name">The Close Reader</h1>
+    <div class="mast-sub">精读日报</div>
+    <nav class="tabs" aria-label="栏目">
+      <button class="tab" data-act="view" data-v="read">今日精读</button>
+      <button class="tab" data-act="view" data-v="archive">往期 <span class="ct" id="ctArch"></span></button>
+      <button class="tab" data-act="view" data-v="vocab">单词本 <span class="ct" id="ctVocab"></span></button>
+      <button class="tab" data-act="view" data-v="import">导入新文章</button>
+    </nav>
+  </header>
+  <main class="layout has-rail">
+    <section id="view" class="view"></section>
+    <aside id="panel" class="panel" aria-live="polite"></aside>
+  </main>
+  <footer class="foot">文章、作答进度和单词本保存在你的 claude.ai 账号里，换设备打开也在。</footer>
+</div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+(() => {
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LS = {
+  get(k, d){ try { const v = localStorage.getItem('cr.' + k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem('cr.' + k, JSON.stringify(v)); } catch(e){} }
+};
+const canSpeak = 'speechSynthesis' in window;
+const SPEAK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+
+const S = {
+  db: null, sample: null, dbState: 'loading',
+  articles: [], prog: {}, vocab: [],
+  view: 'read', cur: null, userChose: false, panel: null,
+  showPos: LS.get('showPos', false), showKw: LS.get('showKw', true), zhAll: false, group: LS.get('group', false),
+  hideZh: LS.get('hideZh', false), vf: 'all', va: 'all', vshow: new Set(),
+  notes: {}, dictAll: false, sheet: 'half',
+  openZh: new Set(), unguard: new Set(), hint: false, confirmReset: false, confirmDel: null, selAt: 0,
+  impMode: 'text', impForm: { impTitle:'', impText:'', impBank:'', impAns:'' }, impFile: null, imp: null, impCtl: null, impDirty: true
+};
+
+/* ---------- helpers on article data ---------- */
+const cur = () => S.articles.find(a => a.id === S.cur) || null;
+const blankNums = a => Object.keys(a.blanks || {}).sort((x, y) => +x - +y);
+const optW = (a, l) => a.options?.[l]?.w || '';
+function st(a, n){
+  const b = a.blanks?.[n]; if (!b) return { done:false, ans:'' };
+  const p = S.prog[a.id] || {};
+  const pick = (p.picks || {})[n], shown = (p.shown || {})[n];
+  if (pick) return { done:true, pick, ok: pick === b.ans, ans: b.ans };
+  if (shown) return { done:true, shown:true, ans: b.ans };
+  return { done:false, ans: b.ans };
+}
+function score(a){
+  const ns = blankNums(a); let done = 0, ok = 0;
+  ns.forEach(n => { const r = st(a, n); if (r.done) done++; if (r.ok) ok++; });
+  return { total: ns.length, done, ok };
+}
+function toks(en){
+  const out = [];
+  String(en).split(/(\{\{\d+\}\})/).forEach(part => {
+    const m = part.match(/^\{\{(\d+)\}\}$/);
+    if (m) { out.push({ t:'b', n:m[1] }); return; }
+    const re = /[A-Za-z]+(?:['’][A-Za-z]+)*|\d+(?:[.,]\d+)*|\s+|[^\sA-Za-z\d]+/g; let x;
+    while ((x = re.exec(part))) {
+      const v = x[0];
+      out.push({ t: /^\s+$/.test(v) ? 'sp' : /^[A-Za-z\d]/.test(v) ? 'w' : 'p', v });
+    }
+  });
+  return out;
+}
+function markKw(tk, keys, used){
+  const wi = tk.map((t, i) => t.t === 'w' ? i : -1).filter(i => i >= 0);
+  keys.forEach((k, ki) => {
+    if (used.has(ki)) return;
+    const parts = String(k.t).toLowerCase().split(/\s+/).filter(Boolean);
+    if (!parts.length) return;
+    for (let j = 0; j + parts.length <= wi.length; j++) {
+      let ok = true;
+      for (let q = 0; q < parts.length; q++) { const t = tk[wi[j + q]]; if (t.v.toLowerCase() !== parts[q] || t.kw != null) { ok = false; break; } }
+      if (ok) { for (let q = 0; q < parts.length; q++) tk[wi[j + q]].kw = ki; used.add(ki); break; }
+    }
+  });
+}
+function lexOf(a, w){
+  const e = a.lex?.[w];
+  if (Array.isArray(e) && e.length >= 2) return e;
+  if (/^\d/.test(w)) return ['num.', '数字'];
+  return null;
+}
+function posClass(pos){
+  const m = String(pos || '').trim().match(/^(adj|adv|aux|art|num|modal|prep|pron|conj|det|phrase|n|v)/);
+  if (!m) return 'pf';
+  return ({ n:'pn', v:'pv', adj:'pa', adv:'pd' })[m[1]] || 'pf';
+}
+const shortPos = pos => String(pos || '').split(/[\s（(/]/)[0] || '?';
+function sentHasOpen(a, p, s){ return toks(a.paragraphs[p].sentences[s].en).some(t => t.t === 'b' && !st(a, t.n).done); }
+function paraHasOpen(a, p){ return a.paragraphs[p].sentences.some((_, s) => sentHasOpen(a, p, s)); }
+function plainSent(a, p, s){
+  return toks(a.paragraphs[p].sentences[s].en).map(t => t.t === 'b' ? (st(a, t.n).done ? optW(a, a.blanks[t.n].ans) : '____') : t.v).join('');
+}
+function sentHtml(a, p, s, hl){
+  const tk = toks(a.paragraphs[p].sentences[s].en);
+  const marks = new Set();
+  if (hl) {
+    const hp = String(hl).toLowerCase().split(/\s+/).filter(Boolean);
+    const wi = tk.map((t, i) => t.t === 'w' ? i : -1).filter(i => i >= 0);
+    for (let j = 0; j + hp.length <= wi.length; j++) if (hp.every((h, q) => tk[wi[j + q]].v.toLowerCase() === h)) for (let q = 0; q < hp.length; q++) marks.add(wi[j + q]);
+  }
+  return tk.map((t, i) => {
+    if (t.t === 'b') { const r = st(a, t.n); return r.done ? `<span class="fill">${esc(optW(a, r.ans))}</span>` : `<span class="gap">(${t.n})____</span>`; }
+    return marks.has(i) ? `<mark>${esc(t.v)}</mark>` : esc(t.v);
+  }).join('');
+}
+function guarded(key, isGuarded, html, label){
+  if (isGuarded && !S.unguard.has(key)) return `<button class="guard" data-act="unguard" data-k="${esc(key)}">${label || '这段译文会透露还没作答的空 · 点按显示'}</button>`;
+  return html;
+}
+const zhBlock = (a, p, s) => guarded(`s${p}-${s}`, sentHasOpen(a, p, s), `<p class="p-zht">${esc(a.paragraphs[p].sentences[s].zh)}</p>`, '这句译文会透露还没作答的空 · 点按显示');
+const vocabHas = (art, w) => S.vocab.find(v => v.art === art && v.w === w);
+const speakBtn = w => canSpeak ? `<button class="ibtn" data-act="speak" data-w="${esc(w)}" aria-label="朗读 ${esc(w)}">${SPEAK}</button>` : '';
+function dateCN(t){ const d = new Date(t); return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`; }
+
+/* ---------- dictionary: Chinese senses from ECDICT (MIT); English senses, examples, IPA from Open English WordNet (CC BY 4.0) ---------- */
+const DICT = {}, DICT_P = {};
+function shard(ch){
+  ch = (ch || '').toLowerCase();
+  if (!/^[a-z]$/.test(ch)) return Promise.resolve({});
+  if (DICT[ch]) return Promise.resolve(DICT[ch]);
+  if (!DICT_P[ch]) DICT_P[ch] = fetch(`dict/${ch}.json`).then(r => { if (!r.ok) throw new Error('http'); return r.json(); })
+    .then(j => (DICT[ch] = j)).catch(e => { delete DICT_P[ch]; throw e; });
+  return DICT_P[ch];
+}
+async function rawGet(w){ const s = await shard(w[0]); return s[w]; }
+function stems(w){
+  const c = [w.replace(/ies$/, 'y'), w.replace(/ied$/, 'y'), w.replace(/es$/, ''), w.replace(/s$/, ''), w.replace(/ed$/, ''), w.replace(/ed$/, 'e'),
+    w.replace(/(.)\1ed$/, '$1'), w.replace(/ing$/, ''), w.replace(/ing$/, 'e'), w.replace(/(.)\1ing$/, '$1'), w.replace(/ier$/, 'y'), w.replace(/iest$/, 'y'), w.replace(/er$/, ''), w.replace(/est$/, ''), w.replace(/ly$/, '')];
+  return [...new Set(c)].filter(x => x !== w && x.length > 1);
+}
+const INFL = { p:'过去式', d:'过去分词', i:'现在分词', '3':'第三人称单数', s:'复数', r:'比较级', t:'最高级' };
+function formNote(codes, ctxPos){
+  let cs = String(codes || '').split('').filter(c => INFL[c]);
+  if (cs.includes('s') && cs.includes('3')) cs = cs.filter(c => c !== (/^v/.test(ctxPos || '') ? 's' : '3'));
+  return cs.map(c => INFL[c]).join(' / ') || '变化形式';
+}
+async function dictLookup(word, ctxPos){
+  const w = String(word).toLowerCase().replace(/['’]s$/, '');
+  if (!/^[a-z]/.test(w)) return null;
+  let e = await rawGet(w), form = null;
+  if (e === undefined) {
+    for (const c of stems(w)) { const f = await rawGet(c); if (f) { return f.l ? { lemma: f.l, form: w, ff: '', e: await rawGet(f.l) } : { lemma: c, form: w, ff: '', e: f }; } }
+    return null;
+  }
+  if (e.l) { const t = await rawGet(e.l); return t && !t.l ? { lemma: e.l, form: w, ff: e.f, e: t } : null; }
+  if (e.x && /(过去|复数|三单|分词|比较级|最高级)/.test(ctxPos || '')) { const t = await rawGet(e.x); if (t && !t.l) return { lemma: e.x, form: w, ff: e.xf, e: t }; }
+  return { lemma: w, form, ff: '', e };
+}
+function ctxKey(pos){ const c = posClass(pos); return c === 'pv' ? 'v' : c === 'pn' ? 'n' : c === 'pa' ? 'a' : c === 'pd' ? 'r' : ''; }
+const TP_LABEL = { a:'adj.', adj:'adj.', ad:'adv.', adv:'adv.', vt:'vt.', vi:'vi.', v:'v.', n:'n.', pl:'pl.', prep:'prep.', conj:'conj.', pron:'pron.', art:'art.', num:'num.', int:'int.', interj:'int.', aux:'aux.', abbr:'abbr.', suf:'suf.', pref:'pref.' };
+function trLines(t, key){
+  const out = String(t || '').split('\n').filter(Boolean).map(line => {
+    const m = line.match(/^(vt|vi|v|n|pl|adj|a|adv|ad|prep|conj|pron|art|num|interj|int|aux|abbr|suf|pref)\.\s*/);
+    const tp = m ? m[1] : '';
+    const k = /^v/.test(tp) ? 'v' : (tp === 'n' || tp === 'pl') ? 'n' : (tp === 'a' || tp === 'adj') ? 'a' : (tp === 'ad' || tp === 'adv') ? 'r' : '';
+    return { tp: m ? TP_LABEL[tp] : '', k, text: m ? line.slice(m[0].length) : line };
+  });
+  return key ? [...out.filter(l => l.k === key), ...out.filter(l => l.k !== key)] : out;
+}
+const DEF_TP = { n:'n.', v:'v.', a:'adj.', r:'adv.' };
+function defLines(e, key){
+  let out;
+  if (Array.isArray(e.w)) out = e.w.map(([k, text, ex]) => ({ tp: DEF_TP[k] || '', k, text, ex: ex || '' }));
+  else out = String(e.d || '').split('\n').filter(Boolean).map(line => {
+    const m = line.match(/^([nvasr])\.?\s+/);
+    const k = m ? (m[1] === 's' ? 'a' : m[1]) : '';
+    return { tp: DEF_TP[k] || '', k, text: m ? line.slice(m[0].length) : line, ex: '' };
+  });
+  // context part of speech first, then parts of speech in the order the Chinese entry lists them (most common first)
+  const order = [key, ...trLines(e.t).map(l => l.k)].filter(Boolean);
+  const rank = k => { const i = order.indexOf(k); return i < 0 ? 99 : i; };
+  return out.map((l, i) => [l, i]).sort((x, y) => rank(x[0].k) - rank(y[0].k) || x[1] - y[1]).map(x => x[0]);
+}
+const KCLS = { v:'pv', n:'pn', a:'pa', r:'pd' };
+const TAGS = { cet4:'CET-4', cet6:'CET-6', ky:'考研', ielts:'IELTS', toefl:'TOEFL', gre:'GRE' };
+function loadDict(P, word, pos){
+  P.dict = { state: 'loading' }; P.lw = word; P.pos = pos;
+  dictLookup(word, pos).then(res => { P.dict = res ? { state: 'ok', res } : { state: 'none' }; })
+    .catch(() => { P.dict = { state: 'err' }; })
+    .then(() => { if (P.showDetail) loadMore(P); if (S.panel === P) renderPanel(true); });
+}
+function dictHead(P){
+  const D = P.dict; if (!D || D.state !== 'ok') return '';
+  const e = D.res.e || {};
+  const tags = (e.g || '').split(' ').filter(t => TAGS[t]).map(t => `<span class="tag${t === 'cet6' ? ' hot' : ''}">${TAGS[t]}</span>`).join('');
+  const stars = e.c ? `<span class="stars" title="柯林斯 ${e.c} 星">${'★'.repeat(e.c)}${'☆'.repeat(5 - e.c)}</span>` : '';
+  const ox = e.o ? '<span class="tag">牛津3000</span>' : '';
+  const ipa = e.i && (e.i[0] || e.i[1]) ? [e.i[0] ? `<span class="ipa">英 /${esc(e.i[0])}/</span>` : '', e.i[1] ? `<span class="ipa">美 /${esc(e.i[1])}/</span>` : ''].join('')
+    : e.p ? `<span class="ipa">/${esc(e.p)}/</span>` : '';
+  const row = ipa || tags || stars || ox ? `<div class="phon">${ipa}${tags}${ox}${stars}</div>` : '';
+  const note = D.res.form ? `<p class="lemma-note">${esc(D.res.form)} → 原形 <b>${esc(D.res.lemma)}</b>${D.res.ff ? ` · ${esc(formNote(D.res.ff, P.pos))}` : ''}</p>` : '';
+  return row + note;
+}
+function dictBody(P){
+  const D = P.dict;
+  if (!D || D.state === 'loading') return `<p class="dload"><span class="spin"></span>正在查词典…</p>`;
+  if (D.state === 'err') return `<p class="dload">词典没加载出来。<button class="more" data-act="dictretry">重试</button></p>`;
+  if (D.state === 'none') return `<p class="dload">词典里没有收录这个词。</p>`;
+  const e = D.res.e || {}; const key = ctxKey(P.pos);
+  const tr = trLines(e.t, key).slice(0, 6);
+  const df = defLines(e, key); const showN = S.dictAll ? df.length : Math.min(4, df.length);
+  const li = (l, cls) => `<li class="${key && l.k === key ? 'hit' : ''}" style="--pc:var(--${({ v:'pos-v', n:'pos-n', a:'pos-adj', r:'pos-adv' })[l.k] || 'ink-3'})"><span class="tp">${esc(l.tp)}</span><span class="${cls}">${esc(l.text)}${l.ex ? `<em class="exm">${esc(l.ex)}</em>` : ''}</span></li>`;
+  return `${tr.length ? `<h5 class="p-sec">常见释义</h5><ul class="dl">${tr.map(l => li(l, 'zh')).join('')}</ul>` : ''}
+    ${df.length ? `<h5 class="p-sec">英英释义 · WordNet</h5><ol class="dl en-list">${df.slice(0, showN).map(l => li(l, 'en')).join('')}</ol>
+      ${df.length > 4 ? `<button class="more" data-act="dictmore">${S.dictAll ? '收起' : `展开全部 ${df.length} 条`}</button>` : ''}` : ''}`;
+}
+function dictExtras(P){
+  const D = P.dict; if (!D || D.state !== 'ok') return {};
+  const e = D.res.e || {}; const d = defLines(e, ctxKey(P.pos))[0];
+  return { ph: (e.i && (e.i[0] || e.i[1])) || e.p || '', en: d ? d.text : '' };
+}
+const DSRC = '<div class="dsrc">中文释义：ECDICT（MIT）<br>英英释义、例句、音标：Open English WordNet（CC BY 4.0，源自 Princeton WordNet）</div>';
+
+/* ---------- word details: etymology (GCIDE / Webster 1913), roots & near-synonyms (ECDICT), synonyms (WordNet), look-alikes ---------- */
+const MORE = {}, MORE_P = {}; let RESEMBLE = null, RESEMBLE_P = null;
+function moreShard(ch){
+  if (!/^[a-z]$/.test(ch)) return Promise.resolve({});
+  if (MORE[ch]) return Promise.resolve(MORE[ch]);
+  if (!MORE_P[ch]) MORE_P[ch] = fetch(`more/${ch}.json`).then(r => { if (!r.ok) throw new Error('http'); return r.json(); })
+    .then(j => (MORE[ch] = j)).catch(e => { delete MORE_P[ch]; throw e; });
+  return MORE_P[ch];
+}
+function resemble(){
+  if (RESEMBLE) return Promise.resolve(RESEMBLE);
+  if (!RESEMBLE_P) RESEMBLE_P = fetch('more/resemble.json').then(r => r.json()).then(j => (RESEMBLE = j)).catch(e => { RESEMBLE_P = null; throw e; });
+  return RESEMBLE_P;
+}
+function loadMore(P){
+  if (!P.dict || P.dict.state !== 'ok') { if (P.dict && P.dict.state !== 'loading') P.more = { state: 'none' }; return; }
+  const lemma = P.dict.res.lemma;
+  P.more = { state: 'loading', lemma };
+  moreShard(lemma[0]).then(async m => {
+    const e = m[lemma] || {};
+    const groups = e.g ? (await resemble()).filter((_, i) => e.g.includes(i)) : [];
+    P.more = { state: 'ok', lemma, e, groups };
+  }).catch(() => { P.more = { state: 'err', lemma }; })
+    .then(() => { if (S.panel === P) renderPanel(true); });
+}
+const ROOT_CLS = c => /prefix/.test(c) ? '前缀' : /suffix/.test(c) ? '后缀' : /root/.test(c) ? '词根' : '构词成分';
+const ORIGIN = { Latin:'拉丁语', Greek:'希腊语', 'Old English':'古英语', French:'法语', 'Latin and Greek':'拉丁语 / 希腊语', Germanic:'日耳曼语' };
+function diffMark(base, w){
+  const a = base.toLowerCase(), b = w.toLowerCase(), n = a.length, m = b.length;
+  const L = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  const keep = new Array(m).fill(false); let i = 0, j = 0;
+  while (i < n && j < m) { if (a[i] === b[j]) { keep[j] = true; i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) i++; else j++; }
+  return [...w].map((c, k) => keep[k] ? esc(c) : `<u>${esc(c)}</u>`).join('');
+}
+function detailBlock(P){
+  if (!P.showDetail) return `<button class="xbtn" data-act="detail"><span>展开详解</span><small>词源 · 构词 · 近义词 · 形近词</small></button>`;
+  const M = P.more;
+  if (!M || M.state === 'loading') return `<div class="xsec"><p class="dload"><span class="spin"></span>正在整理详解…</p></div>`;
+  if (M.state === 'err') return `<div class="xsec"><p class="dload">详解没加载出来。<button class="more" data-act="detailretry">重试</button></p></div>`;
+  if (M.state === 'none') return `<div class="xsec"><p class="dload">词典里没有这个词的详解。</p></div>`;
+  const e = M.e, lemma = M.lemma, key = ctxKey(P.pos);
+  const note = S.notes[lemma];
+  let h = `<div class="xsec"><h4 class="xh">详解 · ${esc(lemma)}</h4>`;
+  // etymology
+  h += `<h5 class="p-sec">词源 Etymology</h5>`;
+  h += e.e ? `<p class="ety">${esc(e.e)}</p><div class="dsrc" style="margin-top:4px">Webster 1913 · GCIDE（GPL）</div>` : `<p class="dload" style="margin-top:0">Webster 词典没有记录这个词的词源。</p>`;
+  if (note) {
+    h += `<div class="ai"><span class="lbl">Claude 讲解</span>
+      ${note.story ? `<p>${esc(note.story)}</p>` : ''}
+      ${note.memory ? `<p><b>记忆</b>${esc(note.memory)}</p>` : ''}
+      ${(note.collocations || []).length ? `<p><b>常用搭配</b></p><ul>${note.collocations.map(c => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}
+      ${(note.examples || []).length ? `<p><b>例句</b></p><ul class="exl">${note.examples.map(x => `<li>${esc(x[0])}<span>${esc(x[1] || '')}</span></li>`).join('')}</ul>` : ''}
+      ${note.confusions ? `<p><b>易混</b>${esc(note.confusions)}</p>` : ''}</div>`;
+  } else if (S.sample) {
+    h += P.aiBusy ? `<p class="dload"><span class="spin"></span>Claude 正在写词源故事和记忆方法…</p>`
+      : `<button class="pbtn ghost" style="margin-top:10px" data-act="ainote">让 Claude 讲讲词源、记法和搭配</button>${P.aiErr ? `<p class="dload">${esc(P.aiErr)}</p>` : ''}`;
+  }
+  // roots
+  if ((e.r || []).length) h += `<h5 class="p-sec">构词 Word parts</h5><ul class="roots">${e.r.map(r => `<li><b>${esc(r[0])}</b><span class="tag">${ROOT_CLS(r[2])}</span><span class="rm">${esc(r[1])}</span>${r[3] ? `<span class="ro">${esc(ORIGIN[r[3]] || r[3])}</span>` : ''}</li>`).join('')}</ul>`;
+  // synonyms
+  const syn = (e.s || []).slice();
+  if (key) syn.sort((x, y) => (y[1] === key) - (x[1] === key));
+  if (syn.length) h += `<h5 class="p-sec">近义词 Synonyms</h5><ul class="rel">${syn.map(s => `<li><button class="rw" data-act="look" data-w="${esc(s[0])}">${esc(s[0])}</button>${s[1] ? `<span class="chip ${KCLS[s[1]] || 'pf'}">${esc(DEF_TP[s[1]] || '')}</span>` : '<span></span>'}<span class="rz">${esc(s[2])}</span></li>`).join('')}</ul>`;
+  // near-synonym discrimination
+  M.groups.forEach(g => {
+    const lines = String(g[1]).split('\n');
+    const head = lines.filter(l => !l.startsWith('- ')).join(' ');
+    const items = lines.filter(l => l.startsWith('- ')).map(l => { const m = l.slice(2).match(/^([^:：]+)[:：]\s*(.*)$/); return m ? [m[1].trim(), m[2]] : ['', l.slice(2)]; });
+    h += `<h5 class="p-sec">近义辨析 · ${esc(g[0].join(' / '))}</h5>${head ? `<p class="disc-h">${esc(head)}</p>` : ''}<ul class="disc">${items.map(([w, t]) => `<li class="${w.toLowerCase() === lemma ? 'me' : ''}"><b>${esc(w)}</b>${esc(t)}</li>`).join('')}</ul>`;
+  });
+  // look-alikes
+  if ((e.k || []).length) h += `<h5 class="p-sec">形近词 Look-alikes</h5><ul class="rel">${e.k.map(k => `<li><button class="rw" data-act="look" data-w="${esc(k[0])}">${diffMark(lemma, k[0])}</button><span class="tag">${k[2] === 1 ? '差 1 处' : '差 2 处'}</span><span class="rz">${esc(k[1])}</span></li>`).join('')}</ul>`;
+  if (!e.e && !(e.r || []).length && !syn.length && !(e.k || []).length && !M.groups.length) h += `<p class="dload">这个词没有更多可拓展的内容。</p>`;
+  return h + `<div class="dsrc">点近义词或形近词可以继续查词</div></div>`;
+}
+async function aiNote(P){
+  const M = P.more; if (!S.sample || !M || M.state !== 'ok') return;
+  P.aiBusy = true; P.aiErr = ''; renderPanel(true);
+  const e = M.e;
+  const prompt = `你是英语六级词汇老师。请用中文为学生详细讲解英语单词 "${M.lemma}"。
+参考资料（可能不完整，有错就以你的知识为准）：
+- Webster 1913 词源记录：${e.e || '无'}
+- 词根词缀：${(e.r || []).map(r => r[0] + ' = ' + r[1]).join('；') || '无'}
+- 近义词：${(e.s || []).map(s => s[0]).join(', ') || '无'}
+- 形近词：${(e.k || []).map(k => k[0]).join(', ') || '无'}
+只输出一个 JSON 对象，不要其他文字：
+{"story": "词源故事，2–4 句：来自哪种语言、原来是什么意思、怎样演变成今天的意思", "memory": "一个基于词根词缀或词源的记忆方法，不要用谐音", "collocations": ["3–5 条六级常见搭配，格式：搭配 中文"], "examples": [["六级难度英文例句", "中文翻译"], ["…", "…"]], "confusions": "和最容易混淆的一两个词的区别，一两句话；没有就写空字符串"}`;
+  try {
+    const r = await S.sample.json(prompt, { modelTier: 'default' });
+    if (!r || typeof r !== 'object' || !r.story) throw { code: 'invalid_json' };
+    const note = { story: String(r.story), memory: String(r.memory || ''), collocations: (r.collocations || []).map(String).slice(0, 6),
+      examples: (r.examples || []).filter(Array.isArray).map(x => [String(x[0] || ''), String(x[1] || '')]).slice(0, 3), confusions: String(r.confusions || ''), at: Date.now() };
+    S.notes[M.lemma] = note;
+    write('notes/' + M.lemma.replace(/[^A-Za-z0-9_\-.~:@+]/g, '_'), ref => ref.set(note));
+  } catch(err){ P.aiErr = sampleErr(err); }
+  P.aiBusy = false;
+  if (S.panel === P) renderPanel(true);
+}
+function dictCard(P){
+  const D = P.dict; const back = P.back;
+  const backLabel = back ? (back.type === 'dict' ? back.disp : back.type === 'opt' ? (cur()?.options?.[back.l]?.w || '上一个') : back.disp || '上一个') : '';
+  const tr = D && D.state === 'ok' ? trLines(D.res.e.t)[0] : null;
+  const saved = cur() && vocabHas(cur().id, P.w);
+  return `<div class="p-top">${back ? `<button class="backb" data-act="back">← ${esc(backLabel)}</button>` : '<span class="p-eyebrow">查词</span>'}<button class="p-close" data-act="close" aria-label="关闭">×</button></div>
+    <div class="p-head"><h2 class="p-word">${esc(P.disp)}</h2>${speakBtn(P.disp)}</div>
+    ${dictHead(P)}
+    ${tr && cur() ? `<div class="p-actions"><button class="pbtn ${saved ? 'ghost' : 'primary'}" data-act="savedict">${saved ? '已收藏 · 移除' : '加入单词本'}</button></div>` : ''}
+    ${dictBody(P)}
+    ${D && D.state === 'ok' ? detailBlock(P) + DSRC : ''}`;
+}
+
+/* ---------- writes ---------- */
+const queues = {};
+function write(path, fn){
+  if (!S.db) { toast('现在连不上存档，这次改动不会保存'); return Promise.resolve(); }
+  const run = async () => { try { await fn(S.db.doc(path)); } catch(e){ toast(dbErr(e)); } };
+  queues[path] = (queues[path] || Promise.resolve()).then(run);
+  return queues[path];
+}
+function dbErr(e){
+  const c = e && e.code;
+  if (c === 'quota_exceeded') return '存储空间满了，删掉一些旧文章或单词再试';
+  if (c === 'invalid_argument') return '你只有查看权限，改动没有保存';
+  if (c === 'resource_exhausted') return '操作太快了，稍等一下再试';
+  return '保存失败，请稍后再试';
+}
+function setProg(id, obj){ S.prog[id] = obj; write('progress/' + id, ref => ref.set(obj)); }
+function progOf(id){ const p = S.prog[id] || {}; return { picks: { ...(p.picks || {}) }, shown: { ...(p.shown || {}) }, lastOpened: p.lastOpened || 0 }; }
+
+/* ---------- chrome ---------- */
+function renderChrome(){
+  const d = new Date(); const wk = '日一二三四五六'[d.getDay()];
+  $('#dateLine').textContent = `${dateCN(d)} · 星期${wk}`;
+  $('#issueLine').textContent = S.articles.length ? `第 ${S.articles.length} 期` : '创刊号';
+  $('#ctArch').textContent = S.articles.length || '';
+  $('#ctVocab').textContent = S.vocab.length || '';
+  $$('.tab').forEach(t => t.toggleAttribute('aria-current', false));
+  const t = $(`.tab[data-v="${S.view}"]`); if (t) t.setAttribute('aria-current', 'page');
+  $('.layout').classList.toggle('has-rail', S.view === 'read' && !!cur());
+}
+function render(){ renderChrome(); renderView(); renderPanel(); }
+function renderView(){
+  const v = $('#view');
+  if (S.view === 'import') {
+    if (S.impDirty || !v.querySelector('.imp')) {
+      v.innerHTML = importHtml(); S.impDirty = false;
+      const img = $('#impPrev'); if (img && S.impFile) { try { img.src = URL.createObjectURL(S.impFile); } catch(err){} }
+    }
+    else { const s = $('#impStatus'); if (s) s.innerHTML = impStatusHtml(); }
+    return;
+  }
+  v.innerHTML = S.view === 'read' ? readHtml() : S.view === 'archive' ? archiveHtml() : vocabHtml();
+}
+
+/* ---------- read view ---------- */
+function readHtml(){
+  const a = cur();
+  if (!a) {
+    if (S.dbState === 'loading') return `<div class="story"><div class="kicker">正在取报</div><div class="skel" style="width:80%;height:38px"></div><div class="skel" style="width:55%"></div><div class="skel"></div><div class="skel"></div><div class="skel" style="width:70%"></div></div>`;
+    if (S.dbState !== 'ok') return `<div class="empty"><div class="kicker">暂时无法读取</div><h2>存档没有连上</h2><p>文章库存在 claude.ai 里。请在 claude.ai 或 Claude App 中登录后打开这个页面。</p></div>`;
+    return `<div class="empty"><div class="kicker">创刊号待印</div><h2>报纸还空着</h2><p>粘贴一篇文章或拍一张试卷，就能生成第一期精读。</p><button class="pbtn primary" data-act="view" data-v="import">导入第一篇</button></div>`;
+  }
+  const keys = a.keys || []; const used = new Set(); let wc = 0;
+  const paras = a.paragraphs.map((p, pi) => {
+    const sents = p.sentences.map((s, si) => {
+      const tk = toks(s.en); markKw(tk, keys, used);
+      wc += tk.filter(t => t.t === 'w').length;
+      return `<span class="s" data-p="${pi}" data-s="${si}">${renderToks(a, tk)}</span>`;
+    }).join(' ');
+    const open = S.zhAll || S.openZh.has(pi);
+    const zh = open ? `<div class="para-zh">${guarded('p' + pi, paraHasOpen(a, pi), esc(p.sentences.map(s => s.zh).join('')))}</div>` : '';
+    return `<div class="para" data-p="${pi}"><div class="gut"><span class="pnum">¶${pi + 1}</span><button class="ptr" data-act="ptr" data-p="${pi}" aria-pressed="${open}">${open ? '收起' : '译文'}</button></div><p class="ptext">${sents}</p>${zh}</div>`;
+  }).join('');
+  const sc = score(a);
+  const scoreTxt = sc.total ? `已作答 <b>${sc.done}/${sc.total}</b> · 答对 <b>${sc.ok}</b>` : '阅读篇';
+  return `<article class="story">
+    <div class="kicker">${esc(a.source || '精读')}</div>
+    <h2 class="headline">${esc(a.title)}</h2>
+    ${a.zh ? `<p class="dek">${esc(a.zh)}</p>` : ''}
+    <div class="byline"><span>${a.paragraphs.length} 段 · ${wc} 词${sc.total ? ` · ${sc.total} 空` : ''}</span><span>${scoreTxt}</span></div>
+    <div class="toolbar">
+      <button class="tbtn" data-act="toggle" data-k="showPos" aria-pressed="${S.showPos}">词性标注</button>
+      <button class="tbtn" data-act="toggle" data-k="showKw" aria-pressed="${S.showKw}">重点划线</button>
+      <button class="tbtn" data-act="toggle" data-k="zhAll" aria-pressed="${S.zhAll}">全文对照</button>
+      ${sc.total ? `<button class="tbtn" data-act="revealAll" ${sc.done === sc.total ? 'disabled' : ''}>显示全部答案</button>
+      <button class="tbtn${S.confirmReset ? ' warn' : ''}" data-act="reset">${S.confirmReset ? '再点一次确认重做' : '重做本篇'}</button>` : ''}
+    </div>
+    <div id="body" class="${S.showKw ? 'show-kw' : ''} ${S.showPos ? 'show-pos' : ''}">${paras}</div>
+    ${bankHtml(a)}
+    ${(a.tips || []).length ? `<section class="tips"><h3>Technique <span>技巧小结</span></h3><ol>${a.tips.map(t => `<li>${esc(t)}</li>`).join('')}</ol></section>` : ''}
+  </article>`;
+}
+function renderToks(a, tk){
+  const first = {}, last = {};
+  tk.forEach((t, i) => { if (t.kw != null) { if (first[t.kw] == null) first[t.kw] = i; last[t.kw] = i; } });
+  const opens = {}, closes = {};
+  for (const k in first) { opens[first[k]] = k; closes[last[k]] = (closes[last[k]] || 0) + 1; }
+  let h = '';
+  tk.forEach((t, i) => {
+    if (opens[i] != null) { const kk = a.keys[opens[i]]; h += `<span class="kw${kk.k === 'phrase' ? ' ph' : ''}" data-k="${opens[i]}">`; }
+    if (t.t === 'w') {
+      const e = lexOf(a, t.v.toLowerCase());
+      h += `<span class="w ${e ? posClass(e[0]) : 'pf'}" data-i="${i}" data-pos="${e ? esc(shortPos(e[0])) : '·'}">${esc(t.v)}</span>`;
+    } else if (t.t === 'b') h += blankHtml(a, t.n);
+    else h += esc(t.v);
+    if (closes[i]) h += '</span>'.repeat(closes[i]);
+  });
+  return h;
+}
+function blankHtml(a, n){
+  const r = st(a, n);
+  const base = `data-act="blank" data-n="${n}"`;
+  if (!r.done) return `<button class="blank" ${base} aria-label="第 ${n} 空，未作答"><span class="bn">${n}</span><span class="bw"></span></button>`;
+  const w = esc(optW(a, r.ans));
+  if (r.shown) return `<button class="blank shown" ${base} aria-label="第 ${n} 空，答案 ${w}"><span class="bn">${n}</span><span class="bw">${w}</span></button>`;
+  if (r.ok) return `<button class="blank ok" ${base} aria-label="第 ${n} 空，答对"><span class="bn">${n}</span><span class="bw">${w}</span></button>`;
+  return `<button class="blank bad" ${base} aria-label="第 ${n} 空，答错"><span class="bn">${n}</span><span class="bw"><s>${esc(optW(a, r.pick))}</s> ${w}</span></button>`;
+}
+const POS_RANK = p => /原形/.test(p) ? 0 : /^v/.test(p) ? 1 : /^n/.test(p) ? 2 : /^adj/.test(p) ? 3 : /^adv/.test(p) ? 4 : 5;
+function bankHtml(a){
+  const L = Object.keys(a.options || {}).sort();
+  if (!L.length) return '';
+  const usedBy = {};
+  blankNums(a).forEach(n => { const r = st(a, n); if (r.done) usedBy[r.ans] = n; });
+  const item = l => `<button class="opt${usedBy[l] ? ' used' : ''}" data-act="opt" data-l="${l}"><b>${l})</b><span>${esc(a.options[l].w)}</span>${usedBy[l] ? `<span class="u">→${usedBy[l]}</span>` : ''}</button>`;
+  let inner;
+  if (S.group) {
+    const g = {};
+    L.forEach(l => { const k = a.options[l].pos || '其他'; (g[k] = g[k] || []).push(l); });
+    inner = Object.keys(g).sort((x, y) => POS_RANK(x) - POS_RANK(y)).map(k => `<div class="grp"><h4>${esc(k)} <span>· ${g[k].length} 个</span></h4><div class="opts">${g[k].map(item).join('')}</div></div>`).join('');
+  } else inner = `<div class="opts">${L.map(item).join('')}</div>`;
+  return `<section class="bank"><header><h3>Word Bank<span>选项词库</span></h3><button class="tbtn" data-act="toggle" data-k="group" aria-pressed="${S.group}">按词性分组</button></header>${inner}
+    <p class="bank-note">${S.group ? '先分词性、再看语义：判断每个空需要什么词性，候选就只剩这一组。' : '点选项看词义和词性；点文中的空格作答。'}</p></section>`;
+}
+
+/* ---------- panel ---------- */
+function renderPanel(keep){
+  const el = $('#panel'); const a = cur(); const y = el.scrollTop;
+  if (S.view !== 'read' || !a) { el.innerHTML = ''; el.classList.remove('open'); return; }
+  const P = S.panel;
+  el.classList.toggle('open', !!P);
+  if (!P) S.sheet = 'half';
+  el.classList.toggle('full', !!P && S.sheet === 'full');
+  let h = '';
+  try {
+    if (!P) h = idleHtml();
+    else if (P.type === 'word') h = wordCard(a, P);
+    else if (P.type === 'blank') h = blankCard(a, P.n);
+    else if (P.type === 'opt') h = optCard(a, P.l);
+    else if (P.type === 'sent') h = sentCard(a, P.list);
+    else if (P.type === 'dict') h = dictCard(P);
+  } catch(e){ h = idleHtml(); }
+  el.innerHTML = `<div class="grab-zone" data-grab aria-label="拖动调整高度，下拉关闭" role="button" tabindex="-1"><span class="grab"></span></div>${h}`;
+  el.scrollTop = keep ? y : 0;
+  highlight();
+}
+const top = label => `<div class="p-top"><span class="p-eyebrow">${label}</span><button class="p-close" data-act="close" aria-label="关闭">×</button></div>`;
+function idleHtml(){
+  return `<div class="idle">${top('读报指南')}<h3>怎么用这一版</h3><ul>
+    <li><b>点单词</b><span>看词性、中文释义和整句翻译，可收进单词本</span></li>
+    <li><b>选中句子</b><span>拖选一句或几句，右侧给出对应译文</span></li>
+    <li><b>点空格</b><span>从词库里作答，立刻判对错并给出解题思路</span></li>
+    <li><b>¶ 译文</b><span>整段中英对照；会透露答案的译文先折起来</span></li>
+  </ul>
+  <div class="legend"><span class="l1">单个重点词</span><span class="l2">固定搭配</span></div>
+  <div class="posleg"><span class="chip pn">n. 名词</span><span class="chip pv">v. 动词</span><span class="chip pa">adj. 形容词</span><span class="chip pd">adv. 副词</span><span class="chip pf">功能词</span></div></div>`;
+}
+function wordCard(a, P){
+  const e = lexOf(a, P.w);
+  const kw = P.k != null ? (a.keys || [])[P.k] : null;
+  const saved = vocabHas(a.id, P.w);
+  const kwSaved = kw && kw.k === 'phrase' && vocabHas(a.id, kw.t);
+  P.pos = e ? e[0] : '';
+  return `${top(`¶${P.p + 1} · 第 ${P.s + 1} 句`)}
+    <div class="p-head"><h2 class="p-word">${esc(P.disp)}</h2>${speakBtn(P.disp)}</div>
+    ${dictHead(P)}
+    ${e ? `<div class="ctxbox"><span class="lbl">本文释义 · In this text</span><div class="row"><span class="chip ${posClass(e[0])}">${esc(e[0])}</span><span class="zh">${esc(e[1])}</span></div>${e[2] ? `<p class="cen">${esc(e[2])}</p>` : ''}</div>`
+        : `<p class="p-miss">还没有这个词在本文中的释义。</p>${S.sample ? `<button class="pbtn" data-act="lookup" id="lookupBtn">让 Claude 按语境释义</button>` : ''}`}
+    ${kw ? `<div class="note"><b>${kw.k === 'phrase' ? '重点搭配' : '重点词'} · ${esc(kw.t)}</b><br>${esc(kw.n)}</div>` : ''}
+    <div class="p-actions">
+      <button class="pbtn ${saved ? 'ghost' : 'primary'}" data-act="save" ${e ? '' : 'disabled'}>${saved ? '已收藏 · 移除' : '加入单词本'}</button>
+      ${kw && kw.k === 'phrase' ? `<button class="pbtn ghost" data-act="savekw">${kwSaved ? '搭配已收藏 · 移除' : '收藏这个搭配'}</button>` : ''}
+    </div>
+    ${dictBody(P)}${P.dict && P.dict.state === 'ok' ? detailBlock(P) + DSRC : ''}`;
+}
+function sentCard(a, list){
+  return `${top(list.length > 1 ? `选中 ${list.length} 句` : `¶${list[0][0] + 1} · 第 ${list[0][1] + 1} 句`)}
+    ${list.map(([p, s]) => `<h5 class="p-sec">¶${p + 1} · 第 ${s + 1} 句</h5><p class="p-en">${sentHtml(a, p, s)}</p>${zhBlock(a, p, s)}`).join('')}`;
+}
+function locate(a, n){
+  for (let p = 0; p < a.paragraphs.length; p++) for (let s = 0; s < a.paragraphs[p].sentences.length; s++)
+    if (a.paragraphs[p].sentences[s].en.includes(`{{${n}}}`)) return [p, s];
+  return [0, 0];
+}
+function blankCard(a, n){
+  const b = a.blanks[n]; if (!b) return idleHtml();
+  const r = st(a, n); const [p, s] = locate(a, n);
+  const ctx = toks(a.paragraphs[p].sentences[s].en).map(t => {
+    if (t.t !== 'b') return esc(t.v);
+    if (t.n === n) return r.done ? `<mark><span class="fill">${esc(optW(a, r.ans))}</span></mark>` : `<mark>(${n})____</mark>`;
+    const o = st(a, t.n); return o.done ? `<span class="fill">${esc(optW(a, o.ans))}</span>` : `<span class="gap">(${t.n})____</span>`;
+  }).join('');
+  const L = Object.keys(a.options || {}).sort();
+  const taken = {}; blankNums(a).forEach(m => { const o = st(a, m); if (o.done && m !== n) taken[o.ans] = m; });
+  const head = `${top(`第 ${n} 空`)}<p class="p-en" style="margin-top:8px">${ctx}</p>`;
+  if (!r.done) {
+    return `${head}
+      <p class="need">${S.hint ? `这个空需要：<b>${esc(b.need)}</b>` : '先自己判断：这个空需要什么词性？'}</p>
+      <div class="pick-grid">${L.map(l => `<button class="pick${S.hint && (b.cands || []).includes(l) ? ' cand' : ''}${taken[l] ? ' taken' : ''}" data-act="pick" data-n="${n}" data-l="${l}"><b>${l}</b>${esc(a.options[l].w)}</button>`).join('')}</div>
+      <div class="p-actions"><button class="pbtn ghost" data-act="hint">${S.hint ? '收起提示' : '提示：看词性候选'}</button><button class="pbtn ghost" data-act="show" data-n="${n}">直接看答案</button></div>`;
+  }
+  const ans = a.options[r.ans] || {};
+  const verdict = r.shown ? `<p class="verdict shown">答案</p>` : r.ok ? `<p class="verdict ok">✓ 答对了</p>` : `<p class="verdict bad">✗ 你选了 ${esc(r.pick)}) ${esc(optW(a, r.pick))}</p>`;
+  const nx = nextOpen(a, n);
+  return `${head}${verdict}
+    <div class="ans-big"><b>${esc(r.ans)})</b><span>${esc(ans.w)}</span><i>${esc(ans.pos || '')} ${esc(ans.zh || '')}</i></div>
+    <h5 class="p-sec">需要的词性</h5><p class="ex">${esc(b.need)}</p>
+    ${(b.cands || []).length ? `<div class="cands">${b.cands.map(l => `<span class="${l === r.ans ? 'hit' : ''}">${esc(l)} ${esc(optW(a, l))}</span>`).join('')}</div>` : ''}
+    <h5 class="p-sec">解题思路</h5><p class="ex">${esc(b.why)}</p>
+    ${b.trap ? `<h5 class="p-sec">干扰项</h5><p class="ex trap">${esc(b.trap)}</p>` : ''}
+    ${b.tip ? `<div class="note"><b>技巧</b><br>${esc(b.tip)}</div>` : ''}
+    <h5 class="p-sec">本句译文</h5><p class="p-zht">${esc(a.paragraphs[p].sentences[s].zh)}</p>
+    <div class="p-actions">${nx ? `<button class="pbtn primary" data-act="blank" data-n="${nx}">下一空 · ${nx}</button>` : ''}<button class="pbtn ghost" data-act="redo" data-n="${n}">重做这一空</button>
+      ${ans.w ? `<button class="pbtn ghost" data-act="saveopt" data-l="${esc(r.ans)}">${vocabHas(a.id, ans.w) ? '已在单词本' : '收藏答案词'}</button>` : ''}</div>`;
+}
+function nextOpen(a, n){
+  const ns = blankNums(a); const i = ns.indexOf(n);
+  for (let k = 1; k <= ns.length; k++) { const m = ns[(i + k) % ns.length]; if (!st(a, m).done) return m; }
+  return null;
+}
+function optCard(a, l){
+  const o = a.options[l]; if (!o) return idleHtml();
+  let usedIn = null; blankNums(a).forEach(n => { const r = st(a, n); if (r.done && r.ans === l) usedIn = n; });
+  const sc = score(a);
+  const role = usedIn ? `第 ${usedIn} 空的答案` : (sc.total && sc.done === sc.total) ? '干扰项 · 本篇没有用到' : '词库选项';
+  const P = S.panel; P.pos = o.pos;
+  return `${top(`选项 ${l} · ${role}`)}
+    <div class="p-head"><h2 class="p-word">${esc(o.w)}</h2>${speakBtn(o.w)}</div>
+    ${dictHead(P)}
+    <div class="ctxbox"><span class="lbl">${usedIn ? '本文释义' : '选项释义'}</span><div class="row"><span class="chip ${posClass(o.pos)}">${esc(o.pos)}</span><span class="zh">${esc(o.zh)}</span></div>${o.en ? `<p class="cen">${esc(o.en)}</p>` : ''}</div>
+    <div class="p-actions"><button class="pbtn ${vocabHas(a.id, o.w) ? 'ghost' : 'primary'}" data-act="saveopt" data-l="${l}">${vocabHas(a.id, o.w) ? '已收藏 · 移除' : '加入单词本'}</button>
+    ${usedIn ? `<button class="pbtn ghost" data-act="blank" data-n="${usedIn}">看第 ${usedIn} 空解析</button>` : ''}</div>
+    ${dictBody(P)}${P.dict && P.dict.state === 'ok' ? detailBlock(P) + DSRC : ''}`;
+}
+function highlight(){
+  $$('#view .on').forEach(e => e.classList.remove('on'));
+  const P = S.panel; if (!P) return;
+  if (P.type === 'word') {
+    const s = $(`#body .s[data-p="${P.p}"][data-s="${P.s}"]`); if (!s) return;
+    s.classList.add('on');
+    const w = P.i != null ? $(`.w[data-i="${P.i}"]`, s) : null;
+    if (w) w.classList.add('on');
+  } else if (P.type === 'blank') { const b = $(`#body .blank[data-n="${P.n}"]`); if (b) b.classList.add('on'); }
+  else if (P.type === 'opt') { const o = $(`.opt[data-l="${P.l}"]`); if (o) o.classList.add('on'); }
+  else if (P.type === 'sent') P.list.forEach(([p, s]) => { const e = $(`#body .s[data-p="${p}"][data-s="${s}"]`); if (e) e.classList.add('on'); });
+}
+
+/* ---------- archive ---------- */
+function archiveHtml(){
+  if (!S.articles.length) return readHtml();
+  const byAge = [...S.articles].sort((x, y) => (x.createdAt || 0) - (y.createdAt || 0));
+  const no = id => byAge.findIndex(a => a.id === id) + 1;
+  const cards = S.articles.map(a => {
+    const sc = score(a); const p = S.prog[a.id] || {};
+    const vc = S.vocab.filter(v => v.art === a.id).length;
+    const pct = sc.total ? Math.round(sc.done / sc.total * 100) : 0;
+    return `<article class="issue">
+      <div class="no"><span>No. ${no(a.id)}</span><span>${a.createdAt ? dateCN(a.createdAt) : ''}</span></div>
+      <h3><button data-act="open" data-id="${esc(a.id)}">${esc(a.title)}</button></h3>
+      ${a.zh ? `<p class="izh">${esc(a.zh)}</p>` : ''}
+      ${sc.total ? `<div class="bar" aria-hidden="true"><i style="width:${pct}%"></i></div>` : ''}
+      <div class="imeta">${sc.total ? `<span>作答 ${sc.done}/${sc.total}</span><span>答对 ${sc.ok}</span>` : '<span>阅读篇</span>'}<span>生词 ${vc}</span>${p.lastOpened ? `<span>上次 ${dateCN(p.lastOpened)}</span>` : '<span>未读</span>'}</div>
+      <div class="iact"><button class="pbtn primary" data-act="open" data-id="${esc(a.id)}">${p.lastOpened ? '继续精读' : '开始精读'}</button>
+      <button class="pbtn ghost${S.confirmDel === a.id ? ' warn' : ''}" data-act="delart" data-id="${esc(a.id)}" style="${S.confirmDel === a.id ? 'color:var(--red);border-color:var(--red)' : ''}">${S.confirmDel === a.id ? '确认删除' : '删除'}</button></div>
+    </article>`;
+  }).join('');
+  return `<div class="sect-head"><h2>往期合订本</h2><p>${S.articles.length} 篇 · 按导入时间倒序</p></div><div class="issues">${cards}</div>`;
+}
+
+/* ---------- vocab ---------- */
+function vocabHtml(){
+  let list = S.vocab;
+  if (S.vf === 'todo') list = list.filter(v => !v.done);
+  if (S.vf === 'done') list = list.filter(v => v.done);
+  if (S.va !== 'all') list = list.filter(v => v.art === S.va);
+  const todo = S.vocab.filter(v => !v.done).length;
+  const arts = [...new Set(S.vocab.map(v => v.art))];
+  const head = `<div class="sect-head"><h2>单词本</h2><p>${S.vocab.length} 个 · 待掌握 ${todo}</p></div>
+    <div class="vtools">
+      <button class="tbtn" data-act="vf" data-v="all" aria-pressed="${S.vf === 'all'}">全部</button>
+      <button class="tbtn" data-act="vf" data-v="todo" aria-pressed="${S.vf === 'todo'}">待掌握</button>
+      <button class="tbtn" data-act="vf" data-v="done" aria-pressed="${S.vf === 'done'}">已掌握</button>
+      <select id="vaSel" aria-label="按文章筛选"><option value="all">全部文章</option>${arts.map(id => { const a = S.articles.find(x => x.id === id); const t = a ? a.title : (S.vocab.find(v => v.art === id) || {}).title; return `<option value="${esc(id)}" ${S.va === id ? 'selected' : ''}>${esc(t || id)}</option>`; }).join('')}</select>
+      <button class="tbtn" data-act="toggle" data-k="hideZh" aria-pressed="${S.hideZh}">遮住释义自测</button>
+    </div>`;
+  if (!S.vocab.length) return head + `<div class="empty"><h2>还没有生词</h2><p>在精读页点任意单词，选“加入单词本”。每个词都会记住它出自哪一句，之后可以一键回到原文。</p></div>`;
+  if (!list.length) return head + `<p class="p-miss">这个筛选下没有单词。</p>`;
+  return head + `<div class="vgrid">${list.map(v => {
+    const blur = S.hideZh && !S.vshow.has(v.id);
+    const ctx = esc(v.ctx || '').replace(new RegExp(`\\b(${esc(v.w).replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+')})\\b`, 'i'), '<mark>$1</mark>');
+    return `<article class="vitem${v.done ? ' done' : ''}">
+      <div class="vhead"><b>${esc(v.w)}</b>${v.ph ? `<span class="vipa">/${esc(v.ph)}/</span>` : ''}<span class="chip ${posClass(v.pos)}">${esc(v.pos)}</span>${speakBtn(v.w)}</div>
+      <p class="vzh${blur ? ' blur' : ''}" ${blur ? `data-act="vreveal" data-id="${esc(v.id)}" title="点按显示"` : ''}>${esc(v.zh)}</p>
+      ${v.en && !blur ? `<p class="ven">${esc(v.en)}</p>` : ''}
+      ${v.ctx ? `<p class="vctx">${ctx}</p>` : ''}
+      <div class="vsrc">《${esc(v.title || '')}》 ¶${(v.p ?? 0) + 1} · ${v.at ? dateCN(v.at) : ''}</div>
+      <div class="vact"><button class="pbtn" data-act="goto" data-id="${esc(v.id)}">回到原句</button>
+      <button class="pbtn ghost" data-act="vdone" data-id="${esc(v.id)}">${v.done ? '标为待掌握' : '我记住了'}</button>
+      <button class="pbtn ghost" data-act="vdel" data-id="${esc(v.id)}">删除</button></div>
+    </article>`;
+  }).join('')}</div>`;
+}
+function vocabId(art, w){ return (art + '~' + w).replace(/[^A-Za-z0-9_\-.~:@+]/g, '_').slice(0, 180); }
+function toggleVocab(a, entry){
+  const have = vocabHas(a.id, entry.w);
+  if (have) {
+    S.vocab = S.vocab.filter(v => v !== have);
+    write('vocab/' + have.id, ref => ref.delete());
+    toast(`已从单词本移除 ${entry.w}`);
+  } else {
+    const id = vocabId(a.id, entry.w);
+    const doc = { w: entry.w, pos: entry.pos, zh: entry.zh, ph: entry.ph || '', en: entry.en || '', art: a.id, title: a.title, p: entry.p, s: entry.s, ctx: entry.p != null ? plainSent(a, entry.p, entry.s) : '', at: Date.now(), done: false };
+    S.vocab = [{ id, ...doc }, ...S.vocab];
+    write('vocab/' + id, ref => ref.set(doc));
+    toast(`已加入单词本：${entry.w}`);
+  }
+  renderChrome(); renderPanel();
+}
+
+/* ---------- import ---------- */
+const SCHEMA = `{
+  "title": "英文标题（原文没有就按内容拟一个简短标题）",
+  "zh": "中文标题",
+  "source": "出处，例如 CET-6 · Part III Reading · Section A 选词填空",
+  "paragraphs": [ { "sentences": [ { "en": "英文原句，填空处写成 {{26}}", "zh": "整句中文翻译" } ] } ],
+  "options": { "A": { "w": "affirmed", "pos": "v.（过去式）", "zh": "证实；断言", "en": "stated or showed that something is true" } },
+  "blanks": { "26": { "ans": "N", "need": "动词原形", "cands": ["D","J","M","N"], "why": "解题思路", "trap": "干扰项分析", "tip": "可迁移的技巧" } },
+  "keys": [ { "t": "a significant body of", "k": "phrase", "n": "大量的…" } ],
+  "tips": [ "技巧小结" ]
+}`;
+function importPrompt(f, photo){
+  return `你是一名资深的英语六级阅读老师，正在为学生整理一篇精读材料。
+${photo ? '附图是一页英语试卷或文章的照片。请准确识别其中的英文原文、题号和选项；照片可能是旋转的；学生的铅笔笔迹和划线不是原文，请忽略。' : '下面是学生粘贴的文章。'}
+请把它整理成下面这个 JSON 结构，只输出 JSON，不要任何其他文字：
+${SCHEMA}
+要求：
+1. en 逐字保留原文，按句子切分；填空处写成 {{题号}}，题号沿用原文数字。不要输出 Directions 说明文字。
+2. zh 是该句通顺的中文翻译；含空的句子按正确答案填入后再翻译。
+3. 如果是选词填空：options 以原文选项字母为键；pos 写成 "v.（原形）"、"v.（过去式）"、"v.（过去分词）"、"n."、"adj."、"adv." 这类形式；zh 给常用中文义。blanks 每个空都要写：ans（正确选项字母）、need（空格需要的词性或形式）、cands（词性符合的候选字母数组）、why（2–3 句解题思路，讲清语法线索和语义线索）、trap（主要干扰项为什么错）、tip（一条可迁移的技巧）。学生提供了答案时以学生的答案为准。
+4. 如果不是填空题，options 和 blanks 都输出 {}。
+5. keys 挑 10–16 个六级重点词或固定搭配；t 必须是原文中连续出现的原词（小写即可）；k 为 "word" 或 "phrase"；n 为简明中文注释。
+6. tips 写 3–5 条本篇的技巧小结。
+${f.impTitle ? `\n标题：${f.impTitle}` : ''}${f.impText ? `\n\n文章：\n${f.impText}` : ''}${f.impBank ? `\n\n选项：\n${f.impBank}` : ''}${f.impAns ? `\n\n答案：\n${f.impAns}` : ''}`;
+}
+function lexPrompt(plain, words){
+  return `下面是一篇英文文章和其中出现的全部单词。请按每个词在本文中的用法给出词性和简明中文释义。
+只输出一个 JSON 对象：键是列表里的单词（保持小写原样），值是 ["词性", "中文释义", "English gloss"]。English gloss 是这个词在本文语境中的简短英文释义（学习词典风格，10 个词左右）；冠词、介词、代词等功能词可以省略第三项。
+词性用 n. v. adj. adv. prep. conj. pron. art. det. aux. modal num. 等缩写；动词、名词的变化形式在括号里注明，例如 "v.（过去式）"、"n.（复数）"；人名写 "n.（人名）"。释义贴合本文语境，必要时在括号里补原形。
+
+文章：
+${plain}
+
+单词列表：
+${words.join(', ')}`;
+}
+function importHtml(){
+  if (!S.sample) return `<section class="imp"><div class="kicker">编辑部</div><h2 class="headline sm">导入新文章</h2>
+    <p class="dek">${window.claude && window.claude.local ? '本地部署版还没有接入 Claude：启动 server/dev-server.mjs 并在 runtime/config.js 里设置 CLOSE_READER_SAMPLE_ENDPOINT 后即可拍照导入。也可以手动按 seeds/ 里的格式整理文章，从「单词本 → 备份」导入。' : '导入需要在 claude.ai 或 Claude App 里打开本页，并允许它调用 Claude。'}</p>
+    <p class="imp-alt">也可以直接在对话里把试卷照片发给 Claude，说“按精读日报的格式加进去”，整理好后会出现在往期里。</p></section>`;
+  const F = S.impForm; const photo = S.impMode === 'photo';
+  return `<section class="imp">
+    <div class="kicker">编辑部 · 新稿件</div>
+    <h2 class="headline sm">导入新文章</h2>
+    <p class="dek">粘贴文章或上传试卷照片。Claude 会拆句翻译、逐词标词性、划出重点；如果是选词填空，还会写出每个空的解题思路。</p>
+    <div class="seg" role="group" aria-label="导入方式"><button data-act="impmode" data-m="text" aria-pressed="${!photo}">粘贴文本</button><button data-act="impmode" data-m="photo" aria-pressed="${photo}">试卷照片</button></div>
+    ${photo ? `<div class="field"><label for="impFile">照片<span>JPG / PNG，尽量拍清楚整页</span></label><div class="drop"><input type="file" id="impFile" accept="image/jpeg,image/png,image/webp">${S.impFile ? `<div>${esc(S.impFile.name)}</div><img id="impPrev" alt="已选照片预览">` : ''}</div></div>`
+      : `<div class="field"><label for="impTitle">标题<span>可不填</span></label><input type="text" id="impTitle" value="${esc(F.impTitle)}"></div>
+         <div class="field"><label for="impText">正文<span>空格写成 26 或 ___26___ 都可以</span></label><textarea id="impText" placeholder="Scientists recently examined studies on dog intelligence …">${esc(F.impText)}</textarea></div>
+         <div class="field"><label for="impBank">选项<span>选词填空才需要</span></label><textarea id="impBank" placeholder="A) affirmed  B) approximately …">${esc(F.impBank)}</textarea></div>`}
+    <div class="field"><label for="impAns">答案<span>可不填，Claude 会自己做</span></label><input type="text" id="impAns" value="${esc(F.impAns)}" placeholder="26 N  27 K  28 O …"></div>
+    <div class="p-actions"><button class="pbtn primary" data-act="impgo" ${S.imp && S.imp.busy ? 'disabled' : ''}>整理成精读文章</button>${S.imp && S.imp.busy ? '<button class="pbtn ghost" data-act="impstop">停止</button>' : ''}</div>
+    <div id="impStatus" class="imp-status">${impStatusHtml()}</div>
+    <p class="imp-alt">整理一篇大约需要一两分钟。也可以直接在对话里把照片发给 Claude，让它整理好放进往期。</p>
+  </section>`;
+}
+function impStatusHtml(){
+  const I = S.imp; if (!I) return '';
+  if (I.busy) return `<span class="spin"></span>${esc(I.msg)}${I.n ? ` · 已写 ${I.n} 字` : ''}`;
+  if (I.err) return `<span class="err">${esc(I.err)}</span>`;
+  if (I.done) return `<span class="done">${esc(I.done)}</span>`;
+  return '';
+}
+function setImp(o){ S.imp = o; const s = $('#impStatus'); if (s) s.innerHTML = impStatusHtml(); const g = $('[data-act="impgo"]'); if (g) { S.impDirty = true; renderView(); } }
+function sampleErr(e){
+  const c = e && e.code;
+  return ({
+    cancelled: '已停止。',
+    not_granted: '没有允许本页调用 Claude，导入暂时用不了。',
+    sampling_disabled: '这个账号暂时不能调用 Claude。',
+    rate_limited: '调用太频繁或达到用量上限，过一会儿再试。',
+    invalid_json: 'Claude 返回的内容不完整。可以再试一次，或者把文章分成两半导入。',
+    prompt_too_large: '文章太长了，请分段导入。',
+    images_unavailable: '这里没法发送照片，请改用粘贴文本。',
+    image_rejected: '这张照片读不了，换一张清晰的 JPG 或 PNG 试试。',
+    refused: 'Claude 拒绝处理这段内容，请检查后再试。',
+    session_expired: '登录已过期，请重新登录 claude.ai。'
+  })[c] || '出了点问题，稍后再试一次。';
+}
+function normalize(d){
+  if (!d || !Array.isArray(d.paragraphs) || !d.paragraphs.length) throw { code: 'invalid_json' };
+  const paragraphs = d.paragraphs.map(p => ({ sentences: (p.sentences || []).filter(s => s && s.en).map(s => ({ en: String(s.en).replace(/\{\{\s*(\d+)\s*\}\}/g, '{{$1}}'), zh: String(s.zh || '') })) })).filter(p => p.sentences.length);
+  if (!paragraphs.length) throw { code: 'invalid_json' };
+  const options = {}; Object.entries(d.options || {}).forEach(([k, v]) => { if (v && v.w) options[k.trim().toUpperCase().slice(0, 1)] = { w: String(v.w), pos: String(v.pos || ''), zh: String(v.zh || ''), en: String(v.en || '') }; });
+  const blanks = {}; Object.entries(d.blanks || {}).forEach(([k, v]) => { const n = String(k).replace(/\D/g, ''); if (n && v && v.ans) blanks[n] = { ans: String(v.ans).trim().toUpperCase().slice(0, 1), need: String(v.need || ''), cands: Array.isArray(v.cands) ? v.cands.map(x => String(x).toUpperCase().slice(0, 1)) : [], why: String(v.why || ''), trap: String(v.trap || ''), tip: String(v.tip || '') }; });
+  const keys = (d.keys || []).filter(k => k && k.t).map(k => ({ t: String(k.t), k: k.k === 'phrase' || /\s/.test(k.t) ? 'phrase' : 'word', n: String(k.n || '') })).slice(0, 20);
+  return { title: String(d.title || '未命名文章'), zh: String(d.zh || ''), source: String(d.source || '精读'), paragraphs, options, blanks, keys, tips: (d.tips || []).map(String).slice(0, 6) };
+}
+async function runImport(){
+  const photo = S.impMode === 'photo';
+  if (photo && !S.impFile) { setImp({ err: '请先选一张照片。' }); return; }
+  if (!photo && !S.impForm.impText.trim()) { setImp({ err: '请先粘贴文章正文。' }); return; }
+  if (!S.db) { setImp({ err: '存档没有连上，导入的文章无法保存。' }); return; }
+  const ctl = new AbortController(); S.impCtl = ctl;
+  setImp({ busy: true, msg: 'Claude 正在拆句、翻译、写解析', n: 0 });
+  try {
+    const opts = { modelTier: 'complex', signal: ctl.signal, onText: ({ text }) => { if (S.imp && S.imp.busy) { S.imp.n = text.length; const s = $('#impStatus'); if (s) s.innerHTML = impStatusHtml(); } } };
+    if (photo) opts.images = [S.impFile];
+    const raw = await S.sample.json(importPrompt(S.impForm, photo), opts);
+    const art = normalize(raw);
+    const id = (art.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'article') + '-' + Date.now().toString(36);
+    S.imp = { busy: true, msg: '结构完成，正在逐词标注词性', n: 0 }; const s1 = $('#impStatus'); if (s1) s1.innerHTML = impStatusHtml();
+    const plain = art.paragraphs.map(p => p.sentences.map(s => s.en).join(' ')).join('\n\n');
+    const words = [...new Set(plain.replace(/\{\{\d+\}\}/g, ' ').match(/[A-Za-z]+(?:['’][A-Za-z]+)*/g) || [])].map(w => w.toLowerCase());
+    let lex = {};
+    try {
+      const L = await S.sample.json(lexPrompt(plain, [...new Set(words)]), { modelTier: 'default', signal: ctl.signal, onText: ({ text }) => { if (S.imp && S.imp.busy) { S.imp.n = text.length; const s = $('#impStatus'); if (s) s.innerHTML = impStatusHtml(); } } });
+      if (L && typeof L === 'object') Object.entries(L).forEach(([k, v]) => { if (Array.isArray(v) && v.length >= 2) lex[k.toLowerCase()] = v[2] ? [String(v[0]), String(v[1]), String(v[2])] : [String(v[0]), String(v[1])]; });
+    } catch(e){ if (e && e.code === 'cancelled') throw e; }
+    const doc = { ...art, id, lex, createdAt: Date.now() };
+    await S.db.doc('articles/' + id).set(doc);
+    S.impForm = { impTitle:'', impText:'', impBank:'', impAns:'' }; S.impFile = null;
+    S.imp = { done: `已加入往期：${art.title}${Object.keys(lex).length ? '' : '（词性标注没完成，点单词时可以单独查）'}` };
+    if (!S.articles.find(a => a.id === id)) S.articles = [{ ...doc }, ...S.articles];
+    openArticle(id);
+    toast('新文章已排版，开始精读吧');
+  } catch(e){
+    S.imp = { err: sampleErr(e) }; S.impDirty = true; renderView();
+  }
+}
+
+/* ---------- actions ---------- */
+function openArticle(id){
+  S.cur = id; S.userChose = true; S.view = 'read'; S.panel = null;
+  S.openZh = new Set(); S.unguard = new Set(); S.confirmReset = false;
+  const p = progOf(id); p.lastOpened = Date.now(); setProg(id, p);
+  render(); window.scrollTo({ top: 0 });
+}
+function pickDefault(){
+  if (!S.articles.length) return null;
+  let best = null, t = -1;
+  S.articles.forEach(a => { const lo = (S.prog[a.id] || {}).lastOpened || 0; if (lo > t) { t = lo; best = a.id; } });
+  return t > 0 ? best : S.articles[0].id;
+}
+let toastT;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2200); }
+function speak(w){
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(w); u.lang = 'en-US'; u.rate = .9; speechSynthesis.speak(u); } catch(e){}
+}
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act]');
+  if (!t) {
+    const w = e.target.closest('#body .w');
+    if (w && Date.now() - S.selAt > 350) {
+      const sEl = w.closest('.s'); const kw = w.closest('.kw');
+      const lw = w.textContent.toLowerCase(); const le = lexOf(cur(), lw);
+      S.panel = { type: 'word', w: lw, disp: w.textContent, p: +sEl.dataset.p, s: +sEl.dataset.s, i: +w.dataset.i, k: kw ? +kw.dataset.k : null };
+      S.dictAll = false; loadDict(S.panel, lw, le ? le[0] : '');
+      renderPanel();
+    }
+    return;
+  }
+  const act = t.dataset.act; const a = cur();
+  switch (act) {
+    case 'view':
+      S.view = t.dataset.v; S.panel = null; S.confirmDel = null;
+      if (S.view === 'import') S.impDirty = true;
+      render(); window.scrollTo({ top: 0 }); break;
+    case 'close': S.panel = null; renderPanel(); break;
+    case 'blank': {
+      S.panel = { type: 'blank', n: t.dataset.n }; S.hint = false; renderPanel();
+      if (!t.closest('#body')) { const b = $(`#body .blank[data-n="${t.dataset.n}"]`); if (b && window.innerWidth >= 1040) b.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+      break;
+    }
+    case 'pick': {
+      const p = progOf(a.id); p.picks[t.dataset.n] = t.dataset.l; delete p.shown[t.dataset.n];
+      setProg(a.id, p); renderView(); renderPanel(); break;
+    }
+    case 'show': { const p = progOf(a.id); p.shown[t.dataset.n] = true; setProg(a.id, p); renderView(); renderPanel(); break; }
+    case 'redo': { const p = progOf(a.id); delete p.picks[t.dataset.n]; delete p.shown[t.dataset.n]; setProg(a.id, p); S.hint = false; renderView(); renderPanel(); break; }
+    case 'hint': S.hint = !S.hint; renderPanel(); break;
+    case 'revealAll': { const p = progOf(a.id); blankNums(a).forEach(n => { if (!st(a, n).done) p.shown[n] = true; }); setProg(a.id, p); renderView(); renderPanel(); break; }
+    case 'reset': {
+      if (!S.confirmReset) { S.confirmReset = true; renderView(); setTimeout(() => { if (S.confirmReset) { S.confirmReset = false; if (S.view === 'read') renderView(); } }, 3500); break; }
+      S.confirmReset = false; const p = progOf(a.id); p.picks = {}; p.shown = {}; setProg(a.id, p); S.unguard = new Set(); S.panel = null; renderView(); renderPanel(); toast('已清空本篇作答'); break;
+    }
+    case 'opt': { const o = a.options[t.dataset.l]; S.panel = { type: 'opt', l: t.dataset.l }; S.dictAll = false; if (o) loadDict(S.panel, o.w, o.pos); renderPanel(); break; }
+    case 'dictmore': S.dictAll = !S.dictAll; renderPanel(true); break;
+    case 'detail': case 'detailretry': { const P = S.panel; if (!P) break; P.showDetail = true; loadMore(P); renderPanel(true); break; }
+    case 'look': {
+      const prev = S.panel; const w = t.dataset.w;
+      S.panel = { type: 'dict', w: w.toLowerCase(), disp: w, back: prev, pos: '', showDetail: false };
+      S.dictAll = false; loadDict(S.panel, w.toLowerCase(), ''); renderPanel(); break;
+    }
+    case 'back': if (S.panel && S.panel.back) { S.panel = S.panel.back; renderPanel(); } break;
+    case 'ainote': aiNote(S.panel); break;
+    case 'savedict': {
+      const P = S.panel; if (!P || !P.dict || P.dict.state !== 'ok') break;
+      const tl = trLines(P.dict.res.e.t)[0];
+      toggleVocab(a, { w: P.w, pos: tl ? (tl.tp || '—') : '—', zh: tl ? tl.text : '', p: null, s: null, ...dictExtras(P) }); break;
+    }
+    case 'dictretry': if (S.panel && S.panel.lw) { loadDict(S.panel, S.panel.lw, S.panel.pos); renderPanel(true); } break;
+    case 'ptr': { const p = +t.dataset.p; S.openZh.has(p) ? S.openZh.delete(p) : S.openZh.add(p); if (S.zhAll && !S.openZh.has(p)) S.zhAll = false; renderView(); highlight(); break; }
+    case 'unguard': S.unguard.add(t.dataset.k); if (S.view === 'read') { renderView(); renderPanel(); } break;
+    case 'toggle': { const k = t.dataset.k; S[k] = !S[k]; if (k !== 'zhAll') LS.set(k, S[k]); if (k === 'zhAll' && !S.zhAll) S.openZh = new Set(); renderView(); highlight(); break; }
+    case 'save': {
+      const P = S.panel; const e2 = lexOf(a, P.w); if (!e2) break;
+      toggleVocab(a, { w: P.w, pos: e2[0], zh: e2[1], p: P.p, s: P.s, ...dictExtras(P) }); break;
+    }
+    case 'savekw': { const P = S.panel; const kw = a.keys[P.k]; toggleVocab(a, { w: kw.t, pos: 'phrase', zh: kw.n, p: P.p, s: P.s }); break; }
+    case 'saveopt': {
+      const o = a.options[t.dataset.l]; let ps = [null, null];
+      blankNums(a).forEach(n => { if (a.blanks[n].ans === t.dataset.l) ps = locate(a, n); });
+      toggleVocab(a, { w: o.w, pos: o.pos, zh: o.zh, p: ps[0], s: ps[1], ...(S.panel && S.panel.type === 'opt' && S.panel.l === t.dataset.l ? dictExtras(S.panel) : {}) }); break;
+    }
+    case 'speak': speak(t.dataset.w); break;
+    case 'lookup': lookup(a, S.panel, t); break;
+    case 'open': openArticle(t.dataset.id); break;
+    case 'delart': {
+      const id = t.dataset.id;
+      if (S.confirmDel !== id) { S.confirmDel = id; renderView(); break; }
+      S.confirmDel = null; S.articles = S.articles.filter(x => x.id !== id);
+      write('articles/' + id, ref => ref.delete()); write('progress/' + id, ref => ref.delete());
+      if (S.cur === id) S.cur = pickDefault();
+      render(); toast('已删除这篇文章（单词本里的词保留）'); break;
+    }
+    case 'vf': S.vf = t.dataset.v; renderView(); break;
+    case 'vreveal': S.vshow.add(t.dataset.id); renderView(); break;
+    case 'vdone': { const v = S.vocab.find(x => x.id === t.dataset.id); if (!v) break; const nd = !v.done; S.vocab = S.vocab.map(x => x === v ? { ...x, done: nd } : x); write('vocab/' + v.id, ref => ref.update({ done: nd })); renderView(); break; }
+    case 'vdel': { const v = S.vocab.find(x => x.id === t.dataset.id); if (!v) break; S.vocab = S.vocab.filter(x => x !== v); write('vocab/' + v.id, ref => ref.delete()); renderChrome(); renderView(); toast(`已删除 ${v.w}`); break; }
+    case 'goto': gotoVocab(t.dataset.id); break;
+    case 'impmode': S.impMode = t.dataset.m; S.imp = null; S.impDirty = true; renderView(); break;
+    case 'impgo': runImport(); break;
+    case 'impstop': if (S.impCtl) S.impCtl.abort(); break;
+  }
+});
+function gotoVocab(id){
+  const v = S.vocab.find(x => x.id === id); if (!v) return;
+  const a = S.articles.find(x => x.id === v.art);
+  if (!a) { toast('原文已被删除'); return; }
+  if (S.cur !== a.id) openArticle(a.id); else { S.view = 'read'; render(); }
+  if (v.p == null) { const l = Object.keys(a.options || {}).find(x => a.options[x].w === v.w); S.panel = { type: 'opt', l }; if (l) loadDict(S.panel, v.w, a.options[l].pos); renderPanel(); return; }
+  const single = !/\s/.test(v.w) && v.pos !== 'phrase';
+  S.panel = single ? { type: 'word', w: v.w.toLowerCase(), disp: v.w, p: v.p, s: v.s, i: null, k: null } : { type: 'sent', list: [[v.p, v.s]] };
+  S.dictAll = false; if (single) loadDict(S.panel, v.w.toLowerCase(), v.pos);
+  renderPanel();
+  const sEl = $(`#body .s[data-p="${v.p}"][data-s="${v.s}"]`);
+  if (sEl) {
+    if (single) $$('.w', sEl).filter(w => w.textContent.toLowerCase() === v.w.toLowerCase()).forEach(w => w.classList.add('on'));
+    requestAnimationFrame(() => { sEl.scrollIntoView({ block: 'center', behavior: 'smooth' }); sEl.classList.remove('flash'); void sEl.offsetWidth; sEl.classList.add('flash'); });
+  }
+}
+async function lookup(a, P, btn){
+  if (!S.sample || !P) return;
+  btn.disabled = true; btn.textContent = '正在查…';
+  try {
+    const res = await S.sample.json(`英文句子："${plainSent(a, P.p, P.s)}"\n请给出单词 "${P.disp}" 在这句话中的词性和简明中文释义。只输出 JSON 数组 ["词性", "中文释义", "这句话里的简短英文释义"]，词性用 n. v. adj. adv. prep. conj. pron. 等缩写，变化形式写在括号里，如 "v.（过去式）"。`, { modelTier: 'quick' });
+    if (!Array.isArray(res) || res.length < 2) throw { code: 'invalid_json' };
+    const entry = res[2] ? [String(res[0]), String(res[1]), String(res[2])] : [String(res[0]), String(res[1])];
+    const idx = S.articles.findIndex(x => x.id === a.id);
+    if (idx >= 0) S.articles[idx] = { ...S.articles[idx], lex: { ...(S.articles[idx].lex || {}), [P.w]: entry } };
+    write('articles/' + a.id, ref => ref.update({ lex: { [P.w]: entry } }));
+    renderView(); renderPanel();
+  } catch(e){ btn.disabled = false; btn.textContent = '让 Claude 按语境释义'; toast(sampleErr(e)); }
+}
+document.addEventListener('input', e => {
+  const id = e.target.id;
+  if (id in S.impForm) S.impForm[id] = e.target.value;
+});
+document.addEventListener('change', e => {
+  if (e.target.id === 'vaSel') { S.va = e.target.value; renderView(); }
+  if (e.target.id === 'impFile') {
+    S.impFile = e.target.files && e.target.files[0] || null; S.imp = null; S.impDirty = true; renderView();
+  }
+});
+function onSelect(){
+  const sel = getSelection(); if (!sel || sel.isCollapsed || !sel.rangeCount) return;
+  const body = $('#body'); if (!body) return;
+  const r = sel.getRangeAt(0); if (!body.contains(r.commonAncestorContainer)) return;
+  if (sel.toString().trim().length < 2) return;
+  const list = $$('.s', body).filter(el => r.intersectsNode(el)).map(el => [+el.dataset.p, +el.dataset.s]);
+  if (!list.length) return;
+  S.selAt = Date.now(); S.panel = { type: 'sent', list }; renderPanel();
+}
+document.addEventListener('mouseup', () => setTimeout(onSelect, 10));
+document.addEventListener('touchend', () => setTimeout(onSelect, 120));
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.panel) { S.panel = null; renderPanel(); } });
+
+/* ---------- bottom sheet drag (phones / narrow windows) ---------- */
+(() => {
+  const el = $('#panel');
+  let st = null, lastTouch = 0;
+  const isSheet = () => window.innerWidth < 1040 && el.classList.contains('open');
+  const begin = (y, fromGrab) => ({ y0: y, h0: el.getBoundingClientRect().height, fromGrab, dragging: false, lastY: y, lastT: performance.now(), v: 0 });
+  function move(y, ev){
+    if (!st) return;
+    const dy = y - st.y0;
+    if (!st.dragging) {
+      if (st.fromGrab) { if (Math.abs(dy) < 4) return; }
+      else if (!(el.scrollTop <= 0 && dy > 6)) { if (Math.abs(dy) > 6) st = null; return; }
+      st.dragging = true; el.classList.add('dragging');
+    }
+    if (ev && ev.cancelable) ev.preventDefault();
+    const now = performance.now();
+    st.v = (y - st.lastY) / Math.max(1, now - st.lastT); st.lastY = y; st.lastT = now;
+    const H = window.innerHeight;
+    el.style.height = Math.max(60, Math.min(H * 0.95, st.h0 - dy)) + 'px';
+  }
+  function end(){
+    if (!st) return;
+    const s = st; st = null;
+    if (!s.dragging) {
+      if (s.fromGrab) { S.sheet = S.sheet === 'full' ? 'half' : 'full'; el.classList.toggle('full', S.sheet === 'full'); }
+      return;
+    }
+    const H = window.innerHeight, half = H * 0.62, full = H * 0.92;
+    const h = el.getBoundingClientRect().height;
+    let target;
+    if (s.v > 0.5) target = s.h0 > (half + full) / 2 && h > half * 0.7 ? 'half' : 'close';
+    else if (s.v < -0.5) target = 'full';
+    else target = h < half * 0.6 ? 'close' : h < (half + full) / 2 ? 'half' : 'full';
+    el.classList.remove('dragging');
+    void el.offsetHeight;
+    if (target === 'close') {
+      S.panel = null; S.sheet = 'half';
+      el.classList.remove('open', 'full');
+      setTimeout(() => { el.style.height = ''; renderPanel(); }, 300);
+      highlight();
+    } else {
+      S.sheet = target;
+      el.classList.toggle('full', target === 'full');
+      el.style.height = '';
+    }
+  }
+  el.addEventListener('touchstart', e => { lastTouch = Date.now(); if (!isSheet() || e.touches.length !== 1) return; st = begin(e.touches[0].clientY, !!e.target.closest('[data-grab]')); }, { passive: true });
+  el.addEventListener('touchmove', e => { if (st) move(e.touches[0].clientY, e); }, { passive: false });
+  el.addEventListener('touchend', end);
+  el.addEventListener('touchcancel', end);
+  el.addEventListener('mousedown', e => {
+    if (!isSheet() || !e.target.closest('[data-grab]') || Date.now() - lastTouch < 800) return;
+    st = begin(e.clientY, true); e.preventDefault();
+    const mm = ev => move(ev.clientY, ev);
+    const mu = () => { window.removeEventListener('mousemove', mm); window.removeEventListener('mouseup', mu); end(); };
+    window.addEventListener('mousemove', mm); window.addEventListener('mouseup', mu);
+  });
+})();
+
+/* ---------- boot ---------- */
+render();
+(async () => {
+  const C = window.claude;
+  if (!C || typeof C.use !== 'function') { S.dbState = 'none'; render(); return; }
+  C.use('sample').then(s => { S.sample = s || null; if (S.view === 'import') { S.impDirty = true; renderView(); } else renderPanel(); }).catch(() => {});
+  let db = null;
+  try { db = await C.use('db'); } catch(e){ db = null; }
+  if (!db) { S.dbState = 'none'; render(); return; }
+  S.db = db;
+  const settle = () => { if (!S.userChose) S.cur = pickDefault(); };
+  db.collection('articles').onSnapshot(snap => {
+    S.articles = snap.docs.map(d => ({ ...d.data(), id: d.id })).sort((x, y) => (y.createdAt || 0) - (x.createdAt || 0));
+    S.dbState = 'ok';
+    if (S.cur && !S.articles.find(a => a.id === S.cur)) S.cur = null;
+    if (!S.cur) settle();
+    if (S.view !== 'import') render(); else renderChrome();
+  }, () => { S.dbState = 'err'; render(); });
+  db.collection('progress').onSnapshot(snap => {
+    snap.docs.forEach(d => { S.prog[d.id] = d.data(); });
+    if (!S.userChose) settle();
+    if (S.view === 'read' || S.view === 'archive') { renderChrome(); renderView(); highlight(); }
+  }, () => {});
+  db.collection('notes').onSnapshot(snap => {
+    snap.docs.forEach(d => { const n = d.data(); S.notes[d.id] = n; });
+    if (S.view === 'read' && S.panel && S.panel.showDetail) renderPanel(true);
+  }, () => {});
+  db.collection('vocab').onSnapshot(snap => {
+    S.vocab = snap.docs.map(d => ({ ...d.data(), id: d.id })).sort((x, y) => (y.at || 0) - (x.at || 0));
+    renderChrome();
+    if (S.view === 'vocab' || S.view === 'archive') renderView();
+    else if (S.view === 'read') renderPanel();
+  }, () => {});
+})();
+})();
+</script>

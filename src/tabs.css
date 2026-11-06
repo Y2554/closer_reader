@@ -1,0 +1,23 @@
+/* tab bar scroll cues: edge fades + chevrons when more tabs sit off-screen */
+.tabs-shell{position:relative}
+.tabs-fade{position:absolute;top:3px;bottom:1px;width:44px;display:flex;align-items:center;border:0;padding:0;margin:0;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s;z-index:2;color:var(--pencil)}
+.tabs-fade.l{left:0;justify-content:flex-start;padding-left:2px;background:linear-gradient(90deg,var(--paper) 35%,transparent)}
+.tabs-fade.r{right:0;justify-content:flex-end;padding-right:2px;background:linear-gradient(270deg,var(--paper) 35%,transparent)}
+.tabs-fade svg{width:16px;height:16px}
+.tabs-shell.can-l .tabs-fade.l,.tabs-shell.can-r .tabs-fade.r{opacity:1;pointer-events:auto}
+.tabs-shell.can-r .tabs-fade.r svg{animation:nudge 1.6s ease-in-out 3}
+@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
+/* overscroll: past either end the row squeezes into the far wall, then springs back */
+.tabs{overscroll-behavior-x:contain}
+.tabs>*{translate:var(--tx,0px) 0;scale:var(--sx,1) 1}
+.tabs.pulling>*{transition:none!important}
+.tabs.spring>*{transition:translate .62s var(--ease-spring),scale .62s var(--ease-spring),transform .5s var(--ease-spring),width .45s var(--ease-out),opacity .2s,color .2s!important}
+.tabs-glow{position:absolute;top:3px;bottom:1px;width:16px;pointer-events:none;opacity:0;z-index:3;transform:scaleY(.4);transition:opacity .45s,transform .55s var(--ease-spring)}
+.tabs-glow.l{left:0;background:radial-gradient(farthest-side at 0 50%,var(--pencil),transparent)}
+.tabs-glow.r{right:0;background:radial-gradient(farthest-side at 100% 50%,var(--pencil),transparent)}
+.tabs-shell.pulling .tabs-glow{transition:none}
+/* press feedback on tabs */
+.tab{transform-origin:50% 60%}
+.tab:active{transform:scale(.94)}
+.tabs:not(.pulling):not(.spring) .tab{transition:color .2s,transform .18s var(--ease-out)}
+.tabs-fade:active svg{transform:scale(.8)}

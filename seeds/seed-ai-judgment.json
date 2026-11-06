@@ -1,0 +1,1594 @@
+{
+ "id": "ai-judgment",
+ "type": "mcq",
+ "title": "Technology Is Never a Neutral Tool",
+ "zh": "技术从来不是中立的工具",
+ "source": "CET-6 · Part III Reading · Section C 仔细阅读 Passage One（集训刷题卷）",
+ "createdAt": 1791892800000,
+ "paragraphs": [
+  {
+   "sentences": [
+    {
+     "en": "Technology is never a neutral tool for achieving human ends.",
+     "zh": "技术从来都不是实现人类目的的中立工具。"
+    },
+    {
+     "en": "Technological innovations reshape people as they use these innovations to control their environment.",
+     "zh": "人们在利用技术创新掌控周围环境的同时，也在被这些创新重新塑造。"
+    },
+    {
+     "en": "Artificial intelligence, for example, is altering humanity.",
+     "zh": "比如，人工智能就正在改变人类本身。"
+    }
+   ]
+  },
+  {
+   "sentences": [
+    {
+     "en": "While the term AI conjures up anxieties about killer robots or catastrophic levels of unemployment, there are other, deeper implications.",
+     "zh": "虽然“人工智能”一词会让人联想到杀手机器人或灾难性的失业，但它还有其他更深层的影响。"
+    },
+    {
+     "en": "As AI increasingly shapes the human experience, how does this change what it means to be human?",
+     "zh": "随着人工智能越来越多地塑造人类的经验，这会如何改变“身而为人”的意义？"
+    },
+    {
+     "en": "Central to the problem is a person's capacity to make choices, particularly judgments that have moral implications.",
+     "zh": "问题的核心在于人做出选择的能力，尤其是做出具有道德意义的判断的能力。"
+    }
+   ]
+  },
+  {
+   "sentences": [
+    {
+     "en": "Aristotle argued that the capacity for making practical judgments depends on regularly making them—on habit and practice.",
+     "zh": "亚里士多德认为，做出实践判断的能力取决于经常去做判断——取决于习惯和练习。"
+    },
+    {
+     "en": "We see the emergence of machines as substitute judges in a variety of everyday contexts as a potential threat to people learning how to effectively exercise judgment themselves.",
+     "zh": "在我们看来，机器在各种日常情境中充当替代裁判，可能会威胁到人们学习如何自己有效地做出判断。"
+    }
+   ]
+  },
+  {
+   "sentences": [
+    {
+     "en": "In the workplace, managers routinely make decisions about who to hire or fire and which loan to approve, to name a few.",
+     "zh": "在职场上，管理者经常要做各种决定，比如雇用或解雇谁、批准哪一笔贷款，等等。"
+    },
+    {
+     "en": "These are areas where algorithmic (算法的) prescription is replacing human judgment, and so people who might have had the chance to develop practical judgment in these areas no longer will.",
+     "zh": "在这些领域，算法给出的指令正在取代人的判断，因此原本有机会在这些领域培养实践判断力的人，将不再有这样的机会。"
+    }
+   ]
+  },
+  {
+   "sentences": [
+    {
+     "en": "Recommendation engines, which are increasingly prevalent intermediaries in people's consumption of culture, may serve to constrain choice and minimize luck.",
+     "zh": "推荐引擎在人们的文化消费中日益成为普遍的中介，它们可能会限制人们的选择，并把机缘巧合降到最低。"
+    },
+    {
+     "en": "By presenting consumers with algorithmically selected choices of what to watch, read, stream and visit next, companies are replacing human taste with machine taste.",
+     "zh": "通过向消费者推送由算法挑选出的选项——接下来看什么、读什么、听什么、去哪里——公司正在用机器的品味取代人的品味。"
+    },
+    {
+     "en": "In one sense, this is helpful.",
+     "zh": "从某种意义上说，这是有帮助的。"
+    },
+    {
+     "en": "After all, machines can survey a wider range of choices than any individual is likely to have the time or energy to do on their own.",
+     "zh": "毕竟，机器能浏览的选择范围，比任何个人凭自己的时间和精力所能浏览的都要广。"
+    }
+   ]
+  },
+  {
+   "sentences": [
+    {
+     "en": "At the same time, though, this selection is optimizing for what people are likely to prefer based on what they've preferred in the past.",
+     "zh": "但与此同时，这种筛选是根据人们过去的偏好，来优化推送他们可能喜欢的东西。"
+    },
+    {
+     "en": "We think there is some risk that people's options will be constrained by their past in a new and unanticipated way.",
+     "zh": "我们认为存在一定的风险：人们的选择会以一种前所未有、意想不到的方式受制于自己的过去。"
+    }
+   ]
+  },
+  {
+   "sentences": [
+    {
+     "en": "As machine learning algorithms improve and as they train on more extensive data sets, larger parts of everyday life are likely to become utterly predictable.",
+     "zh": "随着机器学习算法不断改进、在更大规模的数据集上进行训练，日常生活中越来越大的部分很可能会变得完全可以预测。"
+    },
+    {
+     "en": "The predictions are going to get better and better, and they will ultimately make common experiences more efficient and pleasant.",
+     "zh": "预测会越来越准，最终会让日常经历变得更高效、更愉快。"
+    }
+   ]
+  },
+  {
+   "sentences": [
+    {
+     "en": "Algorithms could soon—if they don't already—have a better idea about which show you'd like to watch next and which job candidate you should hire than you do.",
+     "zh": "算法可能很快就会——如果现在还没有的话——比你自己更清楚你接下来想看哪部节目、应该雇用哪位求职者。"
+    },
+    {
+     "en": "One day, humans may even find a way for machines to make these decisions without some of the biases that humans typically display.",
+     "zh": "有一天，人类甚至可能找到办法，让机器在做这些决定时不带人类通常表现出的某些偏见。"
+    }
+   ]
+  },
+  {
+   "sentences": [
+    {
+     "en": "But to the extent that unpredictability is part of how people understand themselves and part of what people like about themselves, humanity is in the process of losing something significant.",
+     "zh": "但既然不可预测性是人们理解自身的一部分，也是人们喜欢自己的地方之一，那么人类正在失去某种重要的东西。"
+    },
+    {
+     "en": "As they become more and more predictable, the creatures inhabiting the increasingly AI-mediated world will become less and less like us.",
+     "zh": "随着变得越来越可以预测，生活在这个日益由人工智能来调节的世界里的生物，将会越来越不像我们。"
+    }
+   ]
+  }
+ ],
+ "items": {
+  "46": {
+   "en": "What do we learn about the deeper implications of AI?",
+   "zh": "关于人工智能更深层的影响，我们可以得知什么？",
+   "o": {
+    "A": {
+     "en": "It is causing catastrophic levels of unemployment.",
+     "zh": "它正在造成灾难性的失业。"
+    },
+    "B": {
+     "en": "It is doing physical harm to human operators.",
+     "zh": "它正在对人类操作者造成身体伤害。"
+    },
+    "C": {
+     "en": "It is altering moral judgments.",
+     "zh": "它正在改变道德判断。"
+    },
+    "D": {
+     "en": "It is reshaping humanity.",
+     "zh": "它正在重塑人类。"
+    }
+   }
+  },
+  "47": {
+   "en": "What is the consequence of algorithmic prescription replacing human judgment?",
+   "zh": "算法指令取代人的判断会带来什么后果？",
+   "o": {
+    "A": {
+     "en": "People lose the chance to cultivate the ability to make practical judgments.",
+     "zh": "人们失去了培养实践判断能力的机会。"
+    },
+    "B": {
+     "en": "People are prevented from participating in making major decisions in the workplace.",
+     "zh": "人们被阻止参与职场上的重大决策。"
+    },
+    "C": {
+     "en": "Managers no longer have the chance to decide which loan to approve.",
+     "zh": "管理者不再有机会决定批准哪一笔贷款。"
+    },
+    "D": {
+     "en": "Managers do not need to take the trouble to determine who to hire or fire.",
+     "zh": "管理者不必费心决定雇用或解雇谁。"
+    }
+   }
+  },
+  "48": {
+   "en": "What may result from increasing application of recommendation engines in our consumption of culture?",
+   "zh": "推荐引擎越来越多地用于我们的文化消费，可能会导致什么结果？",
+   "o": {
+    "A": {
+     "en": "Consumers will have much limited choice.",
+     "zh": "消费者的选择会非常有限。"
+    },
+    "B": {
+     "en": "Consumers will actually enjoy better luck.",
+     "zh": "消费者实际上会更走运。"
+    },
+    "C": {
+     "en": "It will be easier to decide on what to enjoy.",
+     "zh": "决定享受什么会变得更容易。"
+    },
+    "D": {
+     "en": "Humans will develop tastes similar to machines'.",
+     "zh": "人类会形成和机器相似的品味。"
+    }
+   }
+  },
+  "49": {
+   "en": "What is likely to happen to larger parts of our daily life as machine learning algorithms improve?",
+   "zh": "随着机器学习算法的改进，我们日常生活中越来越大的部分可能会怎样？",
+   "o": {
+    "A": {
+     "en": "They will turn out to be more pleasant.",
+     "zh": "它们会变得更加愉快。"
+    },
+    "B": {
+     "en": "They will repeat our past experience.",
+     "zh": "它们会重复我们过去的经历。"
+    },
+    "C": {
+     "en": "They can be completely anticipated.",
+     "zh": "它们能被完全预料。"
+    },
+    "D": {
+     "en": "They may become better and better.",
+     "zh": "它们可能会变得越来越好。"
+    }
+   }
+  },
+  "50": {
+   "en": "Why does the author say the creatures living in the more and more AI-mediated world will become increasingly unlike us?",
+   "zh": "作者为什么说，生活在日益由人工智能调节的世界里的生物会越来越不像我们？",
+   "o": {
+    "A": {
+     "en": "They will have lost the most significant human element of being intelligent.",
+     "zh": "它们将失去作为人最重要的“聪明”这一要素。"
+    },
+    "B": {
+     "en": "They will no longer possess the human characteristic of being unpredictable.",
+     "zh": "它们将不再具有人类“不可预测”这一特征。"
+    },
+    "C": {
+     "en": "They will not be able to understand themselves as we can do today.",
+     "zh": "它们将无法像我们今天这样理解自己。"
+    },
+    "D": {
+     "en": "They will be deprived of what their predecessors were proud of about themselves.",
+     "zh": "它们将被剥夺前人引以为傲的东西。"
+    }
+   }
+  }
+ },
+ "options": {
+  "A": {
+   "w": "A",
+   "pos": "选项",
+   "zh": "",
+   "en": ""
+  },
+  "B": {
+   "w": "B",
+   "pos": "选项",
+   "zh": "",
+   "en": ""
+  },
+  "C": {
+   "w": "C",
+   "pos": "选项",
+   "zh": "",
+   "en": ""
+  },
+  "D": {
+   "w": "D",
+   "pos": "选项",
+   "zh": "",
+   "en": ""
+  }
+ },
+ "blanks": {
+  "46": {
+   "cands": [],
+   "ans": "D",
+   "loc": [
+    1,
+    1
+   ],
+   "need": "定位词 deeper implications → 第 2 段第 1 句；答案在紧接着的第 2 句，并与第 1 段末句呼应。",
+   "why": "第 2 段先用 While 让步：人们担心的是杀手机器人和失业（表层），“there are other, deeper implications”（作者要说的深层影响）。紧接着就点出：As AI increasingly shapes the human experience, how does this change what it means to be human?——AI 在改变“身而为人”的意义。这与第 1 段末句 Artificial intelligence … is altering humanity 一致。D 的 reshaping humanity = altering humanity / change what it means to be human。",
+   "trap": "C 最迷惑：它抓住了第 2 段末句的 moral implications。但原文说的是“问题核心在于人做选择、做判断的能力”，受影响的是这种能力，而不是“改变道德判断”本身。",
+   "tip": "让步结构 While / Although A, B：A 是别人的担心或表层现象，作者真正的观点在 B。",
+   "ox": {
+    "A": "失业出现在 While 引导的让步从句里，是人们的“表层担忧”，作者紧接着说还有更深层的影响，所以 A 恰恰不是答案。",
+    "B": "原文只说 AI 让人联想到“杀手机器人”的焦虑，没有提到对人类操作者造成身体伤害。",
+    "C": "原文说问题的核心是人“做选择、做道德判断的能力”，不是 AI 改变了道德判断本身，把“能力”换成了“判断”。"
+   },
+   "ot": {
+    "A": "swap",
+    "B": "infer",
+    "C": "swap"
+   }
+  },
+  "47": {
+   "cands": [],
+   "ans": "A",
+   "loc": [
+    3,
+    1
+   ],
+   "need": "定位词 algorithmic prescription replacing human judgment → 第 4 段第 2 句。",
+   "why": "第 4 段第 2 句：algorithmic prescription is replacing human judgment, and so people who might have had the chance to develop practical judgment in these areas no longer will。and so 引出结果：人们不再有机会培养实践判断力。A 与之对应：lose the chance ↔ no longer will (have the chance)，cultivate ↔ develop，the ability to make practical judgments ↔ practical judgment。这也呼应第 3 段亚里士多德的观点：判断力要靠经常做判断来养成。",
+   "trap": "C 和 D 都用了原文的例子（批准贷款、雇用解雇），但原文强调的后果是“失去培养判断力的机会”，不是管理者能不能决定、省不省事。",
+   "tip": "问“后果 / 结果”的题，在原因句之后找 so、and so、thus、therefore 引出的部分。",
+   "ox": {
+    "B": "原文没有说人们被“阻止参与”职场重大决策，是由“算法取代判断”过度推出的结论。",
+    "C": "批准贷款只是原文列举的例子之一（to name a few），用一个例子代替了整体结论，而且原文强调的是“培养判断力的机会”。",
+    "D": "原文对此是担忧的态度，D 说管理者“不必费心”，把作者眼中的损失说成了好处。"
+   },
+   "ot": {
+    "B": "infer",
+    "C": "part",
+    "D": "flip"
+   }
+  },
+  "48": {
+   "cands": [],
+   "ans": "A",
+   "loc": [
+    4,
+    0
+   ],
+   "need": "定位词 recommendation engines / consumption of culture → 第 5 段第 1 句，并参考第 6 段末句。",
+   "why": "第 5 段第 1 句：Recommendation engines … may serve to constrain choice and minimize luck。题干 What may result 对应原文 may serve to，constrain choice（限制选择）↔ A have much limited choice。第 6 段末句再次强调：people's options will be constrained by their past。",
+   "trap": "C 容易被第 5 段后半段迷惑：作者说 In one sense, this is helpful，机器能浏览更多选择。但那是让步，而且只说机器看得更多，并没有说“决定享受什么更容易”。",
+   "tip": "may serve to / may lead to / is likely to 这类表示“可能导致”的句子，往往就是“可能结果”题的答案句。",
+   "ox": {
+    "B": "原文是 minimize luck（把运气、机缘降到最低），B 说“更走运”，方向正好相反。",
+    "C": "原文说机器能浏览的选项更多，“从某种意义上有帮助”，并没有说人们做决定会更容易。",
+    "D": "原文是公司用机器的品味“取代”人的品味，不是人会形成和机器相似的品味。"
+   },
+   "ot": {
+    "B": "flip",
+    "C": "infer",
+    "D": "swap"
+   }
+  },
+  "49": {
+   "cands": [],
+   "ans": "C",
+   "loc": [
+    6,
+    0
+   ],
+   "need": "定位词 machine learning algorithms improve / larger parts of everyday life → 第 7 段第 1 句。",
+   "why": "第 7 段第 1 句：As machine learning algorithms improve … larger parts of everyday life are likely to become utterly predictable。题干与原文几乎逐词对应，答案就在同一句：utterly predictable ↔ completely anticipated（utterly = completely，predictable = can be anticipated）。",
+   "trap": "A 和 D 都出自紧接着的第 2 句，但那句的主语是 the predictions（预测会越来越好），让 common experiences 更高效、更愉快——说的不是“日常生活的大部分”本身会怎样。",
+   "tip": "题干和原文句子几乎逐词对应时，答案就在同一句里，不要被下一句的细节带跑。",
+   "ox": {
+    "A": "原文说“预测”会让日常经历更愉快，主语和题干不同，而且下一句才提到；题干问的是日常生活大部分本身的变化。",
+    "B": "第 6 段说选择会受过去的偏好约束，不是生活会“重复过去的经历”，把两处信息拼在了一起。",
+    "D": "原文中越来越好的是 predictions（预测），不是日常生活，主语被换掉了。"
+   },
+   "ot": {
+    "A": "swap",
+    "B": "swap",
+    "D": "swap"
+   }
+  },
+  "50": {
+   "cands": [],
+   "ans": "B",
+   "loc": [
+    8,
+    1
+   ],
+   "need": "定位词 creatures / AI-mediated world / less and less like us → 末段第 2 句，原因在末段第 1 句。",
+   "why": "末段第 1 句：unpredictability is part of how people understand themselves and part of what people like about themselves——不可预测性是人之为人的一部分。第 2 句：As they become more and more predictable, the creatures … will become less and less like us。变得可预测，就失去了“不可预测”这一人的特征，所以越来越不像我们。B: no longer possess the human characteristic of being unpredictable。",
+   "trap": "C 抓住了 understand themselves，但原文只说不可预测性是人们理解自己的“一部分”，并没有说将来的生物“无法理解自己”。",
+   "tip": "问 why 的题，先在原文找到题干原句，原因常在同一句的 as / because 从句里或前一句。",
+   "ox": {
+    "A": "原文说失去的重要东西是 unpredictability（不可预测性），不是“聪明”。",
+    "C": "原文只说不可预测性是人们理解自己的一部分，没有说它们将无法理解自己，推得过远。",
+    "D": "原文 what people like about themselves 是“人们喜欢自己的地方”，没有提到“前人”，也不是“被剥夺”。"
+   },
+   "ot": {
+    "A": "swap",
+    "C": "infer",
+    "D": "infer"
+   }
+  }
+ },
+ "lex": {
+  "a": [
+   "art.",
+   "一（个）"
+  ],
+  "about": [
+   "prep.",
+   "关于"
+  ],
+  "achieving": [
+   "v.（现在分词）",
+   "实现；达到（achieve）",
+   "succeeding in reaching a goal"
+  ],
+  "after": [
+   "prep.",
+   "（after all）毕竟"
+  ],
+  "ai": [
+   "n.（缩写）",
+   "人工智能（artificial intelligence）",
+   "computer systems that can do tasks that normally need human intelligence"
+  ],
+  "algorithmic": [
+   "adj.",
+   "算法的",
+   "done by following a set of computer rules"
+  ],
+  "algorithmically": [
+   "adv.",
+   "通过算法地",
+   "by means of an algorithm"
+  ],
+  "algorithms": [
+   "n.（复数）",
+   "算法（algorithm）",
+   "sets of rules a computer follows to solve a problem"
+  ],
+  "all": [
+   "pron.",
+   "（after all）毕竟"
+  ],
+  "already": [
+   "adv.",
+   "已经"
+  ],
+  "altering": [
+   "v.（现在分词）",
+   "改变（alter）",
+   "changing something"
+  ],
+  "and": [
+   "conj.",
+   "和；而且"
+  ],
+  "anxieties": [
+   "n.（复数）",
+   "忧虑；焦虑（anxiety）",
+   "feelings of worry about what may happen"
+  ],
+  "any": [
+   "det.",
+   "任何"
+  ],
+  "approve": [
+   "v.",
+   "批准",
+   "to officially agree to something"
+  ],
+  "are": [
+   "v.",
+   "是"
+  ],
+  "areas": [
+   "n.（复数）",
+   "领域（area）",
+   "fields of activity"
+  ],
+  "argued": [
+   "v.（过去式）",
+   "主张；论证（argue）",
+   "gave reasons to show that something is true"
+  ],
+  "aristotle": [
+   "n.（人名）",
+   "亚里士多德"
+  ],
+  "artificial": [
+   "adj.",
+   "人造的（artificial intelligence 人工智能）",
+   "made by people, not natural"
+  ],
+  "as": [
+   "conj.",
+   "随着；当……时；作为"
+  ],
+  "at": [
+   "prep.",
+   "（at the same time）同时"
+  ],
+  "based": [
+   "v.（过去分词）",
+   "（based on）基于",
+   "using something as the starting point"
+  ],
+  "be": [
+   "v.",
+   "是；成为"
+  ],
+  "become": [
+   "v.",
+   "变得",
+   "to start to be"
+  ],
+  "better": [
+   "adj.",
+   "更好的（good 的比较级）"
+  ],
+  "biases": [
+   "n.（复数）",
+   "偏见（bias）",
+   "unfair preferences for or against someone or something"
+  ],
+  "but": [
+   "conj.",
+   "但是"
+  ],
+  "by": [
+   "prep.",
+   "被；通过"
+  ],
+  "can": [
+   "modal",
+   "能够"
+  ],
+  "candidate": [
+   "n.",
+   "（job candidate）求职者；候选人",
+   "a person who applies for a job"
+  ],
+  "capacity": [
+   "n.",
+   "能力",
+   "the ability to do something"
+  ],
+  "catastrophic": [
+   "adj.",
+   "灾难性的",
+   "causing very great damage or suffering"
+  ],
+  "central": [
+   "adj.",
+   "（central to）对……至关重要的；核心的",
+   "most important"
+  ],
+  "chance": [
+   "n.",
+   "机会",
+   "an opportunity to do something"
+  ],
+  "change": [
+   "v.",
+   "改变"
+  ],
+  "choice": [
+   "n.",
+   "选择",
+   "the act or possibility of choosing"
+  ],
+  "choices": [
+   "n.（复数）",
+   "选择；选项（choice）",
+   "decisions between possibilities; things you can choose"
+  ],
+  "common": [
+   "adj.",
+   "日常的；普通的",
+   "happening often; ordinary"
+  ],
+  "companies": [
+   "n.（复数）",
+   "公司（company）"
+  ],
+  "conjures": [
+   "v.（三单）",
+   "（conjure up）使联想到；唤起（conjure）",
+   "makes a picture or idea appear in the mind"
+  ],
+  "constrain": [
+   "v.",
+   "限制；约束",
+   "to limit what someone can do"
+  ],
+  "constrained": [
+   "v.（过去分词）",
+   "受限制；受约束（constrain）",
+   "limited"
+  ],
+  "consumers": [
+   "n.（复数）",
+   "消费者（consumer）",
+   "people who buy or use goods and services"
+  ],
+  "consumption": [
+   "n.",
+   "消费",
+   "the use of goods, services or culture"
+  ],
+  "contexts": [
+   "n.（复数）",
+   "情境；场合（context）",
+   "situations in which something happens"
+  ],
+  "control": [
+   "v.",
+   "控制；掌控",
+   "to have power over something"
+  ],
+  "could": [
+   "modal",
+   "可能"
+  ],
+  "creatures": [
+   "n.（复数）",
+   "生物；人（creature）",
+   "living beings"
+  ],
+  "culture": [
+   "n.",
+   "文化（产品）",
+   "books, films, music and other arts"
+  ],
+  "data": [
+   "n.",
+   "（data sets）数据集",
+   "information used by a computer"
+  ],
+  "day": [
+   "n.",
+   "（one day）有一天"
+  ],
+  "decisions": [
+   "n.（复数）",
+   "决定（decision）",
+   "choices made after thinking"
+  ],
+  "deeper": [
+   "adj.（比较级）",
+   "更深层的（deep）",
+   "more serious and less obvious"
+  ],
+  "depends": [
+   "v.（三单）",
+   "（depend on）取决于（depend）",
+   "is decided by"
+  ],
+  "develop": [
+   "v.",
+   "培养；发展",
+   "to build up a skill or ability gradually"
+  ],
+  "display": [
+   "v.",
+   "表现出；显示",
+   "to show a feeling or quality"
+  ],
+  "do": [
+   "v.",
+   "做"
+  ],
+  "does": [
+   "aux.",
+   "（构成疑问）"
+  ],
+  "don't": [
+   "aux.",
+   "不（do not）"
+  ],
+  "effectively": [
+   "adv.",
+   "有效地",
+   "in a way that produces the intended result"
+  ],
+  "efficient": [
+   "adj.",
+   "高效的",
+   "working well without wasting time or energy"
+  ],
+  "emergence": [
+   "n.",
+   "出现；兴起",
+   "the process of appearing or becoming known"
+  ],
+  "ends": [
+   "n.（复数）",
+   "目的（end）",
+   "aims or purposes"
+  ],
+  "energy": [
+   "n.",
+   "精力",
+   "the strength to keep doing things"
+  ],
+  "engines": [
+   "n.（复数）",
+   "（recommendation engines）推荐引擎（engine）",
+   "computer systems that do a particular job"
+  ],
+  "environment": [
+   "n.",
+   "环境",
+   "the surroundings in which people live"
+  ],
+  "even": [
+   "adv.",
+   "甚至"
+  ],
+  "everyday": [
+   "adj.",
+   "日常的",
+   "happening every day; ordinary"
+  ],
+  "example": [
+   "n.",
+   "（for example）例如"
+  ],
+  "exercise": [
+   "v.",
+   "运用；行使（exercise judgment 做出判断）",
+   "to use a power or ability"
+  ],
+  "experience": [
+   "n.",
+   "经验；经历",
+   "what happens to people and how they live"
+  ],
+  "experiences": [
+   "n.（复数）",
+   "经历（experience）",
+   "things that happen to you"
+  ],
+  "extensive": [
+   "adj.",
+   "大量的；广泛的",
+   "large in amount or range"
+  ],
+  "extent": [
+   "n.",
+   "（to the extent that）既然；在……的程度上",
+   "the degree to which something is true"
+  ],
+  "few": [
+   "pron.",
+   "（to name a few）举几个例子"
+  ],
+  "find": [
+   "v.",
+   "找到"
+  ],
+  "fire": [
+   "v.",
+   "解雇",
+   "to dismiss someone from a job"
+  ],
+  "for": [
+   "prep.",
+   "为了；对于"
+  ],
+  "get": [
+   "v.",
+   "变得"
+  ],
+  "going": [
+   "v.（现在分词）",
+   "（be going to）将要（go）"
+  ],
+  "habit": [
+   "n.",
+   "习惯",
+   "something you do regularly"
+  ],
+  "had": [
+   "v.（过去分词）",
+   "有（have）"
+  ],
+  "have": [
+   "v.",
+   "有；具有"
+  ],
+  "helpful": [
+   "adj.",
+   "有帮助的",
+   "useful"
+  ],
+  "hire": [
+   "v.",
+   "雇用",
+   "to give someone a job"
+  ],
+  "how": [
+   "adv.",
+   "如何"
+  ],
+  "human": [
+   "adj.",
+   "人类的；人的",
+   "relating to people"
+  ],
+  "humanity": [
+   "n.",
+   "人类；人性",
+   "people in general; the qualities of being human"
+  ],
+  "humans": [
+   "n.（复数）",
+   "人类（human）"
+  ],
+  "idea": [
+   "n.",
+   "（have a better idea）更清楚",
+   "knowledge or understanding"
+  ],
+  "if": [
+   "conj.",
+   "如果"
+  ],
+  "implications": [
+   "n.（复数）",
+   "（可能的）影响；含义（implication）",
+   "possible effects or results"
+  ],
+  "improve": [
+   "v.",
+   "改进；提高",
+   "to become better"
+  ],
+  "in": [
+   "prep.",
+   "在……中"
+  ],
+  "increasingly": [
+   "adv.",
+   "越来越多地",
+   "more and more"
+  ],
+  "individual": [
+   "n.",
+   "个人",
+   "a single person"
+  ],
+  "inhabiting": [
+   "v.（现在分词）",
+   "居住在；栖息于（inhabit）",
+   "living in a place"
+  ],
+  "innovations": [
+   "n.（复数）",
+   "创新；新发明（innovation）",
+   "new ideas, methods or inventions"
+  ],
+  "intelligence": [
+   "n.",
+   "智能；智力（artificial intelligence 人工智能）",
+   "the ability to learn and understand"
+  ],
+  "intermediaries": [
+   "n.（复数）",
+   "中介；媒介（intermediary）",
+   "things that come between two parties and link them"
+  ],
+  "is": [
+   "v.",
+   "是"
+  ],
+  "it": [
+   "pron.",
+   "它"
+  ],
+  "job": [
+   "n.",
+   "工作（job candidate 求职者）"
+  ],
+  "judges": [
+   "n.（复数）",
+   "裁判；评判者（judge）",
+   "people or things that decide"
+  ],
+  "judgment": [
+   "n.",
+   "判断；判断力",
+   "the ability to make good decisions"
+  ],
+  "judgments": [
+   "n.（复数）",
+   "判断（judgment）",
+   "decisions or opinions formed after thinking"
+  ],
+  "killer": [
+   "adj.",
+   "杀人的（killer robots 杀手机器人）"
+  ],
+  "larger": [
+   "adj.（比较级）",
+   "更大的（large）"
+  ],
+  "learning": [
+   "n.",
+   "（machine learning）机器学习；学习",
+   "the process of gaining knowledge or skill"
+  ],
+  "less": [
+   "adv.",
+   "（less and less）越来越不"
+  ],
+  "levels": [
+   "n.（复数）",
+   "程度；水平（level）"
+  ],
+  "life": [
+   "n.",
+   "生活"
+  ],
+  "like": [
+   "prep. / v.",
+   "像；喜欢"
+  ],
+  "likely": [
+   "adj.",
+   "可能的（be likely to 很可能）",
+   "probably going to happen"
+  ],
+  "loan": [
+   "n.",
+   "贷款",
+   "money that a bank lends"
+  ],
+  "longer": [
+   "adv.",
+   "（no longer）不再"
+  ],
+  "losing": [
+   "v.（现在分词）",
+   "失去（lose）"
+  ],
+  "luck": [
+   "n.",
+   "运气；机缘",
+   "chance; good or bad things that happen by chance"
+  ],
+  "machine": [
+   "n.",
+   "机器（machine learning 机器学习；machine taste 机器的品味）"
+  ],
+  "machines": [
+   "n.（复数）",
+   "机器（machine）"
+  ],
+  "make": [
+   "v.",
+   "做出；使"
+  ],
+  "making": [
+   "v.（现在分词）",
+   "做出（make）"
+  ],
+  "managers": [
+   "n.（复数）",
+   "管理者；经理（manager）"
+  ],
+  "may": [
+   "modal",
+   "可能"
+  ],
+  "means": [
+   "v.（三单）",
+   "意味着（mean）"
+  ],
+  "mediated": [
+   "adj.",
+   "（AI-mediated）由人工智能调节的；以人工智能为中介的",
+   "controlled or shaped by something in between"
+  ],
+  "might": [
+   "modal",
+   "可能"
+  ],
+  "minimize": [
+   "v.",
+   "使减到最少",
+   "to reduce something to the smallest amount"
+  ],
+  "moral": [
+   "adj.",
+   "道德的",
+   "relating to right and wrong"
+  ],
+  "more": [
+   "adv.",
+   "更（more and more 越来越）"
+  ],
+  "name": [
+   "v.",
+   "（to name a few）举几个例子",
+   "to mention"
+  ],
+  "neutral": [
+   "adj.",
+   "中立的；不偏不倚的",
+   "not supporting either side"
+  ],
+  "never": [
+   "adv.",
+   "从不"
+  ],
+  "new": [
+   "adj.",
+   "新的"
+  ],
+  "next": [
+   "adv.",
+   "接下来"
+  ],
+  "no": [
+   "adv.",
+   "（no longer）不再"
+  ],
+  "of": [
+   "prep.",
+   "……的"
+  ],
+  "on": [
+   "prep.",
+   "在……上；依据"
+  ],
+  "one": [
+   "num.",
+   "一（in one sense 从某种意义上说）"
+  ],
+  "optimizing": [
+   "v.（现在分词）",
+   "（optimize for）为……优化（optimize）",
+   "making something work as well as possible"
+  ],
+  "options": [
+   "n.（复数）",
+   "选择；选项（option）",
+   "things you can choose"
+  ],
+  "or": [
+   "conj.",
+   "或者"
+  ],
+  "other": [
+   "adj.",
+   "其他的"
+  ],
+  "own": [
+   "adj.",
+   "（on their own）独自地"
+  ],
+  "part": [
+   "n.",
+   "部分"
+  ],
+  "particularly": [
+   "adv.",
+   "尤其",
+   "especially"
+  ],
+  "parts": [
+   "n.（复数）",
+   "部分（part）"
+  ],
+  "past": [
+   "n.",
+   "过去",
+   "the time before now"
+  ],
+  "people": [
+   "n.",
+   "人们"
+  ],
+  "people's": [
+   "n.（所有格）",
+   "人们的"
+  ],
+  "person's": [
+   "n.（所有格）",
+   "人的；个人的"
+  ],
+  "pleasant": [
+   "adj.",
+   "令人愉快的",
+   "enjoyable"
+  ],
+  "potential": [
+   "adj.",
+   "潜在的；可能的",
+   "possible in the future"
+  ],
+  "practical": [
+   "adj.",
+   "实践的；实际的（practical judgment 实践判断）",
+   "relating to real situations rather than theory"
+  ],
+  "practice": [
+   "n.",
+   "练习；实践",
+   "doing something regularly to improve"
+  ],
+  "predictable": [
+   "adj.",
+   "可预测的",
+   "able to be known in advance"
+  ],
+  "predictions": [
+   "n.（复数）",
+   "预测（prediction）",
+   "statements about what will happen"
+  ],
+  "prefer": [
+   "v.",
+   "更喜欢",
+   "to like one thing more than another"
+  ],
+  "preferred": [
+   "v.（过去分词）",
+   "更喜欢（prefer）"
+  ],
+  "prescription": [
+   "n.",
+   "指令；规定",
+   "an official instruction about what should be done"
+  ],
+  "presenting": [
+   "v.（现在分词）",
+   "（present sb with sth）向……提供（present）",
+   "giving or showing something to someone"
+  ],
+  "prevalent": [
+   "adj.",
+   "普遍的；盛行的",
+   "common or widespread"
+  ],
+  "problem": [
+   "n.",
+   "问题"
+  ],
+  "process": [
+   "n.",
+   "（in the process of）在……的过程中"
+  ],
+  "range": [
+   "n.",
+   "范围",
+   "a number of different things of the same kind"
+  ],
+  "read": [
+   "v.",
+   "读"
+  ],
+  "recommendation": [
+   "n.",
+   "推荐（recommendation engines 推荐引擎）",
+   "a suggestion that something is good"
+  ],
+  "regularly": [
+   "adv.",
+   "经常地；定期地",
+   "often; at regular times"
+  ],
+  "replacing": [
+   "v.（现在分词）",
+   "取代（replace）",
+   "taking the place of"
+  ],
+  "reshape": [
+   "v.",
+   "重塑；改造",
+   "to change the shape or nature of something"
+  ],
+  "risk": [
+   "n.",
+   "风险",
+   "the possibility of something bad happening"
+  ],
+  "robots": [
+   "n.（复数）",
+   "机器人（robot）"
+  ],
+  "routinely": [
+   "adv.",
+   "经常地；例行地",
+   "as a normal part of a job"
+  ],
+  "same": [
+   "adj.",
+   "（at the same time）同时"
+  ],
+  "see": [
+   "v.",
+   "（see … as）把……视为"
+  ],
+  "selected": [
+   "v.（过去分词）",
+   "挑选的（select）",
+   "chosen"
+  ],
+  "selection": [
+   "n.",
+   "选择；筛选",
+   "the act of choosing from a group"
+  ],
+  "sense": [
+   "n.",
+   "（in one sense）从某种意义上",
+   "a way of understanding something"
+  ],
+  "serve": [
+   "v.",
+   "（serve to）起……作用",
+   "to have a particular effect"
+  ],
+  "sets": [
+   "n.（复数）",
+   "（data sets）数据集（set）"
+  ],
+  "shapes": [
+   "v.（三单）",
+   "塑造；影响（shape）",
+   "influences how something develops"
+  ],
+  "should": [
+   "modal",
+   "应该"
+  ],
+  "show": [
+   "n.",
+   "（电视）节目",
+   "a television programme"
+  ],
+  "significant": [
+   "adj.",
+   "重要的；意义重大的",
+   "important"
+  ],
+  "so": [
+   "conj.",
+   "因此"
+  ],
+  "some": [
+   "det.",
+   "一些；某种"
+  ],
+  "something": [
+   "pron.",
+   "某种东西"
+  ],
+  "soon": [
+   "adv.",
+   "很快"
+  ],
+  "stream": [
+   "v.",
+   "（在线）听；看（流媒体）",
+   "to watch or listen to something over the internet"
+  ],
+  "substitute": [
+   "adj.",
+   "替代的",
+   "used instead of another"
+  ],
+  "survey": [
+   "v.",
+   "浏览；全面考察",
+   "to look at all of something"
+  ],
+  "taste": [
+   "n.",
+   "品味；鉴赏力",
+   "the ability to judge what is good"
+  ],
+  "technological": [
+   "adj.",
+   "技术的",
+   "relating to technology"
+  ],
+  "technology": [
+   "n.",
+   "技术"
+  ],
+  "term": [
+   "n.",
+   "术语；说法",
+   "a word or phrase used for something"
+  ],
+  "than": [
+   "conj.",
+   "比"
+  ],
+  "that": [
+   "conj. / pron.",
+   "（引导从句）"
+  ],
+  "the": [
+   "art.",
+   "这；那（定冠词）"
+  ],
+  "their": [
+   "pron.",
+   "他们的"
+  ],
+  "them": [
+   "pron.",
+   "它们；他们"
+  ],
+  "themselves": [
+   "pron.",
+   "他们自己"
+  ],
+  "there": [
+   "pron.",
+   "（there be）有"
+  ],
+  "these": [
+   "det.",
+   "这些"
+  ],
+  "they": [
+   "pron.",
+   "他们；它们"
+  ],
+  "they've": [
+   "pron. + aux.",
+   "他们已经（they have）"
+  ],
+  "think": [
+   "v.",
+   "认为"
+  ],
+  "this": [
+   "pron.",
+   "这"
+  ],
+  "though": [
+   "adv.",
+   "不过；然而",
+   "however"
+  ],
+  "threat": [
+   "n.",
+   "威胁",
+   "something likely to cause harm"
+  ],
+  "time": [
+   "n.",
+   "时间"
+  ],
+  "to": [
+   "prep.",
+   "到；（不定式）"
+  ],
+  "tool": [
+   "n.",
+   "工具"
+  ],
+  "train": [
+   "v.",
+   "（模型）训练",
+   "to teach a computer system using data"
+  ],
+  "typically": [
+   "adv.",
+   "通常",
+   "usually"
+  ],
+  "ultimately": [
+   "adv.",
+   "最终",
+   "in the end"
+  ],
+  "unanticipated": [
+   "adj.",
+   "意料之外的",
+   "not expected"
+  ],
+  "understand": [
+   "v.",
+   "理解"
+  ],
+  "unemployment": [
+   "n.",
+   "失业",
+   "the state of not having a job"
+  ],
+  "unpredictability": [
+   "n.",
+   "不可预测性",
+   "the quality of not being predictable"
+  ],
+  "up": [
+   "adv.",
+   "（conjure up）唤起"
+  ],
+  "us": [
+   "pron.",
+   "我们"
+  ],
+  "use": [
+   "v.",
+   "使用"
+  ],
+  "utterly": [
+   "adv.",
+   "完全地",
+   "completely"
+  ],
+  "variety": [
+   "n.",
+   "（a variety of）各种各样的",
+   "many different kinds"
+  ],
+  "visit": [
+   "v.",
+   "访问；去（网站、地方）"
+  ],
+  "watch": [
+   "v.",
+   "观看"
+  ],
+  "way": [
+   "n.",
+   "方式；办法"
+  ],
+  "we": [
+   "pron.",
+   "我们"
+  ],
+  "what": [
+   "pron.",
+   "什么；……的东西"
+  ],
+  "where": [
+   "adv.",
+   "（引导定语从句）在那里"
+  ],
+  "which": [
+   "det. / pron.",
+   "哪一个；（引导定语从句）"
+  ],
+  "while": [
+   "conj.",
+   "虽然",
+   "although"
+  ],
+  "who": [
+   "pron.",
+   "谁"
+  ],
+  "wider": [
+   "adj.（比较级）",
+   "更广的（wide）"
+  ],
+  "will": [
+   "modal",
+   "将会"
+  ],
+  "with": [
+   "prep.",
+   "用；以（replace A with B 用 B 取代 A）"
+  ],
+  "without": [
+   "prep.",
+   "没有；不带"
+  ],
+  "workplace": [
+   "n.",
+   "工作场所；职场"
+  ],
+  "world": [
+   "n.",
+   "世界"
+  ],
+  "you": [
+   "pron.",
+   "你"
+  ],
+  "you'd": [
+   "pron. + modal",
+   "你会（you would）"
+  ]
+ },
+ "keys": [
+  {
+   "t": "neutral",
+   "k": "word",
+   "n": "neutral adj. 中立的；不偏不倚的 · a neutral tool 中立的工具"
+  },
+  {
+   "t": "reshape",
+   "k": "word",
+   "n": "reshape v. 重塑 ↔ 题干 46 D reshaping humanity"
+  },
+  {
+   "t": "altering humanity",
+   "k": "phrase",
+   "n": "改变人类。alter = change，46 题答案依据之一"
+  },
+  {
+   "t": "conjures up",
+   "k": "phrase",
+   "n": "conjure up 使联想到；唤起（某种形象或想法）"
+  },
+  {
+   "t": "catastrophic",
+   "k": "word",
+   "n": "catastrophic adj. 灾难性的（catastrophe n. 灾难）"
+  },
+  {
+   "t": "implications",
+   "k": "word",
+   "n": "implication n.（可能的）影响；含义 · deeper implications 更深层的影响"
+  },
+  {
+   "t": "capacity",
+   "k": "word",
+   "n": "capacity n. 能力 · the capacity for/to do sth 做某事的能力"
+  },
+  {
+   "t": "practical judgments",
+   "k": "phrase",
+   "n": "实践判断；在实际情境中做判断的能力"
+  },
+  {
+   "t": "exercise judgment",
+   "k": "phrase",
+   "n": "做出判断；运用判断力（exercise v. 运用、行使）"
+  },
+  {
+   "t": "to name a few",
+   "k": "phrase",
+   "n": "举几个例子；仅举数例"
+  },
+  {
+   "t": "prescription",
+   "k": "word",
+   "n": "prescription n. 指令；处方 · algorithmic prescription 算法指令"
+  },
+  {
+   "t": "prevalent",
+   "k": "word",
+   "n": "prevalent adj. 普遍的；盛行的 = widespread, common"
+  },
+  {
+   "t": "intermediaries",
+   "k": "word",
+   "n": "intermediary n. 中介；媒介"
+  },
+  {
+   "t": "constrain",
+   "k": "word",
+   "n": "constrain v. 限制；约束 ↔ 48 A limited choice"
+  },
+  {
+   "t": "minimize",
+   "k": "word",
+   "n": "minimize v. 使减到最少（maximize 使最大化）"
+  },
+  {
+   "t": "in one sense",
+   "k": "phrase",
+   "n": "从某种意义上说（常引出让步）"
+  },
+  {
+   "t": "optimizing for",
+   "k": "phrase",
+   "n": "optimize for 为……而优化"
+  },
+  {
+   "t": "unanticipated",
+   "k": "word",
+   "n": "unanticipated adj. 意料之外的（anticipate v. 预料）"
+  },
+  {
+   "t": "utterly predictable",
+   "k": "phrase",
+   "n": "完全可以预测 ↔ 49 C can be completely anticipated"
+  },
+  {
+   "t": "to the extent that",
+   "k": "phrase",
+   "n": "既然；在……的程度上"
+  },
+  {
+   "t": "inhabiting",
+   "k": "word",
+   "n": "inhabit v. 居住于；栖息于（inhabitant n. 居民）"
+  },
+  {
+   "t": "mediated",
+   "k": "word",
+   "n": "mediate v. 调节；作为中介 · AI-mediated world 由人工智能调节的世界"
+  }
+ ],
+ "tips": [
+  "先读题干、圈定位词：deeper implications（46）、algorithmic prescription（47）、recommendation engines（48）、machine learning algorithms（49）、AI-mediated world（50）。仔细阅读的题目顺序基本和文章顺序一致。",
+  "正确答案多是原文的同义替换：develop ↔ cultivate（47）、constrain choice ↔ much limited choice（48）、utterly predictable ↔ completely anticipated（49）、unpredictability ↔ being unpredictable（50）。",
+  "注意让步结构：While …（46）、In one sense … At the same time, though …（48）。让步部分是别人的看法或次要的一面，转折之后才是作者的重点。",
+  "排除四类常见干扰：偷换概念（换主语、换对象）、无中生有、以偏概全（用一个例子代替整体）、正反颠倒。选项里出现原文的词，不代表它就是对的（46C、49A、49D）。"
+ ]
+}

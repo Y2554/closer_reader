@@ -166,6 +166,7 @@ function renderView(){
     if (S.impDirty || !v.querySelector('.imp')) {
       v.innerHTML = importHtml(); S.impDirty = false;
       const img = $('#impPrev'); if (img && S.impFile) { try { img.src = URL.createObjectURL(S.impFile); } catch(err){} }
+      if (window.CR_AI && window.CR_AI.mount) window.CR_AI.mount($('#crAiBox'));   // standalone build: "AI 设置" box
     }
     else { const s = $('#impStatus'); if (s) s.innerHTML = impStatusHtml(); }
     return;

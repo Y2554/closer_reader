@@ -91,36 +91,51 @@ node server/dev-server.mjs
 
 ### 1.3 开启 AI 功能（拍照导入、AI 讲解、按语境释义、翻译批改）
 
-在 claude.ai 里，这些功能由 Artifact 运行时直接调用 Claude。独立部署时需要一个后端代理，**API Key 只能放在服务器上，绝不能写进前端**。
+在 claude.ai 里，这些功能由 Artifact 运行时直接调用 Claude。独立部署版走自己的接口 `/api/sample`（`api/sample.js`，Vercel 云函数），默认接 **DeepSeek**（`deepseek-flash`，能看图）。**API Key 只放在服务器的环境变量里，绝不写进前端或提交到 Git。**
+
+两种用法，同一个接口：
+
+| | 免费试用 | 用户自带 Key |
+| --- | --- | --- |
+| 谁的 Key | 站长的 `DEEPSEEK_API_KEY` | 用户在导入页底部「AI 设置」里填的 Key，只存在他自己的浏览器里 |
+| 限额 | 每台设备**一次性** 2 篇导入 + 20 次小功能；同一 IP 每天 40 次；全站每天 150 次 | 每台设备每小时 120 次（防止接口被当中转站） |
+| 支持的平台 | DeepSeek | DeepSeek、通义千问、Kimi、智谱、豆包（固定白名单，不能转发到别处） |
+
+导入一篇文章要调两次模型（整理全文 + 逐词标词性）。免费导入成功后会发一张一次性通行证，第二次调用凭它免费，所以"一篇"只扣一次额度。
+
+**线上配置（Vercel → 项目 → Settings → Environment Variables）：**
+
+| 变量 | 说明 |
+| --- | --- |
+| `DEEPSEEK_API_KEY` | 免费试用用的 Key。不设置则只能用自带 Key |
+| `KV_REST_API_URL` / `KV_REST_API_TOKEN` | 额度计数用的 Upstash Redis，在 Vercel 的 Storage / Marketplace 里接入后自动生成。**没有它，免费试用自动关闭**（绝不会变成无限制） |
+| `FREE_IMPORTS` `FREE_SMALL` `IP_DAILY` `GLOBAL_DAILY` `BYOK_HOURLY` | 可选，覆盖上面的默认限额 |
+
+`vercel.json` 把云函数放在香港节点（`hkg1`），最长运行 300 秒。照片在浏览器里先压缩到长边 2000 像素的 JPEG 再上传，避开 Vercel 每次请求 4.5MB 的上限。
+
+**本地调试：**
 
 ```bash
-ANTHROPIC_API_KEY=sk-ant-... node server/dev-server.mjs
-# 可选环境变量：PORT=8080  CLOSE_READER_MODEL=claude-sonnet-5-5  MAX_TOKENS=16000
+CR_DEV_MEMORY=1 DEEPSEEK_API_KEY=sk-... node server/dev-server.mjs   # 计数存在内存里，重启清零
+python3 tests/e2e_ai.py                                            # 假模型 + 假 Redis，26 项检查
 ```
 
-然后在 `runtime/config.js` 里取消注释这一行：
-
-```js
-window.CLOSE_READER_SAMPLE_ENDPOINT = '/api/sample';
-```
-
-代理协议很简单，换成任何后端（Cloudflare Workers、Vercel、Flask……）都可以：
+接口协议：
 
 ```
+GET  /api/sample                → { free: { enabled, importsLeft, smallLeft }, providers: [...] }
 POST /api/sample
-请求体  { "prompt": "…", "images": ["data:image/jpeg;base64,…"], "modelTier": "default" }
-响应体  模型输出解析后的 JSON（对象或数组），HTTP 200
-错误码  429 太频繁 · 422 模型没按 JSON 输出 · 413 太大 · 其他非 2xx 统一显示"暂时不能调用 Claude"
+请求头  X-CR-Device（必填，浏览器随机生成）· X-CR-Provider / X-CR-Key / X-CR-Model（自带 Key 时）· X-CR-Ticket
+请求体  { "prompt": "…", "images": ["data:image/jpeg;base64,…"], "modelTier": "default" | "complex" | "quick" }
+响应    模型输出解析后的 JSON，HTTP 200；响应头 X-CR-Free: 剩余导入,剩余小功能
+错误    { "error": 代码 }：402 free_used_up / no_balance · 401 bad_key · 429 rate_limited / busy_today
+        · 413 prompt_too_large · 422 invalid_json · 502 model_rejected / upstream_error · 503 ai_unavailable
 ```
-
-`dev-server.mjs` 的实现很直接：把图片转成 Messages API 的 base64 图片块，转发到 `https://api.anthropic.com/v1/messages`（请求头 `anthropic-version: 2023-06-01`），把返回的文本剥掉代码围栏后解析成 JSON 返回。
-
-> 这个代理在沙箱里只验证了静态服务和"未配置 Key 时返回 503"，**没有实际连到 Anthropic API 测试过**（沙箱访问不了外网）。第一次部署时请先导入一篇短文章验证。模型名以 [官方模型列表](https://platform.claude.com/docs/en/models/overview) 为准。
 
 ### 1.4 部署到线上
 
 - **纯静态托管**（GitHub Pages、Netlify、Vercel 静态站、对象存储都行）：把仓库根目录原样上传即可，入口是 `index.html`。词典数据约 69MB（核心 18MB + 扩展 42MB + 详解 8.7MB），全部分片懒加载、用到才下载，首屏只加载页面（约 250KB）和等级表 `level.json`（约 680KB）。
-- **需要 AI 功能**：静态资源 + 一个实现了 `/api/sample` 的函数或服务。部署公开站点前，至少要给代理加上身份校验和限流，否则任何人都能消耗你的 API 额度。
+- **需要 AI 功能**：部署到 Vercel 时 `api/sample.js` 会自动成为云函数，按 1.3 配好环境变量即可。换成别的平台，需要一个实现同样协议的函数。
 - **国内访问**：页面从 Google Fonts 加载字体。`index.html` 里这条样式表是非阻塞加载的（`media="print"` + `onload`，由 `src/assemble.py` 生成），字体服务器卡住时页面先用系统衬线字体（宋体 / Georgia）显示，不会白屏等待；实测模拟字体请求挂起 12 秒，首屏从 12.4 秒降到 0.2 秒。如果想要稳定的视觉效果，可以把字体文件下载下来自托管，然后改 `src/base.html` 头部的 `<link>`。
 
 ### 1.5 调试小抄
@@ -859,7 +874,7 @@ downloads.save({ filename, data }) → { status: 'saved' }
 16. **数据只在本机**：IndexedDB 的数据只属于一个浏览器的一个站点（协议 + 域名 + 端口）。换浏览器、换端口、清除网站数据，都会"丢"数据。重要数据请定期在「单词本 → 备份」里导出 JSON。从 claude.ai 版搬到独立版，也是靠这个 JSON。
 17. **端口也算站点**：`localhost:8080` 和 `localhost:8000` 是两个不同的站点，数据互不相通。
 18. **缓存**：重新构建后如果页面没更新，强制刷新一次（Ctrl/Cmd + Shift + R）即可。`dev-server.mjs` 已经关闭了缓存。
-19. **AI 代理没有任何鉴权**：它只用于本地开发，公开部署前必须加上鉴权和限流。
+19. **AI 接口的防护**：免费试用靠设备编号 + IP + 全站三层计数，再加上模型平台的预充值余额兜底。设备编号清掉浏览器数据就会变，所以真正的上限是 IP、全站两层和余额。
 
 ### 词典
 

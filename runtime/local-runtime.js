@@ -138,22 +138,99 @@
     }
   };
 
+  /* ---------- AI calls: POST to our own /api/sample (see api/sample.js) ---------- */
+  const ls = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} }
+  };
+  // A random id for this browser, so the free trial can be counted per device. Not personal data.
+  let device = ls.get('cr-device');
+  if (!device || !/^[A-Za-z0-9-]{16,64}$/.test(device)) {
+    device = (crypto.randomUUID ? crypto.randomUUID() : Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join(''));
+    ls.set('cr-device', device);
+  }
+  // The user's own API key (optional). Lives only in this browser's localStorage.
+  const aiCfg = () => { try { const c = JSON.parse(ls.get('cr-ai') || 'null'); return c && c.key ? c : null; } catch (e) { return null; } };
+  const quota = { enabled: null, importsLeft: null, smallLeft: null };
+  const changed = () => window.dispatchEvent(new CustomEvent('cr-ai-change'));
+  const readQuota = r => {
+    const h = r.headers.get('X-CR-Free');
+    if (h) { const [a, b] = h.split(',').map(Number); quota.enabled = true; quota.importsLeft = a; quota.smallLeft = b; changed(); }
+  };
+  let ticket = '';   // one-time pass so an import's follow-up word-tagging call isn't charged twice
+
+  // Phone photos are 3–10 MB; the server accepts 4.5 MB per request and the model scales big
+  // images down anyway. Shrink to ≤2000 px on the long side, JPEG, on a white background.
   const toDataURL = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(f); });
-  const sample = window.CLOSE_READER_SAMPLE_ENDPOINT ? {
+  async function shrink(file, max = 2000, q = 0.85) {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+      const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(img.naturalWidth * s)); c.height = Math.max(1, Math.round(img.naturalHeight * s));
+      const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+      return c.toDataURL('image/jpeg', q);
+    } catch (e) { return toDataURL(file); }   // couldn't decode: send as is, the server will judge
+    finally { URL.revokeObjectURL(url); }
+  }
+
+  const ERR = {   // server error code → the page's error codes (sampleErr in src/base.html)
+    free_used_up: 'free_used_up', busy_today: 'busy_today', bad_key: 'bad_key', no_balance: 'no_balance',
+    model_rejected: 'model_rejected', invalid_json: 'invalid_json', prompt_too_large: 'prompt_too_large',
+    rate_limited: 'rate_limited', ai_unavailable: 'ai_unavailable', forbidden: 'ai_unavailable'
+  };
+  const EP = window.CLOSE_READER_SAMPLE_ENDPOINT;
+  const headersFor = () => {
+    const h = { 'Content-Type': 'application/json', 'X-CR-Device': device };
+    const c = aiCfg();
+    if (c) { h['X-CR-Provider'] = c.provider || 'deepseek'; h['X-CR-Key'] = c.key; if (c.model) h['X-CR-Model'] = c.model; }
+    else if (ticket) h['X-CR-Ticket'] = ticket;
+    return h;
+  };
+  const sample = EP ? {
     async json(prompt, opts = {}) {
-      const images = opts.images ? await Promise.all(opts.images.map(i => typeof i === 'string' ? i : toDataURL(i))) : [];
+      const images = opts.images ? await Promise.all(opts.images.map(i => typeof i === 'string' ? i : shrink(i))) : [];
+      const usedTicket = ticket;
       let r;
       try {
-        r = await fetch(window.CLOSE_READER_SAMPLE_ENDPOINT, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: opts.signal,
+        r = await fetch(EP, {
+          method: 'POST', headers: headersFor(), signal: opts.signal,
           body: JSON.stringify({ prompt, images, modelTier: opts.modelTier || 'default' })
         });
       } catch (e) { throw (e && e.name === 'AbortError') ? { code: 'cancelled' } : { code: 'network' }; }
-      if (r.status === 429) throw { code: 'rate_limited' };
-      if (r.status === 422) throw { code: 'invalid_json' };
-      if (r.status === 413) throw { code: 'prompt_too_large' };
-      if (!r.ok) throw { code: 'sampling_disabled' };
+      if (usedTicket && usedTicket === ticket) ticket = '';
+      readQuota(r);
+      if (r.headers.get('X-CR-Ticket')) ticket = r.headers.get('X-CR-Ticket');
+      if (!r.ok) {
+        const body = await r.json().catch(() => ({}));
+        throw { code: ERR[body && body.error] || (r.status === 413 ? 'prompt_too_large' : r.status === 429 ? 'rate_limited' : 'ai_unavailable') };
+      }
       try { return await r.json(); } catch (e) { throw { code: 'invalid_json' }; }
+    }
+  } : null;
+
+  /* Small API for runtime/ai-panel.js (the "AI 设置" box on the import page). */
+  window.CR_AI = EP ? {
+    providers: [
+      { id: 'deepseek', name: 'DeepSeek', model: 'deepseek-flash', hint: '可不填，默认 deepseek-flash（能看图）' },
+      { id: 'qwen', name: '通义千问（阿里云百炼）', hint: '例如 qwen-vl-max；拍照导入要选能看图的 VL 模型' },
+      { id: 'moonshot', name: 'Kimi（月之暗面）', hint: '填平台文档里的模型名' },
+      { id: 'zhipu', name: '智谱 GLM', hint: '填平台文档里的模型名；看图要选 V 系列' },
+      { id: 'doubao', name: '豆包（火山方舟）', hint: '填推理接入点 ID（ep- 开头）或模型名' }
+    ],
+    get: aiCfg,
+    set(c) { ls.set('cr-ai', c && c.key ? JSON.stringify({ provider: c.provider, key: c.key, model: c.model || '' }) : null); changed(); },
+    quota: () => ({ ...quota }),
+    async refresh() {
+      try {
+        const r = await fetch(EP, { headers: { 'X-CR-Device': device } });
+        const d = r.ok ? await r.json() : null;
+        if (d && d.free) Object.assign(quota, { enabled: !!d.free.enabled, importsLeft: d.free.importsLeft ?? null, smallLeft: d.free.smallLeft ?? null });
+        else quota.enabled = false;              // no /api/sample here (e.g. a plain static server)
+        changed();
+      } catch (e) { if (quota.enabled == null) { quota.enabled = false; changed(); } }
+      return { ...quota };
     }
   } : null;
 

@@ -1051,6 +1051,7 @@ function importHtml(){
     <div class="p-actions"><button class="pbtn primary" data-act="impgo" ${S.imp && S.imp.busy ? 'disabled' : ''}>整理成精读文章</button>${S.imp && S.imp.busy ? '<button class="pbtn ghost" data-act="impstop">停止</button>' : ''}</div>
     <div id="impStatus" class="imp-status">${impStatusHtml()}</div>
     <p class="imp-alt">整理一篇大约需要一两分钟。也可以直接在对话里把照片发给 Claude，让它整理好放进往期。</p>
+    <div id="crAiBox"></div>
   </section>`;
 }
 function impStatusHtml(){
@@ -1073,7 +1074,14 @@ function sampleErr(e){
     images_unavailable: '这里没法发送照片，请改用粘贴文本。',
     image_rejected: '这张照片读不了，换一张清晰的 JPG 或 PNG 试试。',
     refused: 'Claude 拒绝处理这段内容，请检查后再试。',
-    session_expired: '登录已过期，请重新登录 claude.ai。'
+    session_expired: '登录已过期，请重新登录 claude.ai。',
+    free_used_up: '免费试用已经用完了。在「导入新文章」页底部的「AI 设置」里填入自己的 API Key 就能继续用。',
+    busy_today: '今天的免费试用名额用完了，明天再来；或者在「导入新文章」页底部填入自己的 API Key。',
+    bad_key: 'API Key 无效或已过期，请到「导入新文章」页底部的「AI 设置」里检查。',
+    no_balance: '你的 API 账户余额不足，请先到平台充值。',
+    model_rejected: '模型拒绝了这次请求：可能是模型名填错了，或这个模型不能看图。请检查「AI 设置」。',
+    ai_unavailable: 'AI 功能暂时不可用，稍后再试一次。',
+    network: '网络连接失败，检查网络后再试。'
   })[c] || '出了点问题，稍后再试一次。';
 }
 function normalize(d){

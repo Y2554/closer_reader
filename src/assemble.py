@@ -117,7 +117,26 @@ open('close-reader.html', 'w', encoding='utf-8').write(out)
 web = ('<!doctype html>\n<html lang="zh-CN">\n<head>\n<meta charset="utf-8">\n'
        '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
        '<script src="runtime/config.js"></script>\n'
-       '<script src="runtime/local-runtime.js"></script>\n</head>\n<body>\n' + out + '</body>\n</html>\n')
+       '<script src="runtime/local-runtime.js"></script>\n'
+       '<script src="runtime/ai-panel.js"></script>\n</head>\n<body>\n' + out + '</body>\n</html>\n')
+# The standalone site talks to whatever model api/sample.js is configured for (DeepSeek by default),
+# not to Claude, so its UI text says "AI". The claude.ai build (close-reader.html) keeps "Claude".
+for a_, b_ in [
+    ('<p class="imp-alt">也可以直接在对话里把试卷照片发给 Claude，说“按精读日报的格式加进去”，整理好后会出现在往期里。</p>', ''),
+    ('也可以直接在对话里把照片发给 Claude，让它整理好放进往期。', ''),
+]:
+    assert web.count(a_) == 1, a_[:40]
+    web = web.replace(a_, b_)
+web = web.replace('Claude', 'AI')
+# Storage lives in this browser (IndexedDB), not in a claude.ai account.
+for a_, b_ in [
+    ('文章、作答进度和单词本保存在你的 claude.ai 账号里，换设备打开也在。',
+     '文章、作答进度和单词本保存在这台设备的浏览器里。换浏览器或清除网站数据之前，记得在「单词本 → 备份」里导出。'),
+    ('文章库存在 claude.ai 里。请在 claude.ai 或 AI App 中登录后打开这个页面。',
+     '浏览器没能打开本地存档，可能是开了隐私模式或禁用了网站数据。换成普通窗口再试一次。'),
+]:
+    assert web.count(a_) == 1, a_[:40]
+    web = web.replace(a_, b_)
 # Google Fonts is often slow or unreachable in mainland China; a render-blocking <link> there can
 # hold first paint for many seconds. Load it without blocking: system serif fonts show first,
 # web fonts swap in if they arrive.

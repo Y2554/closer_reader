@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script src="runtime/config.js"></script>
 <script src="runtime/local-runtime.js"></script>
+<script src="runtime/ai-panel.js"></script>
 </head>
 <body>
 <title>The Close Reader</title>
@@ -1361,7 +1362,7 @@ kbd{display:inline-block;min-width:1.5em;padding:0 5px;border:1px solid var(--ru
     <section id="view" class="view"></section>
     <aside id="panel" class="panel" aria-live="polite"></aside>
   </main>
-  <footer class="foot">文章、作答进度和单词本保存在你的 claude.ai 账号里，换设备打开也在。</footer>
+  <footer class="foot">文章、作答进度和单词本保存在这台设备的浏览器里。换浏览器或清除网站数据之前，记得在「单词本 → 备份」里导出。</footer>
 </div>
 <div id="toast" class="toast" hidden></div>
 <button id="backq" class="backq" data-act="backq" hidden></button>
@@ -1623,15 +1624,15 @@ function detailBlock(P){
   h += `<h5 class="p-sec">词源 Etymology</h5>`;
   h += e.e ? `<p class="ety">${esc(e.e)}</p><div class="dsrc" style="margin-top:4px">Webster 1913 · GCIDE（GPL）</div>` : `<p class="dload" style="margin-top:0">Webster 词典没有记录这个词的词源。</p>`;
   if (note) {
-    h += `<div class="ai"><span class="lbl">Claude 讲解</span>
+    h += `<div class="ai"><span class="lbl">AI 讲解</span>
       ${note.story ? `<p>${esc(note.story)}</p>` : ''}
       ${note.memory ? `<p><b>记忆</b>${esc(note.memory)}</p>` : ''}
       ${(note.collocations || []).length ? `<p><b>常用搭配</b></p><ul>${note.collocations.map(c => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}
       ${(note.examples || []).length ? `<p><b>例句</b></p><ul class="exl">${note.examples.map(x => `<li>${esc(x[0])}<span>${esc(x[1] || '')}</span></li>`).join('')}</ul>` : ''}
       ${note.confusions ? `<p><b>易混</b>${esc(note.confusions)}</p>` : ''}</div>`;
   } else if (S.sample) {
-    h += P.aiBusy ? `<p class="dload"><span class="spin"></span>Claude 正在写词源故事和记忆方法…</p>`
-      : `<button class="pbtn ghost" style="margin-top:10px" data-act="ainote">让 Claude 讲讲词源、记法和搭配</button>${P.aiErr ? `<p class="dload">${esc(P.aiErr)}</p>` : ''}`;
+    h += P.aiBusy ? `<p class="dload"><span class="spin"></span>AI 正在写词源故事和记忆方法…</p>`
+      : `<button class="pbtn ghost" style="margin-top:10px" data-act="ainote">让 AI 讲讲词源、记法和搭配</button>${P.aiErr ? `<p class="dload">${esc(P.aiErr)}</p>` : ''}`;
   }
   // roots
   if ((e.r || []).length) h += `<h5 class="p-sec">构词 Word parts</h5><ul class="roots">${e.r.map(r => `<li><b>${esc(r[0])}</b><span class="tag">${ROOT_CLS(r[2])}</span><span class="rm">${esc(r[1])}</span>${r[3] ? `<span class="ro">${esc(ORIGIN[r[3]] || r[3])}</span>` : ''}</li>`).join('')}</ul>`;
@@ -1842,6 +1843,7 @@ function renderView(){
     if (S.impDirty || !v.querySelector('.imp')) {
       v.innerHTML = importHtml(); S.impDirty = false;
       const img = $('#impPrev'); if (img && S.impFile) { try { img.src = URL.createObjectURL(S.impFile); } catch(err){} }
+      if (window.CR_AI && window.CR_AI.mount) window.CR_AI.mount($('#crAiBox'));   // standalone build: "AI 设置" box
     }
     else { const s = $('#impStatus'); if (s) s.innerHTML = impStatusHtml(); }
     return;
@@ -1863,7 +1865,7 @@ function readHtml(){
   const a = cur();
   if (!a) {
     if (S.dbState === 'loading') return `<div class="story"><div class="kicker">正在取报</div><div class="skel" style="width:80%;height:38px"></div><div class="skel" style="width:55%"></div><div class="skel"></div><div class="skel"></div><div class="skel" style="width:70%"></div></div>`;
-    if (S.dbState !== 'ok') return `<div class="empty"><div class="kicker">暂时无法读取</div><h2>存档没有连上</h2><p>文章库存在 claude.ai 里。请在 claude.ai 或 Claude App 中登录后打开这个页面。</p></div>`;
+    if (S.dbState !== 'ok') return `<div class="empty"><div class="kicker">暂时无法读取</div><h2>存档没有连上</h2><p>浏览器没能打开本地存档，可能是开了隐私模式或禁用了网站数据。换成普通窗口再试一次。</p></div>`;
     return `<div class="empty"><div class="kicker">创刊号待印</div><h2>报纸还空着</h2><p>粘贴一篇文章或拍一张试卷，就能生成第一期精读。</p><button class="pbtn primary" data-act="view" data-v="import">导入第一篇</button></div>`;
   }
   if (isTrans(a)) return transHtml(a);
@@ -2164,7 +2166,7 @@ function popHtml(P){
   if (ok && D.res.form) h += `<p class="pop-lem">${esc(D.res.form)} → 原形 <b>${esc(D.res.lemma)}</b>${D.res.ff ? ` · ${esc(formNote(D.res.ff, P.pos))}` : ''}</p>`;
   const cm = lex ? { pos: lex[0], zh: lex[1], en: lex[2] } : opt ? { pos: opt.pos, zh: opt.zh, en: opt.en } : null;
   if (cm) h += `<div class="pop-ctx"><span class="pop-lbl">${P.kind === 'opt' ? '选项' : '本文'}</span><div class="pop-ctxm"><span class="chip ${posClass(cm.pos)}">${esc(shortPos(cm.pos))}</span> <span class="pop-ctxzh">${esc(cm.zh)}</span>${cm.en ? `<span class="pop-ctxen">${esc(cm.en)}</span>` : ''}</div></div>`;
-  else if (P.kind === 'word' && S.sample && a) h += `<button class="more" data-act="lookup">让 Claude 按语境释义</button>`;
+  else if (P.kind === 'word' && S.sample && a) h += `<button class="more" data-act="lookup">让 AI 按语境释义</button>`;
   if (!D || D.state === 'loading') h += `<p class="dload"><span class="spin"></span>正在查词典…</p>`;
   else if (D.state === 'err') h += `<p class="dload">词典没加载出来。<button class="more" data-act="dictretry">重试</button></p>`;
   else if (D.state === 'none') h += `<p class="dload">词典里没有收录这个词。</p>`;
@@ -2507,7 +2509,7 @@ function dtNext(){ const D = S.dt; if (!D) return; D.i++; D.state = 'ask'; D.inp
 function backupHtml(){
   const B = S.bk || {};
   return `<section class="bk">
-    <div class="bk-item"><h4>导出全部数据</h4><p>文章、作答进度、单词本（含熟悉度、分类、复习进度）和 Claude 讲解，存成一个 JSON 文件。以后搬到 GitHub 版本时可以直接导入。</p>
+    <div class="bk-item"><h4>导出全部数据</h4><p>文章、作答进度、单词本（含熟悉度、分类、复习进度）和 AI 讲解，存成一个 JSON 文件。以后搬到 GitHub 版本时可以直接导入。</p>
       <button class="pbtn primary" data-act="exjson">导出 JSON</button></div>
     <div class="bk-item"><h4>导出到 Anki</h4><p>字段依次是：单词、音标、词性、中文释义、英文释义、原句、等级、熟悉度、分类。CSV 格式，在 Anki 里选“导入文件”即可。</p>
       <div class="vtools"><select id="exScope"><option value="learn">生词 + 学习中</option><option value="all">全部（除忽略）</option>${S.cats.map(c => `<option value="cat:${esc(c)}">分类：${esc(c)}</option>`).join('')}</select><button class="pbtn primary" data-act="excsv">导出 CSV</button></div></div>
@@ -3211,13 +3213,13 @@ function transHtml(a){
     <div class="kicker">${esc(a.source || '翻译')}</div>
     <h2 class="headline">${esc(a.title)}</h2>
     ${a.zh ? `<p class="dek">${esc(a.zh)}</p>` : ''}
-    <div class="byline"><span>汉译英 · ${a.paragraphs.reduce((n, pp) => n + pp.sentences.length, 0)} 句 · ${zhChars} 字 · 建议 30 分钟</span><span>${R ? `Claude 批改 <b>${R.score}/15</b>` : p.draft ? `已写 <b>${wc}</b> 词` : '还没开始'}</span></div>
+    <div class="byline"><span>汉译英 · ${a.paragraphs.reduce((n, pp) => n + pp.sentences.length, 0)} 句 · ${zhChars} 字 · 建议 30 分钟</span><span>${R ? `AI 批改 <b>${R.score}/15</b>` : p.draft ? `已写 <b>${wc}</b> 词` : '还没开始'}</span></div>
     <section class="tr-src"><h3>原文 <span>Chinese</span></h3>${src}${shown ? '<p class="tr-hint">点带下划线的词语，看对应的英文表达。</p>' : ''}</section>
     <section class="tr-work">
       <header><h3>Your Translation<span>我的译文</span></h3><span class="tr-wc" id="trWc">${wc} 词</span></header>
-      <textarea id="trIn" class="tr-in" spellcheck="true" placeholder="在这里写你的英文译文。六级翻译 30 分钟，参考译文约 ${a.paragraphs.reduce((n, pp) => n + pp.sentences.reduce((m, s) => m + enWords(s.en), 0), 0)} 词。写完再对照参考译文，或者交给 Claude 按六级标准打分。">${esc(p.draft || '')}</textarea>
+      <textarea id="trIn" class="tr-in" spellcheck="true" placeholder="在这里写你的英文译文。六级翻译 30 分钟，参考译文约 ${a.paragraphs.reduce((n, pp) => n + pp.sentences.reduce((m, s) => m + enWords(s.en), 0), 0)} 词。写完再对照参考译文，或者交给 AI 按六级标准打分。">${esc(p.draft || '')}</textarea>
       <div class="tr-act">
-        ${S.sample ? `<button class="pbtn primary" data-act="trgrade" ${busy ? 'disabled' : ''}>${busy ? '<span class="spin"></span>Claude 正在批改…' : R ? '修改后重新批改' : '交给 Claude 批改'}</button>` : ''}
+        ${S.sample ? `<button class="pbtn primary" data-act="trgrade" ${busy ? 'disabled' : ''}>${busy ? '<span class="spin"></span>AI 正在批改…' : R ? '修改后重新批改' : '交给 AI 批改'}</button>` : ''}
         <button class="pbtn ${S.sample ? 'ghost' : 'primary'}" data-act="trshow">${shown && !R ? '收起参考译文' : shown ? '参考译文在下方' : '对照参考译文'}</button>
       </div>
       ${S.trErr && S.trErr.id === a.id ? `<p class="dload" style="color:var(--red)">${esc(S.trErr.msg)}</p>` : ''}
@@ -3227,7 +3229,7 @@ function transHtml(a){
       ${(R.good || []).length ? `<h5 class="p-sec">做得好的地方</h5><ul class="tr-good">${R.good.map(g => `<li>${esc(g)}</li>`).join('')}</ul>` : ''}
       ${fixes}
       ${R.polished ? `<h5 class="p-sec">在你的译文基础上润色</h5><p class="tr-pol">${esc(R.polished)}</p>` : ''}
-      <p class="dsrc">评分依据六级翻译五档标准（14 / 11 / 8 / 5 / 2 分档），由 Claude 批改，仅供参考。</p>
+      <p class="dsrc">评分依据六级翻译五档标准（14 / 11 / 8 / 5 / 2 分档），由 AI 批改，仅供参考。</p>
     </section>` : ''}
     ${shown ? `<section class="tr-ref"><h3>Reference <span>参考译文 · 逐句对照</span></h3><div id="body" class="${S.showKw ? 'show-kw' : ''} ${S.showSt ? 'show-st' : ''}"><ol class="tr-pairs">${pairs}</ol></div></section>
       ${(a.expr || []).length ? `<section class="tr-exprs"><h3>Expressions <span>表达积累</span></h3><ul>${a.expr.map((e, i) => `<li><button class="tr-x" data-act="trk" data-i="${i}"><b>${esc(e.zh)}</b><span>${esc(e.en)}</span></button></li>`).join('')}</ul></section>` : ''}` : ''}
@@ -3906,22 +3908,23 @@ ${words.join(', ')}`;
 }
 function importHtml(){
   if (!S.sample) return `<section class="imp"><div class="kicker">编辑部</div><h2 class="headline sm">导入新文章</h2>
-    <p class="dek">${window.claude && window.claude.local ? '本地部署版还没有接入 Claude：启动 server/dev-server.mjs 并在 runtime/config.js 里设置 CLOSE_READER_SAMPLE_ENDPOINT 后即可拍照导入。也可以手动按 seeds/ 里的格式整理文章，从「单词本 → 备份」导入。' : '导入需要在 claude.ai 或 Claude App 里打开本页，并允许它调用 Claude。'}</p>
-    <p class="imp-alt">也可以直接在对话里把试卷照片发给 Claude，说“按精读日报的格式加进去”，整理好后会出现在往期里。</p></section>`;
+    <p class="dek">${window.claude && window.claude.local ? '本地部署版还没有接入 AI：启动 server/dev-server.mjs 并在 runtime/config.js 里设置 CLOSE_READER_SAMPLE_ENDPOINT 后即可拍照导入。也可以手动按 seeds/ 里的格式整理文章，从「单词本 → 备份」导入。' : '导入需要在 claude.ai 或 AI App 里打开本页，并允许它调用 AI。'}</p>
+    </section>`;
   const F = S.impForm; const photo = S.impMode === 'photo';
   return `<section class="imp">
     <div class="kicker">编辑部 · 新稿件</div>
     <h2 class="headline sm">导入新文章</h2>
-    <p class="dek">粘贴文章或上传试卷照片。Claude 会拆句翻译、逐词标词性、划出重点；如果是选词填空，还会写出每个空的解题思路。</p>
+    <p class="dek">粘贴文章或上传试卷照片。AI 会拆句翻译、逐词标词性、划出重点；如果是选词填空，还会写出每个空的解题思路。</p>
     <div class="seg" role="group" aria-label="导入方式"><button data-act="impmode" data-m="text" aria-pressed="${!photo}">粘贴文本</button><button data-act="impmode" data-m="photo" aria-pressed="${photo}">试卷照片</button></div>
     ${photo ? `<div class="field"><label for="impFile">照片<span>JPG / PNG，尽量拍清楚整页</span></label><div class="drop"><input type="file" id="impFile" accept="image/jpeg,image/png,image/webp">${S.impFile ? `<div>${esc(S.impFile.name)}</div><img id="impPrev" alt="已选照片预览">` : ''}</div></div>`
       : `<div class="field"><label for="impTitle">标题<span>可不填</span></label><input type="text" id="impTitle" value="${esc(F.impTitle)}"></div>
          <div class="field"><label for="impText">正文<span>空格写成 26 或 ___26___ 都可以</span></label><textarea id="impText" placeholder="Scientists recently examined studies on dog intelligence …">${esc(F.impText)}</textarea></div>
          <div class="field"><label for="impBank">选项<span>选词填空才需要</span></label><textarea id="impBank" placeholder="A) affirmed  B) approximately …">${esc(F.impBank)}</textarea></div>`}
-    <div class="field"><label for="impAns">答案<span>可不填，Claude 会自己做</span></label><input type="text" id="impAns" value="${esc(F.impAns)}" placeholder="26 N  27 K  28 O …"></div>
+    <div class="field"><label for="impAns">答案<span>可不填，AI 会自己做</span></label><input type="text" id="impAns" value="${esc(F.impAns)}" placeholder="26 N  27 K  28 O …"></div>
     <div class="p-actions"><button class="pbtn primary" data-act="impgo" ${S.imp && S.imp.busy ? 'disabled' : ''}>整理成精读文章</button>${S.imp && S.imp.busy ? '<button class="pbtn ghost" data-act="impstop">停止</button>' : ''}</div>
     <div id="impStatus" class="imp-status">${impStatusHtml()}</div>
-    <p class="imp-alt">整理一篇大约需要一两分钟。也可以直接在对话里把照片发给 Claude，让它整理好放进往期。</p>
+    <p class="imp-alt">整理一篇大约需要一两分钟。</p>
+    <div id="crAiBox"></div>
   </section>`;
 }
 function impStatusHtml(){
@@ -3936,15 +3939,22 @@ function sampleErr(e){
   const c = e && e.code;
   return ({
     cancelled: '已停止。',
-    not_granted: '没有允许本页调用 Claude，导入暂时用不了。',
-    sampling_disabled: '这个账号暂时不能调用 Claude。',
+    not_granted: '没有允许本页调用 AI，导入暂时用不了。',
+    sampling_disabled: '这个账号暂时不能调用 AI。',
     rate_limited: '调用太频繁或达到用量上限，过一会儿再试。',
-    invalid_json: 'Claude 返回的内容不完整。可以再试一次，或者把文章分成两半导入。',
+    invalid_json: 'AI 返回的内容不完整。可以再试一次，或者把文章分成两半导入。',
     prompt_too_large: '文章太长了，请分段导入。',
     images_unavailable: '这里没法发送照片，请改用粘贴文本。',
     image_rejected: '这张照片读不了，换一张清晰的 JPG 或 PNG 试试。',
-    refused: 'Claude 拒绝处理这段内容，请检查后再试。',
-    session_expired: '登录已过期，请重新登录 claude.ai。'
+    refused: 'AI 拒绝处理这段内容，请检查后再试。',
+    session_expired: '登录已过期，请重新登录 claude.ai。',
+    free_used_up: '免费试用已经用完了。在「导入新文章」页底部的「AI 设置」里填入自己的 API Key 就能继续用。',
+    busy_today: '今天的免费试用名额用完了，明天再来；或者在「导入新文章」页底部填入自己的 API Key。',
+    bad_key: 'API Key 无效或已过期，请到「导入新文章」页底部的「AI 设置」里检查。',
+    no_balance: '你的 API 账户余额不足，请先到平台充值。',
+    model_rejected: '模型拒绝了这次请求：可能是模型名填错了，或这个模型不能看图。请检查「AI 设置」。',
+    ai_unavailable: 'AI 功能暂时不可用，稍后再试一次。',
+    network: '网络连接失败，检查网络后再试。'
   })[c] || '出了点问题，稍后再试一次。';
 }
 function normalize(d){
@@ -3971,7 +3981,7 @@ async function runImport(){
   if (!photo && !S.impForm.impText.trim()) { setImp({ err: '请先粘贴文章正文。' }); return; }
   if (!S.db) { setImp({ err: '存档没有连上，导入的文章无法保存。' }); return; }
   const ctl = new AbortController(); S.impCtl = ctl;
-  setImp({ busy: true, msg: 'Claude 正在拆句、翻译、写解析', n: 0 });
+  setImp({ busy: true, msg: 'AI 正在拆句、翻译、写解析', n: 0 });
   try {
     const opts = { modelTier: 'complex', signal: ctl.signal, onText: ({ text }) => { if (S.imp && S.imp.busy) { S.imp.n = text.length; const s = $('#impStatus'); if (s) s.innerHTML = impStatusHtml(); } } };
     if (photo) opts.images = [S.impFile];
@@ -4243,7 +4253,7 @@ async function lookup(a, P, btn){
     write('articles/' + a.id, ref => ref.update({ lex: { [P.w]: entry } }));
     P.pos = entry[0];
     renderView(); renderPop(true);
-  } catch(e){ btn.disabled = false; btn.textContent = '让 Claude 按语境释义'; toast(sampleErr(e)); }
+  } catch(e){ btn.disabled = false; btn.textContent = '让 AI 按语境释义'; toast(sampleErr(e)); }
 }
 document.addEventListener('input', e => {
   const id = e.target.id;

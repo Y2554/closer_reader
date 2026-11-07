@@ -188,8 +188,12 @@
   const ERR = {   // server error code → the page's error codes (sampleErr in src/base.html)
     free_used_up: 'free_used_up', busy_today: 'busy_today', bad_key: 'bad_key', no_balance: 'no_balance',
     model_rejected: 'model_rejected', invalid_json: 'invalid_json', prompt_too_large: 'prompt_too_large',
-    rate_limited: 'rate_limited', ai_unavailable: 'ai_unavailable', forbidden: 'ai_unavailable'
+    rate_limited: 'rate_limited', ai_unavailable: 'ai_unavailable', forbidden: 'forbidden', upstream_error: 'upstream_error'
   };
+  // an HTTP failure with no JSON body (the platform's own 500 / 504 page) → a code the page can explain
+  const httpCode = st => st === 413 ? 'prompt_too_large' : st === 429 ? 'rate_limited' : st === 504 ? 'timeout' : st >= 500 ? 'upstream_error' : 'http_' + st;
+  // worth one automatic retry: the provider hiccuped or the line dropped before any reply arrived
+  const RETRY = new Set(['upstream_error', 'timeout', 'network']);
   const EP = window.CLOSE_READER_SAMPLE_ENDPOINT;
   const headersFor = () => {
     const h = { 'Content-Type': 'application/json', 'X-CR-Device': device };
@@ -200,6 +204,18 @@
   };
   const sample = EP ? {
     async json(prompt, opts = {}) {
+      // streamed calls (imports) show their own progress and have their own retry; quick ones retry once here
+      if (typeof opts.onText === 'function') return once(prompt, opts);
+      try { return await once(prompt, opts); }
+      catch (e) {
+        if (!(e && RETRY.has(e.code)) || (opts.signal && opts.signal.aborted)) throw e;
+        await new Promise(r => setTimeout(r, 1200));
+        return once(prompt, opts);
+      }
+    }
+  } : null;
+  async function once(prompt, opts) {
+    {
       const images = opts.images ? await shrinkAll(opts.images) : [];
       const usedTicket = ticket;
       // With opts.onText the reply is streamed: onText({ text }) gets the model's text so far,
@@ -217,7 +233,7 @@
       if (r.headers.get('X-CR-Ticket')) ticket = r.headers.get('X-CR-Ticket');
       if (!r.ok) {
         const body = await r.json().catch(() => ({}));
-        throw { code: ERR[body && body.error] || (r.status === 413 ? 'prompt_too_large' : r.status === 429 ? 'rate_limited' : 'ai_unavailable') };
+        throw { code: ERR[body && body.error] || httpCode(r.status) };
       }
       if (!/^text\/plain/.test(r.headers.get('Content-Type') || '')) {
         let v; try { v = await r.json(); } catch (e) { throw { code: 'invalid_json' }; }
@@ -239,11 +255,11 @@
       const k = all.indexOf('\u0001');
       if (k < 0) throw { code: 'network' };                      // the connection dropped mid-way
       let end; try { end = JSON.parse(all.slice(k + 1)); } catch (e) { throw { code: 'network' }; }
-      if (end.error) throw { code: ERR[end.error] || 'ai_unavailable' };
+      if (end.error) throw { code: ERR[end.error] || 'upstream_error' };
       if (usedTicket && usedTicket === ticket) ticket = '';   // used up only by a successful call
       return end.value;
     }
-  } : null;
+  }
 
   /* Small API for runtime/ai-panel.js (the "AI 设置" box on the import page). */
   window.CR_AI = EP ? {

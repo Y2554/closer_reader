@@ -15,6 +15,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SEEN = []          # every request the fake model received
 STREAM_DELAY = 0.03
 DB = {}            # fake Redis
+FAIL_NEXT = [0]    # the fake model answers this many requests with HTTP 500 first
 
 ARTICLE = {"title": "Test Article", "zh": "测试", "source": "精读",
            "paragraphs": [{"sentences": [{"en": "Dogs are clever animals {{26}}.", "zh": "狗是聪明的动物。"}]}],
@@ -32,6 +33,8 @@ class Model(BaseHTTPRequestHandler):
         SEEN.append({'stream': bool(body.get('stream')), 'auth': auth, 'model': body.get('model'), 'thinking': body.get('thinking'), 'max_tokens': body.get('max_tokens'),
                      'kind': 'import' if '六级阅读老师' in text else 'lex' if '全部单词' in text else 'small', 'imgs': [len(u) for u in imgs],
                      'img_type': [u[:23] for u in imgs], 'text': text[:400]})
+        if FAIL_NEXT[0] > 0:
+            FAIL_NEXT[0] -= 1; self.send_response(500); self.end_headers(); self.wfile.write(b'{"error":{"message":"overloaded"}}'); return
         if auth == 'Bearer sk-bad-key-000000':
             self.send_response(401); self.end_headers(); self.wfile.write(b'{"error":{"message":"bad key"}}'); return
         if '六级阅读老师' in text: out = '```json\n' + json.dumps(ARTICLE, ensure_ascii=False) + '\n```'
@@ -169,10 +172,15 @@ async def main():
             st = await ev("document.querySelector('#impStatus').innerText")
             check('3rd free import refused with the "free trial used up" message', '免费试用已经用完' in st)
 
-            # small calls: 3 allowed, 4th refused
+            FAIL_NEXT[0] = 2
+            res = await ev("(async () => { const s = await window.claude.use('sample'); try { await s.json('gloss x'); return 'ok'; } catch (e) { return e.code; } })()")
+            check('two failures in a row give the specific "upstream_error" code (and cost nothing)', res == 'upstream_error' and FAIL_NEXT[0] == 0)
+            # small calls: 3 allowed, 4th refused; the first one meets a provider hiccup and is retried by itself
+            FAIL_NEXT[0] = 1; n1 = len(SEEN)
             res = await ev("""(async () => { const s = await window.claude.use('sample'); const out = [];
                 for (let i = 0; i < 4; i++) { try { await s.json('gloss ' + i); out.push('ok'); } catch (e) { out.push(e.code); } } return out; })()""")
             check('small calls: 3 ok then free_used_up', res == ['ok', 'ok', 'ok', 'free_used_up'])
+            check('a provider hiccup is retried once automatically and not charged twice', len(SEEN) - n1 == 4 and FAIL_NEXT[0] == 0)
 
             # bring your own key through the panel
             await to_import()

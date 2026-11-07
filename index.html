@@ -4595,9 +4595,12 @@ function sampleErr(e){
     bad_key: 'API Key 无效或已过期，请到「导入新文章」页底部的「AI 设置」里检查。',
     no_balance: '你的 API 账户余额不足，请先到平台充值。',
     model_rejected: '模型拒绝了这次请求：可能是模型名填错了，或这个模型不能看图。请检查「AI 设置」。',
-    ai_unavailable: 'AI 功能暂时不可用，稍后再试一次。',
+    ai_unavailable: '本站的 AI 服务没配置好或额度出了问题，站长正在处理，稍后再试。',
+    upstream_error: 'AI 服务这会儿没响应（已经自动重试过一次），过几秒再点一次。',
+    timeout: 'AI 这次想得太久，超时了，再点一次试试。',
+    forbidden: '请求被拦下了：请直接从本站网址打开页面再试。',
     network: '网络连接失败，检查网络后再试。'
-  })[c] || '出了点问题，稍后再试一次。';
+  })[c] || `出了点问题，稍后再试一次。${c ? `（${c}）` : ''}`;
 }
 // Key words must appear verbatim in the text or they can't be highlighted. The model sometimes
 // misspells one (boast for boost): snap each word to the text's word within one edit, else drop it.

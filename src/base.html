@@ -805,7 +805,7 @@ function renderToks(a, tk){
     if (opens[i] != null) { const kk = a.keys[opens[i]]; h += `<span class="kw${kk.k === 'phrase' ? ' ph' : ''}" data-k="${opens[i]}">`; }
     if (t.t === 'w') {
       const e = lexOf(a, t.v.toLowerCase());
-      h += `<span class="w ${e ? posClass(e[0]) : 'pf'}" data-i="${i}" data-pos="${e ? esc(shortPos(e[0])) : '·'}">${esc(t.v)}</span>`;
+      h += `<span class="w ${e ? posClass(e[0]) : 'pf'}" data-i="${i}" data-pos="${e ? esc(shortPos(e[0])) : ''}">${esc(t.v)}</span>`;
     } else if (t.t === 'b') h += blankHtml(a, t.n);
     else h += esc(t.v);
     if (closes[i]) h += '</span>'.repeat(closes[i]);

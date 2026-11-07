@@ -120,6 +120,7 @@ document.addEventListener('click', e => {
       break;
     }
     /* editor */
+    case 'posfill': posFill(a); break;
     case 'edopen': if (a) openEditor(a.id, false, t.dataset.n || null); break;
     case 'edsave': edSave(); break;
     case 'edcancel': { const E = S.edit; S.edit = null; if (E) openArticle(E.id); else { S.view = 'read'; render(); } break; }

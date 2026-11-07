@@ -263,10 +263,69 @@ function readHtml(){
     <div class="toolbar">${modeSegHtml(a)}${tools}</div>
     ${S.confirmMode ? `<p class="mode-warn">切到考试会清空本篇当前的作答，历史成绩会保留。再点一次“考试”确认。</p>` : ''}
     ${exam ? examBarHtml(a) : ''}
+    ${!exam && S.showPos ? posFillHtml(a) : ''}
     <div id="body" class="${exam ? 'exam ' : ''}${!exam && S.showKw ? 'show-kw' : ''} ${!exam && S.showPos ? 'show-pos' : ''} ${S.showSt ? 'show-st' : ''}">${paras}</div>
     ${isMatch(a) ? itemsHtml(a) : isMcq(a) ? mcqHtml(a) : bankHtml(a)}
     ${!exam && (a.tips || []).length ? `<section class="tips"><h3>Technique <span>技巧小结</span></h3><ol>${a.tips.map(t => `<li>${esc(t)}</li>`).join('')}</ol></section>` : ''}
   </article>`;
+}
+/* ---------- 补标词性: articles whose word tagging didn't finish at import ---------- */
+// Words the article has no part-of-speech tag for (numbers are tagged locally).
+function posGaps(a){
+  const all = new Set(), miss = new Set();
+  a.paragraphs.forEach(p => p.sentences.forEach(s => toks(s.en).forEach(t => {
+    if (t.t !== 'w' || /^\d/.test(t.v)) return;
+    const w = t.v.toLowerCase(); all.add(w); if (!lexOf(a, w)) miss.add(w);
+  })));
+  return { all: all.size, miss: [...miss] };
+}
+function posFillHtml(a){
+  const F = S.posFill && S.posFill.id === a.id ? S.posFill : null;
+  if (F && F.busy) return `<div class="pos-fill busy" role="status"><span class="spin"></span><p><b>正在补标词性…</b>${F.parts > 1 ? `分 ${F.parts} 批同时标，已完成 ${F.done} 批` : '大约半分钟'} · ${mmss(Date.now() - F.t0)}</p></div>`;
+  const g = posGaps(a);
+  if (!S.sample || !g.all || g.miss.length / g.all < 0.4) return F && F.msg ? `<div class="pos-fill ok"><p>${esc(F.msg)}</p></div>` : '';
+  return `<div class="pos-fill"><p><b>这篇还有 ${g.miss.length} 个词没标词性。</b>导入时这一步没完成，现在可以补上：大约半分钟，用 ${posChunks(a, g.miss).length} 次 AI 额度。${F && F.err ? `<span class="pos-err">${esc(F.err)}</span>` : ''}</p>
+    <button class="pbtn primary" data-act="posfill">${F && F.err ? '再试一次' : '现在补标'}</button></div>`;
+}
+// One AI call per batch of paragraphs, each prompt kept under the free trial's short-request limit (8,000 characters).
+function posChunks(a, miss){
+  const need = new Set(miss), out = []; let cur = null;
+  a.paragraphs.forEach(p => {
+    const text = p.sentences.map(s => s.en.replace(/\{\{\d+\}\}/g, '____')).join(' ');
+    const ws = [...new Set(p.sentences.flatMap(s => toks(s.en).filter(t => t.t === 'w').map(t => t.v.toLowerCase())))].filter(w => need.has(w));
+    if (!ws.length) return;
+    ws.forEach(w => need.delete(w));
+    if (cur && cur.text.length + text.length < 3200 && cur.words.length + ws.length <= 220) { cur.text += '\n\n' + text; cur.words.push(...ws); }
+    else { cur = { text, words: ws }; out.push(cur); }
+  });
+  return out;
+}
+async function posFill(a){
+  if (!a || !S.sample || (S.posFill && S.posFill.busy)) return;
+  const chunks = posChunks(a, posGaps(a).miss); if (!chunks.length) return;
+  const F = S.posFill = { id: a.id, busy: true, t0: Date.now(), parts: chunks.length, done: 0 };
+  const paint = () => { const el = $('.pos-fill'); if (el && S.cur === a.id && S.view === 'read') el.outerHTML = posFillHtml(a); };
+  const tick = setInterval(paint, 1000);
+  paint();
+  const lex = {}; let err = null;
+  await Promise.all(chunks.map(async c => {
+    try {
+      const L = await S.sample.json(lexPrompt(c.text, c.words), { modelTier: 'default' });
+      if (L && typeof L === 'object') Object.entries(L).forEach(([k, v]) => { if (Array.isArray(v) && v.length >= 2) lex[k.toLowerCase()] = v[2] ? [String(v[0]), String(v[1]), String(v[2])] : [String(v[0]), String(v[1])]; });
+    } catch (e) { err = err || e; }
+    F.done++; paint();
+  }));
+  clearInterval(tick);
+  const n = Object.keys(lex).length;
+  if (n) {
+    const idx = S.articles.findIndex(x => x.id === a.id);
+    const merged = { ...((idx >= 0 ? S.articles[idx] : a).lex || {}), ...lex };
+    if (idx >= 0) S.articles[idx] = { ...S.articles[idx], lex: merged };
+    write('articles/' + a.id, ref => ref.update({ lex: merged }));
+  }
+  S.posFill = { id: a.id, msg: n ? `已补标 ${n} 个词的词性${err ? '，还有一部分没成功，可以再点一次补齐' : ''}。` : '', err: !n ? sampleErr(err || { code: 'invalid_json' }) : '' };
+  if (n) toast(`词性补好了：${n} 个词`);
+  if (S.cur === a.id && S.view === 'read') renderView();
 }
 function renderToks(a, tk){
   const first = {}, last = {};
@@ -281,7 +340,7 @@ function renderToks(a, tk){
       const e = lexOf(a, lw);
       const rec = wordOf(lw);
       const sc = rec ? (rec.status === 'new' ? ' st1' : rec.status === 'learning' ? ' st2' : '') : '';
-      h += `<span class="w ${e ? posClass(e[0]) : 'pf'}${sc}" data-i="${i}" data-pos="${e ? esc(shortPos(e[0])) : '·'}">${esc(t.v)}</span>`;
+      h += `<span class="w ${e ? posClass(e[0]) : 'pf'}${sc}" data-i="${i}" data-pos="${e ? esc(shortPos(e[0])) : ''}">${esc(t.v)}</span>`;
     } else if (t.t === 'b') h += blankHtml(a, t.n);
     else h += esc(t.v);
     if (closes[i]) h += '</span>'.repeat(closes[i]);
@@ -355,7 +414,7 @@ function idleHtml(){
   return `<div class="idle">${top('读报指南')}<h3>怎么用这一版</h3><ul>
     <li><b>考试模式</b><span>计时做完再交卷，交卷后看成绩和逐题解析，错题自动进错题本</span></li>
     <li><b>点单词</b><span>弹出查词卡：本文释义、常见释义、熟悉度和词典链接，可展开详解</span></li>
-    <li><b>本篇生词</b><span>按四六级等级列出这篇里可能不认识的词，一键标记</span></li>
+    <li><b>本篇生词</b><span>按词汇等级（CEFR 和四六级）列出这篇里可能不认识的词，一键标记</span></li>
     <li><b>选中句子</b><span>拖选一句或几句，这里给出对应译文</span></li>
     <li><b>点空格</b><span>从词库里作答，立刻判对错并给出解题思路</span></li>
     <li><b>双击空白</b><span>随时召唤词典，查任何单词、词组或中文；也可以按 / 键</span></li>

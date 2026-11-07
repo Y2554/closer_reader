@@ -364,3 +364,13 @@ html.impp-lock{overflow:hidden}
 @media (prefers-reduced-motion:reduce){.impp-ov,.impp-dlg{transition:none!important}.impp-mast::after{animation:none!important}}
 .impp-fin b{font:700 1.05em/1.35 var(--f-head);color:var(--ink);text-align:center;max-width:26em;animation:imppSwap .5s .15s var(--ease-out) both}
 .impp-fin small{font:400 13px var(--f-zh);color:var(--ink-3);animation:imppSwap .5s .3s var(--ease-out) both}
+
+/* 补标词性 banner (partB posFillHtml) */
+.pos-fill{display:flex;align-items:center;gap:14px;margin:-6px 0 22px;padding:11px 14px;border:1px solid color-mix(in srgb,var(--pencil) 35%,var(--rule));border-radius:8px;background:var(--pencil-wash);animation:fadeup .3s var(--ease-out)}
+.pos-fill p{flex:1;margin:0;font:400 13.5px/1.65 var(--f-zh);color:var(--ink-2)}
+.pos-fill p b{color:var(--ink);margin-right:4px}
+.pos-fill .pbtn{flex:none}
+.pos-fill .pos-err{display:block;margin-top:2px;color:var(--red)}
+.pos-fill.busy .spin{flex:none}
+.pos-fill.ok{background:var(--ok-wash);border-color:color-mix(in srgb,var(--ok) 30%,transparent)}
+@media (max-width:520px){.pos-fill{flex-direction:column;align-items:stretch}.pos-fill .pbtn{width:100%}}

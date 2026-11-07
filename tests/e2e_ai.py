@@ -146,7 +146,16 @@ async def main():
             # press 停止 half-way: the server aborts the model call and refunds the credit
             await to_import(); await pg.fill('#impText', 'Stopped article.'); await ev("document.querySelector('[data-act=impgo]').click()")
             await pg.wait_for_function("document.querySelectorAll('.impp-l').length > 0", timeout=20000)
-            await ev("document.querySelector('[data-act=impstop]').click()"); await pg.wait_for_timeout(1500)
+            dlg = await ev("(() => { const o = document.querySelector('#imppOv'); if (!o) return null; const r = o.getBoundingClientRect(); return { w: r.width, h: r.height, lock: document.documentElement.classList.contains('impp-lock'), modal: o.querySelector('[role=dialog]').getAttribute('aria-modal') }; })()")
+            check('import runs in a full-screen modal dialog with the page locked', dlg and dlg['w'] >= 1270 and dlg['h'] >= 890 and dlg['lock'] and dlg['modal'] == 'true')
+            await pg.keyboard.press('/'); await pg.wait_for_timeout(300)
+            check('keyboard shortcuts are held back while the dialog is open', await ev("!document.querySelector('#dkov:not([hidden])')"))
+            await ev("document.querySelector('[data-act=imppstop]').click()"); await pg.wait_for_timeout(300)
+            armed = await ev("document.querySelector('#imppStop')?.textContent")
+            still = await ev("!!document.querySelector('#imppOv.in')")
+            check('first tap on 停止 only arms it', armed == '再点一次停止' and still)
+            await ev("document.querySelector('[data-act=imppstop]').click()"); await pg.wait_for_timeout(1500)
+            check('dialog closes after stopping', await ev("!document.querySelector('#imppOv')"))
             st = await ev("document.querySelector('#impStatus').innerText")
             imp_used = DB.get(next((k for k in DB if k.endswith(':import')), ''), None)
             check('停止 shows "已停止" and the import credit is refunded', '已停止' in st and imp_used == '1')
@@ -239,4 +248,4 @@ async def main():
     print(f'\n{sum(OK)}/{len(OK)} passed')
     sys.exit(0 if all(OK) else 1)
 
-asyncio.run(main())
+if __name__ == "__main__": asyncio.run(main())

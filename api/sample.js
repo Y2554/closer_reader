@@ -48,7 +48,9 @@ const LIMIT = {
   imports: num('FREE_IMPORTS', 2), small: num('FREE_SMALL', 20),
   ipDaily: num('IP_DAILY', 40), globalDaily: num('GLOBAL_DAILY', 150), byokHourly: num('BYOK_HOURLY', 120)
 };
-const MAX_TOKENS = { import: 32000, long: 16000, small: 4000 };
+// Output caps. Tagging every word of an article (the import's follow-up call) takes 7–15k tokens,
+// so non-import calls get room too; you only pay for what the model actually writes.
+const MAX_TOKENS = { import: 32000, long: 24000, small: 24000 };
 const MAX_PROMPT = { import: 30000, long: 40000, small: 8000 };
 const MAX_IMAGES = 6;                          // pages of one article (the page shrinks them to fit 4.5 MB)
 const TIMEOUT_MS = 285000;                     // the function itself may run 300 s (vercel.json)
@@ -133,7 +135,7 @@ async function reserveFree(device, ip, kind, ticket) {
   // whatever its length. Long prompts are only ever allowed this way on the free trial.
   if (kind !== 'import' && /^[a-f0-9]{32}$/.test(ticket)) {
     const [ok] = await store.run([['GETDEL', 'cr:ticket:' + ticket]]);
-    if (ok) return { refund: async () => {} };
+    if (ok) return { refund: () => store.run([['SET', 'cr:ticket:' + ticket, '1', 'EX', 900]]).catch(() => {}) };
   }
   if (kind === 'long') return { error: 'forbidden' };
   const dKey = `cr:dev:${device}:${kind}`, ipKey = `cr:ip:${day}:${ip}`, gKey = `cr:all:${day}`;

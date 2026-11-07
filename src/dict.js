@@ -176,7 +176,7 @@ const DK_LINKS = w => {
     ['YouGlish 真人发音', `https://youglish.com/pronounce/${q}/english`]
   ];
 };
-const DK_SRC = `<p class="dk-src">中文释义、考试标签、词频：<b>ECDICT</b>（MIT）· 英英释义、例句、音标：<b>Open English WordNet</b>（CC BY 4.0，源自 Princeton WordNet）· 词源：<b>Webster 1913 / GCIDE</b> · 构词与辨析：ECDICT wordroot / resemble · 少量新词由本站编者补充并标注</p>`;
+const DK_SRC = `<p class="dk-src">中文释义、考试标签、词频：<b>ECDICT</b>（MIT）· 英英释义、例句、音标：<b>Open English WordNet</b>（CC BY 4.0，源自 Princeton WordNet）· 词源：<b>Webster 1913 / GCIDE</b> · 构词与辨析：ECDICT wordroot / resemble · CEFR 等级：<b>CEFR-J Wordlist 1.5</b>（東京外国語大学投野由紀夫研究室）与 <b>Octanove Vocabulary Profile C1/C2</b>（CC BY-SA 4.0）· 少量新词由本站编者补充并标注</p>`;
 const EXN = { p: '过去式', d: '过去分词', i: '现在分词', '3': '三单', s: '复数', r: '比较级', t: '最高级' };
 function dkTotal(){ return DK_TOTAL_CORE + (EXT_IX ? EXT_IX.n : 0); }
 function dkCover(){
@@ -232,7 +232,7 @@ function dkLetterHtml(){
 }
 function dkTitle(){
   return `<div class="dk-title"><span class="dk-cf-top">The Close Reader</span><b>Dictionary</b><span class="dk-tz">英汉双解 · 约 ${(dkTotal() / 10000).toFixed(dkTotal() > 100000 ? 0 : 1)} 万词条</span>
-    <ul><li>中文释义、四六级 / 考研 / 雅思托福 / GRE 标签、COCA 词频 —— ECDICT</li><li>英英释义、例句、英美音标 —— Open English WordNet</li><li>词源 —— Webster 1913；词根、近义辨析、形近词</li><li>词组、专业词、新词一并收录，查不到的词附权威在线词典链接</li></ul>
+    <ul><li>中文释义、四六级 / 考研 / 雅思托福 / GRE 标签、COCA 词频 —— ECDICT</li><li>CEFR 等级（A1–C2）—— CEFR-J Wordlist 1.5 + Octanove C1/C2</li><li>英英释义、例句、英美音标 —— Open English WordNet</li><li>词源 —— Webster 1913；词根、近义辨析、形近词</li><li>词组、专业词、新词一并收录，查不到的词附权威在线词典链接</li></ul>
     <p class="dk-tip">在左页输入单词、词组或中文开始查。</p></div>`;
 }
 function dkCites(lemma, forms){
@@ -289,7 +289,7 @@ function dkEntryHtml(){
     detail = detailBlock(P).replace(/data-act="look"/g, 'data-act="dkgo"').replace(/data-act="ainote"/g, 'data-act="dkainote"').replace(/data-act="detailretry"/g, 'data-act="dkretry"');
   }
   return `${run(lemma)}${back}
-    <div class="dk-hd"><h2 class="dk-hw">${esc(lemma)}</h2>${lv ? `<span class="lvl lvl-${lv}">${LVL[lv]}</span>` : ''}${e.s === 'n' ? '<span class="tag">新词 · 编者补充</span>' : ''}</div>
+    <div class="dk-hd"><h2 class="dk-hw">${esc(lemma)}</h2>${lvBadges(lemma, { e })}${e.s === 'n' ? '<span class="tag">新词 · 编者补充</span>' : ''}</div>
     ${r.form && r.form !== lemma ? `<p class="lemma-note">${esc(r.form)} → 原形 <b>${esc(lemma)}</b>${r.ff ? ` · ${esc(formNote(r.ff, ''))}` : ''}</p>` : ''}
     <div class="dk-phon">${canSpeak ? phon : ''}</div>
     ${tags || stars || e.o || e.fq ? `<div class="phon">${tags}${e.o ? '<span class="tag">牛津3000</span>' : ''}${stars}${e.fq ? `<span class="tag" title="COCA 语料库词频排名">词频 #${e.fq}</span>` : ''}</div>` : ''}

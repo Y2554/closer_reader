@@ -213,7 +213,6 @@
           body: JSON.stringify({ prompt, images, modelTier: opts.modelTier || 'default', stream })
         });
       } catch (e) { throw gone(e); }
-      if (usedTicket && usedTicket === ticket) ticket = '';
       readQuota(r);
       if (r.headers.get('X-CR-Ticket')) ticket = r.headers.get('X-CR-Ticket');
       if (!r.ok) {
@@ -221,7 +220,9 @@
         throw { code: ERR[body && body.error] || (r.status === 413 ? 'prompt_too_large' : r.status === 429 ? 'rate_limited' : 'ai_unavailable') };
       }
       if (!/^text\/plain/.test(r.headers.get('Content-Type') || '')) {
-        try { return await r.json(); } catch (e) { throw { code: 'invalid_json' }; }
+        let v; try { v = await r.json(); } catch (e) { throw { code: 'invalid_json' }; }
+        if (usedTicket && usedTicket === ticket) ticket = '';
+        return v;
       }
       let all = '', last = 0;
       try {
@@ -239,6 +240,7 @@
       if (k < 0) throw { code: 'network' };                      // the connection dropped mid-way
       let end; try { end = JSON.parse(all.slice(k + 1)); } catch (e) { throw { code: 'network' }; }
       if (end.error) throw { code: ERR[end.error] || 'ai_unavailable' };
+      if (usedTicket && usedTicket === ticket) ticket = '';   // used up only by a successful call
       return end.value;
     }
   } : null;

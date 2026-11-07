@@ -204,7 +204,7 @@ Vercel 免费版一次函数调用最长 300 秒。按示例文章估算，最�
 2. **常见释义**：来自 ECDICT 的中文义项，本句的词性排在最前面。
 3. **英英释义**：来自 Open English WordNet，默认显示 4 条，可以展开全部；带例句。
 4. **音标**：英式和美式 IPA，点击用浏览器朗读。
-5. **标签**：CET-4、CET-6、考研、IELTS、TOEFL、GRE 等考试标签，柯林斯星级，牛津 3000，以及本项目的等级（基础、四级、六级、考研、雅思托福、GRE、超纲）。
+5. **标签**：CET-4、CET-6、考研、IELTS、TOEFL、GRE 等考试标签，柯林斯星级，牛津 3000，以及两套词汇等级：CEFR（A1–C2，国际通用）和考试词表（基础、四级、六级、考研、雅思托福、GRE）。两张表都没收的词不再标「超纲」：大写开头的是「专有名词」，其余按语料库词频标「高频 / 中频 / 低频词」（见 6.3）。
 6. **词形还原**：例如「examined → 原形 examine · 过去式」。
 7. **操作**：发音、收藏到单词本、选择分类或新建分类，以及把熟悉度设为生词、学习中、已掌握或忽略。
 8. **外部词典链接**：剑桥词典、有道、YouGlish 真人发音。
@@ -359,7 +359,8 @@ close-reader/
 │   └── local-runtime.js     ← 在 claude.ai 之外模拟 window.claude：IndexedDB 存储、文件下载、AI 代理
 ├── server/
 │   └── dev-server.mjs       ← 零依赖 Node 服务：静态文件 + /api/sample → Anthropic Messages API
-├── level.json               ← 词汇等级表（36k 词形）
+├── level.json               ← 考试词表等级（36k 词形）
+├── cefr.json                ← CEFR 等级（A1–C2，约 8.8k 词，tools/build_cefr.py 生成）
 ├── dict/a.json … z.json     ← 核心词典源数据（8.7 万词：ECDICT 中文 + WordNet 英英 + IPA + 词形变化 + 词频），共 18MB，不上线
 ├── dict/b/                  ← 页面实际读取的核心词典：159 个约 120KB 的有序分卷 + index.json（tools/split_dict.py 生成）
 ├── dict/zh.json             ← 汉英反查索引（1.4 万个考试 / 常用词）
@@ -520,7 +521,7 @@ extra*.css ──────────┘                  └─► index.ht
         → 还没有 → ext/index.json 找到分卷 → ext/<分卷>.json（词组、专业词、新词）
         → 中文义项按本句词性（ctxKey）排序，英英释义同样排序
 展开详解 → more/<首字母>.json[原形] + more/resemble.json[g 下标]
-等级     → level.json（">lemma" 表示变形指向原形）
+等级     → level.json（">lemma" 表示变形指向原形）+ cefr.json（先查原词，再查原形，再按 -s/-ed/-ing 还原）
 ```
 
 查一个词只下载它所在的那一个分卷（约 120KB，压缩后约 40KB），加载过的会缓存；每次下载 15 秒超时并自动重试一次，仍失败时卡片里有「重试」按钮。词典页按字母浏览、联想补全时，才并行下载这个字母的全部分卷。
@@ -704,20 +705,34 @@ downloads.save({ filename, data }) → { status: 'saved' }
 
 **`more/resemble.json`**：`[[词组], "辨析说明"]` 的数组。
 
-**`level.json`**：`{ 词形: 等级 | ">原形" }`。等级码为 `b` 基础、`4` 四级、`6` 六级、`k` 考研、`t` 雅思托福、`g` GRE；不在表里的词视为超纲 `x`。
+**`level.json`**：`{ 词形: 等级 | ">原形" }`。等级码为 `b` 基础、`4` 四级、`6` 六级、`k` 考研、`t` 雅思托福、`g` GRE；不在表里的词没有考试等级。
 
 **等级怎么定**（`tools/build_dict.py` 里的 `level_of`，依据 ECDICT 的考试标签）：
 1. 中考词汇（`zk`）定为基础词。
 2. 否则按 四级 → 六级 → 考研 的顺序，取第一个收录这个词的考试。
 3. 只在高考词汇（`gk`）里、大学考试都没收的词，也定为基础词。
 4. 剩下的按 雅思托福 → GRE 归类。
-5. 都没有就是超纲。
+5. 都没有就不给考试等级。
 
 以前的规则是「高考或中考词汇一律算基础词」，结果 abandon、intelligence 这类四级核心词被标成了基础词，这次一共修正了 1706 个词。
 
 这套等级依据的是 ECDICT 收录的考纲词表，版本较早，个别新进考纲的词可能偏高，例如 resilient 只被标了 GRE。
 
 单词本里已保存的词，显示的是当前等级表的结果，不是保存时记下的旧值。
+
+**`cefr.json`**：`{ "src": 来源说明, "A1": "a able about …", …, "C2": "…" }`，每个等级一串空格分隔的词（词组里的空格写成 `_`），约 75KB，和 `level.json` 一起加载；加载失败时只是不显示 CEFR，不影响别的。由 `python3 tools/build_cefr.py` 从 `tools/cefr/` 下的两张表生成：
+
+- A1–B2：CEFR-J Wordlist 1.5（东京外国语大学投野由纪夫研究室），约 7,800 条；
+- C1–C2：Octanove Vocabulary Profile C1/C2 1.0，约 2,100 条；
+- 同一个词有多个词性时取最低的等级；`analyze/analyse` 这类拼写对拆成两条。
+
+**卡片上的等级标签**（`partB.js` 的 `lvBadges`）按这个顺序决定：
+1. CEFR 等级（A 绿、B 蓝、C 红）和考试等级，有哪个显示哪个，可以同时显示。
+2. 两个都没有、而且在正文里是大写开头（不是全大写缩写），或者 AI 给的词性是人名 / 地名 → 「专有名词」。比如 Tokyo 以前会被标成「超纲」。
+3. 否则看词典里的 COCA / BNC 词频排名：前 5,000 是「高频词」，前 20,000 是「中频词」，再往后是「低频词」；悬停能看到具体排名。
+4. 连词频都没有（多半是拼写错误或很新的词），什么都不标。
+
+「本篇生词」里，没有考试等级、但 CEFR 在 B1 及以下的词（比如 internet）不再算「可能不认识」。
 
 **重新生成**：改了 `dict/<字母>.json` 或 `more/<字母>.json` 之后，运行 `python3 tools/split_dict.py` 重新切分卷（`build_dict.py` 结束时会自动调用它）。`tools/build_dict.py` 的用法写在脚本开头，它负责从 ECDICT 生成 `ext/`、`dict/zh.json`，并给核心词典补上 `ex`、`fq`、`bn`。脚本可以重复运行。
 
@@ -995,6 +1010,8 @@ downloads.save({ filename, data }) → { status: 'saved' }
 | [Open English WordNet](https://github.com/globalwordnet/english-wordnet) | 英英释义、例句、近义词、IPA | CC BY 4.0（源自 Princeton WordNet） |
 | [GCIDE](https://www.gnu.org/software/gcide/)（Webster 1913） | 词源 | GPL-3.0 |
 | ECDICT 全量 `ecdict.csv`（约 77 万条） | 扩展词库、词形、词频、汉英索引 | MIT |
+| [CEFR-J Wordlist 1.5](https://www.cefr-j.org/download.html)（经 [olp-en-cefrj](https://github.com/openlanguageprofiles/olp-en-cefrj)） | CEFR A1–B2 等级 | 可免费使用（含商业用途），须注明出处：『CEFR-J Wordlist Version 1.5』東京外国語大学投野由紀夫研究室 |
+| [Octanove Vocabulary Profile C1/C2 1.0](https://github.com/openlanguageprofiles/olp-en-cefrj) | CEFR C1–C2 等级 | CC BY-SA 4.0（`cefr.json` 作为衍生数据同样适用） |
 | Google Fonts：Newsreader、Old Standard TT、Noto Serif SC、IBM Plex Mono、Kalam、UnifrakturMaguntia | 字体 | SIL OFL 1.1 |
 
 公开发布到 GitHub 之前需要注意：

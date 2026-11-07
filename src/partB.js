@@ -19,13 +19,45 @@ function progOf(id){ const p = JSON.parse(JSON.stringify(S.prog[id] || {})); ret
 /* ---------- words: status, level, categories ---------- */
 const STATUS = { new: '生词', learning: '学习中', known: '已掌握', ignored: '忽略' };
 const ST_ORDER = ['new', 'learning', 'known', 'ignored'];
-const LVL = { b: '基础词', '4': '四级', '6': '六级', k: '考研', t: '雅思托福', g: 'GRE', x: '超纲' };
-let LEVEL = null, LEVEL_P = null;
+const LVL = { b: '基础词', '4': '四级', '6': '六级', k: '考研', t: '雅思托福', g: 'GRE', x: '考纲外' };
+// Two independent yardsticks, both shown when known:
+//   CEFR (A1–C2) from cefr.json — CEFR-J Wordlist 1.5 + Octanove C1/C2 (tools/build_cefr.py), the international scale;
+//   the Chinese exam list a word first appears in, from level.json (ECDICT exam tags).
+// A word on neither list is never called 超纲: a capitalised one is a name (专有名词); otherwise the
+// dictionary's corpus rank (COCA / BNC) says how common it is.
+const CEFR_ZH = { A1: '入门', A2: '基础', B1: '中级', B2: '中高级', C1: '高级', C2: '精通' };
+let LEVEL = null, LEVEL_P = null, CEFR = null;
 function loadLevel(){
   if (LEVEL) return Promise.resolve(LEVEL);
-  if (!LEVEL_P) LEVEL_P = fetch('level.json').then(r => { if (!r.ok) throw new Error('http'); return r.json(); })
-    .then(j => (LEVEL = j)).catch(e => { LEVEL_P = null; throw e; });
+  if (!LEVEL_P) LEVEL_P = Promise.all([
+    fetch('level.json').then(r => { if (!r.ok) throw new Error('http'); return r.json(); }),
+    fetch('cefr.json').then(r => r.ok ? r.json() : {}).catch(() => ({}))
+  ]).then(([j, c]) => {
+    const m = {}; Object.keys(CEFR_ZH).forEach(lv => String(c[lv] || '').split(' ').forEach(w => { if (w) m[w.replace(/_/g, ' ')] = lv; }));
+    CEFR = m; return (LEVEL = j);
+  }).catch(e => { LEVEL_P = null; throw e; });
   return LEVEL_P;
+}
+function cefrOf(w){
+  if (!CEFR || !w) return null;
+  w = String(w).toLowerCase().trim();
+  if (CEFR[w]) return CEFR[w];
+  const l = lemmaOf(w); if (CEFR[l]) return CEFR[l];
+  // plain inflections only: -er / -ly would turn "sneaker" into "sneak" and "early" into "ear"
+  for (const c of stems(w)) { if (c === w.slice(0, -2) && /(er|ly)$/.test(w)) continue; if (CEFR[c]) return CEFR[c]; }
+  return null;
+}
+function cefrBadge(w){ const c = cefrOf(w); return c ? `<span class="lvl cefr c${c[0]}" title="CEFR ${c} · ${CEFR_ZH[c]}（欧洲语言共同参考框架）">${c}</span>` : ''; }
+// o: { w: the form in the text, e: dictionary entry, cap: written with a capital in the text, lex: the article's POS note }
+function lvBadges(lemma, o = {}){
+  if (!LEVEL) return '';
+  const c = cefrBadge(lemma) || (o.w ? cefrBadge(o.w) : ''), x = levelOf(lemma);
+  const h = c + (x ? `<span class="lvl lvl-${x}">${LVL[x]}</span>` : '');
+  if (h) return h;
+  if (o.cap || (o.lex && /人名|地名|专有|专名/.test(o.lex))) return '<span class="lvl lvl-pn" title="人名、地名、机构名等">专有名词</span>';
+  const e = o.e, r = e ? Math.min(e.fq || Infinity, e.bn || Infinity) : Infinity;
+  if (r < Infinity) return `<span class="lvl lvl-f" title="不在 CEFR 词表和考试词表里；在英语语料库（COCA / BNC）中词频排名约第 ${r.toLocaleString()} 位">${r <= 5000 ? '高频词' : r <= 20000 ? '中频词' : '低频词'}</span>`;
+  return '';
 }
 function lemmaOf(w){
   if (!LEVEL || !w) return w;
@@ -173,6 +205,7 @@ function renderView(){
     return;
   }
   v.innerHTML = S.view === 'welcome' ? welcomeHtml() : S.view === 'read' ? readHtml() : S.view === 'archive' ? archiveHtml() : S.view === 'mistakes' ? mistakesHtml() : S.view === 'edit' ? editHtml() : S.view === 'dict' ? dictPageHtml() : vocabHtml();
+  if (S.view === 'welcome') welcomeMount();
   if (S.view === 'vocab') afterVocabRender();
   if (S.view === 'edit') $$('.ed-ta', v).forEach(autosize);
   if (S.view === 'dict') afterDictRender();
@@ -426,7 +459,7 @@ function nwRows(a){
     r.rec = wordOf(r.lw) || S.words[r.key] || null;
     const s = r.rec && r.rec.status;
     if (s === 'new' || s === 'learning') out.push(r);
-    else if (!s && allow.includes(r.lv)) out.push(r);
+    else if (!s && allow.includes(r.lv) && !(r.lv == null && /^(A1|A2|B1)$/.test(cefrOf(r.key) || ''))) out.push(r);
   });
   return out;
 }
@@ -436,7 +469,7 @@ function nwHtml(a){
   const marked = rows.filter(r => r.rec), open = rows.filter(r => !r.rec);
   const row = r => {
     const s = r.rec ? r.rec.status : '';
-    return `<li><div class="nw-top"><button class="nw-w" data-act="nwgo" data-k="${esc(r.key)}">${esc(r.key)}</button>${r.lv ? `<span class="lvl lvl-${r.lv}">${LVL[r.lv]}</span>` : '<span class="lvl lvl-x">超纲</span>'}<span class="nw-n">×${r.n}</span></div>
+    return `<li><div class="nw-top"><button class="nw-w" data-act="nwgo" data-k="${esc(r.key)}">${esc(r.key)}</button>${lvBadges(r.key, { w: r.lw, lex: r.lex && r.lex[0] })}<span class="nw-n">×${r.n}</span></div>
       ${r.lex ? `<div class="nw-zh"><span class="chip ${posClass(r.lex[0])}">${esc(shortPos(r.lex[0]))}</span> ${esc(r.lex[1])}</div>` : ''}
       <div class="mini-st">${ST_ORDER.map(x => `<button class="st-b st-${x}${s === x ? ' on' : ''}" data-act="nwst" data-k="${esc(r.key)}" data-s="${x}">${STATUS[x]}</button>`).join('')}</div></li>`;
   };
@@ -481,11 +514,11 @@ function popHtml(P){
   const opt = P.kind === 'opt' && a ? a.options[P.l] : null;
   const kw = P.kind === 'word' && P.k != null && a ? (a.keys || [])[P.k] : null;
   const ipa = e.i && (e.i[0] || e.i[1]) ? (e.i[0] || e.i[1]) : (e.p || (R && R.ph) || '');
-  const lv = levelOf(lemma) || (ok && LEVEL ? 'x' : null);
+  const lvb = lvBadges(lemma, { w: P.w, e: ok ? e : null, cap: P.kind === 'word' && /^[A-Z]/.test(P.disp || '') && !/^[A-Z]+$/.test(P.disp || ''), lex: lex && lex[0] });
   const back = S.pop.length > 1 ? S.pop[S.pop.length - 2] : null;
   let h = `<div class="pop-hd">
     <div class="pop-tt">${back ? `<button class="pop-back" data-act="pback">‹ ${esc(back.disp)}</button>` : ''}
-      <div class="pop-title"><b class="pop-w">${esc(P.disp)}</b>${ipa ? `<button class="pop-ipa" data-act="speak" data-w="${esc(P.disp)}" title="点击朗读">/${esc(ipa)}/</button>` : ''}${lv ? `<span class="lvl lvl-${lv}">${LVL[lv]}</span>` : ''}${R ? `<span class="stp st-${R.status}">${STATUS[R.status]}</span>` : ''}</div></div>
+      <div class="pop-title"><b class="pop-w">${esc(P.disp)}</b>${ipa ? `<button class="pop-ipa" data-act="speak" data-w="${esc(P.disp)}" title="点击朗读">/${esc(ipa)}/</button>` : ''}${lvb}${R ? `<span class="stp st-${R.status}">${STATUS[R.status]}</span>` : ''}</div></div>
     <button class="pop-x" data-act="pclose" aria-label="关闭">×</button></div><div class="pop-body">`;
   if (ok && D.res.form) h += `<p class="pop-lem">${esc(D.res.form)} → 原形 <b>${esc(D.res.lemma)}</b>${D.res.ff ? ` · ${esc(formNote(D.res.ff, P.pos))}` : ''}</p>`;
   const cm = lex ? { pos: lex[0], zh: lex[1], en: lex[2] } : opt ? { pos: opt.pos, zh: opt.zh, en: opt.en } : null;
@@ -695,7 +728,7 @@ function vocabListHtml(){
     const c0 = (w.ctx || [])[0];
     const due = w.srs && w.srs.reps ? (w.srs.due <= Date.now() ? '今天该复习' : `${spanLabel(w.srs.due - Date.now())}后复习`) : '还没复习过';
     return `<article class="vitem vs-${w.status}">
-      <div class="vhead"><button class="vword" data-act="vlook" data-k="${esc(w.w)}">${esc(w.w)}</button>${w.ph ? `<span class="vipa">/${esc(w.ph)}/</span>` : ''}${wLvl(w) ? `<span class="lvl lvl-${wLvl(w)}">${LVL[wLvl(w)] || ''}</span>` : ''}${speakBtn(w.w)}</div>
+      <div class="vhead"><button class="vword" data-act="vlook" data-k="${esc(w.w)}">${esc(w.w)}</button>${w.ph ? `<span class="vipa">/${esc(w.ph)}/</span>` : ''}${cefrBadge(w.w)}${wLvl(w) ? `<span class="lvl lvl-${wLvl(w)}">${LVL[wLvl(w)] || ''}</span>` : ''}${speakBtn(w.w)}</div>
       <div class="mini-st">${ST_ORDER.map(x => `<button class="st-b st-${x}${w.status === x ? ' on' : ''}" data-act="vst" data-k="${esc(w.w)}" data-s="${x}">${STATUS[x]}</button>`).join('')}</div>
       <p class="vzh${blur ? ' blur' : ''}" ${blur ? `data-act="vreveal" data-k="${esc(w.w)}" title="点按显示"` : ''}>${w.pos ? `<span class="chip ${posClass(w.pos)}">${esc(shortPos(w.pos))}</span> ` : ''}${esc(w.zh)}</p>
       ${w.en && !blur ? `<p class="ven">${esc(w.en)}</p>` : ''}
@@ -871,7 +904,7 @@ function exportCsv(){
   if (!list.length) { S.bk = { ...(S.bk || {}), msg: '这个范围里没有单词', err: true }; renderView(); return; }
   const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const rows = [['单词', '音标', '词性', '中文释义', '英文释义', '原句', '等级', '熟悉度', '分类'].map(q).join(',')];
-  list.forEach(w => rows.push([w.w, w.ph ? `/${w.ph}/` : '', w.pos, w.zh, w.en, (w.ctx || [])[0] ? w.ctx[0].text : '', LVL[wLvl(w)] || '', STATUS[w.status], w.cat].map(q).join(',')));
+  list.forEach(w => rows.push([w.w, w.ph ? `/${w.ph}/` : '', w.pos, w.zh, w.en, (w.ctx || [])[0] ? w.ctx[0].text : '', [cefrOf(w.w), LVL[wLvl(w)]].filter(Boolean).join(' / '), STATUS[w.status], w.cat].map(q).join(',')));
   saveFile(`vocab-${ymd()}.csv`, '﻿' + rows.join('\r\n'));
 }
 function readBackup(file){

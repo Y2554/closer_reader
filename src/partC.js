@@ -223,6 +223,10 @@ document.addEventListener('click', e => {
     case 'impdel': S.impFiles.splice(+t.dataset.i, 1); S.imp = null; S.impDirty = true; renderView(); break;
     case 'impmv': { const i = +t.dataset.i, f = S.impFiles; if (i > 0 && i < f.length) [f[i - 1], f[i]] = [f[i], f[i - 1]]; S.impDirty = true; renderView(); break; }
     case 'impstop': if (S.impCtl) S.impCtl.abort(); break;
+    case 'imppstop':   // the dialog's 停止 needs a second tap, so a stray one can't throw the work away
+      if (S.impStopArm) { S.impStopArm = false; if (S.impCtl) S.impCtl.abort(); }
+      else { S.impStopArm = true; clearTimeout(S.impStopT); S.impStopT = setTimeout(() => { S.impStopArm = false; impPaint(); }, 3000); }
+      impPaint(); break;
   }
 });
 function gotoWord(k){

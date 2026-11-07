@@ -1,5 +1,5 @@
 # Files Vercel does NOT publish. They stay in the GitHub repo; they just aren't served on the website.
-# The site only needs: index.html, runtime/, dict/, ext/, more/, seeds/, level.json
+# The site only needs: index.html, runtime/, dict/, ext/, more/, seeds/, level.json, cefr.json
 tests/
 tools/
 server/

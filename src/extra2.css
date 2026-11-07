@@ -312,3 +312,55 @@
 @media (max-width:1039px){ body:has(#panel.open) .toast{top:calc(14px + env(safe-area-inset-top,0px));bottom:auto} }
 /* archive: the 删除 link was a 24-px target on touch screens */
 @media (pointer:coarse){ .hm-del{padding:9px 12px;font-size:12px;min-height:34px} }
+
+/* ---------- 正在排版: centred modal (impDialog) ---------- */
+html.impp-lock{overflow:hidden}
+.impp-ov{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) 16px max(16px,env(safe-area-inset-bottom,0px));
+  background:color-mix(in srgb,var(--paper) 58%,transparent);-webkit-backdrop-filter:blur(12px) saturate(1.15);backdrop-filter:blur(12px) saturate(1.15);
+  opacity:0;transition:opacity .38s var(--ease-out)}
+.impp-ov.in{opacity:1}
+.impp-ov.out{opacity:0;transition-duration:.42s}
+.impp-dlg{width:min(680px,100%);max-height:calc(100dvh - 32px);overflow:auto;outline:none;border-radius:16px;
+  box-shadow:0 40px 90px -36px rgba(20,24,27,.55),0 12px 30px -18px rgba(20,24,27,.3);transform:translateY(22px) scale(.965);transition:transform .6s var(--ease-spring)}
+.impp-ov.in .impp-dlg{transform:none}
+.impp-ov.out .impp-dlg{transform:translateY(-10px) scale(.985);transition:transform .42s var(--ease-out)}
+.impp-ov .impp{padding:20px 24px 18px;border-radius:16px;border-color:color-mix(in srgb,var(--rule) 80%,var(--ink));
+  margin:0;box-shadow:none}
+.impp-gal.top.st2,.impp-gal.top.st3{justify-content:flex-start;align-content:flex-start;-webkit-mask-image:none;mask-image:none}
+.impp-mast{position:relative;display:flex;justify-content:space-between;gap:12px;padding-bottom:9px;margin-bottom:16px;border-bottom:3px double var(--ink);
+  font:600 10.5px var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.impp-mast span:first-child{font:400 15px var(--f-mast);letter-spacing:0;text-transform:none;color:var(--ink)}
+/* ink travelling along the double rule while work is in progress */
+.impp-mast::after{content:'';position:absolute;left:0;bottom:-3px;height:3px;width:22%;background:linear-gradient(90deg,transparent,var(--pencil),transparent);animation:imppInk 2.4s ease-in-out infinite}
+.impp.fin .impp-mast::after{animation:none;width:100%;background:var(--ok);transition:width .5s}
+@keyframes imppInk{0%{transform:translateX(-30%)}100%{transform:translateX(480%)}}
+.impp-ov .impp-hd{margin-bottom:16px}
+.impp-hd h3{margin:0;font:700 clamp(1.3rem,4.4vw,1.7rem)/1.25 var(--f-zh);letter-spacing:.01em}
+.impp-hd h3.sw{animation:imppSwap .5s var(--ease-out)}
+@keyframes imppSwap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.impp-ov .impp-t{font-size:15px;padding:3px 10px;border-radius:999px;background:var(--paper-2);color:var(--ink-2)}
+.impp-ov .impp-steps{margin-bottom:16px}
+.impp-ov .impp-steps li{font-size:13px}
+.impp-ov .impp-bar{height:5px;margin-bottom:16px}
+.impp-ov .impp-gal{height:min(36vh,300px);font-size:16px;padding:12px 16px 14px}
+.impp.fin .impp-bar b{background:var(--ok)}
+.impp-foot{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-top:2px}
+.impp-foot .impp-tip{flex:1}
+.impp-stop{flex:none;appearance:none;border:1px solid var(--rule);background:transparent;color:var(--ink-2);font:500 13px/1 var(--f-zh);padding:9px 16px;border-radius:999px;cursor:pointer;
+  transition:color .2s,border-color .2s,background-color .2s,transform .15s}
+.impp-stop:hover{border-color:var(--ink-3);color:var(--ink)}
+.impp-stop:active{transform:scale(.96)}
+.impp-stop.arm{border-color:var(--red);color:var(--red);background:var(--red-wash);animation:shake .35s}
+.impp-gal.st4 .impp-fin{flex-direction:column;gap:12px;font-size:19px}
+.impp-gal.st4 .tick{width:52px;height:52px;font-size:26px;box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 40%,transparent);animation:imppPop .55s var(--ease-spring) both,imppGlow 1.2s .3s ease-out}
+@keyframes imppGlow{from{box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 45%,transparent)}to{box-shadow:0 0 0 22px transparent}}
+@media (max-width:520px){
+  .impp-ov{padding:10px}
+  .impp-ov .impp,.impp-dlg{border-radius:14px}
+  .impp-ov .impp{padding:16px 16px 14px}
+  .impp-ov .impp-gal{height:42vh;font-size:15px}
+  .impp-mast span:last-child{display:none}
+}
+@media (prefers-reduced-motion:reduce){.impp-ov,.impp-dlg{transition:none!important}.impp-mast::after{animation:none!important}}
+.impp-fin b{font:700 1.05em/1.35 var(--f-head);color:var(--ink);text-align:center;max-width:26em;animation:imppSwap .5s .15s var(--ease-out) both}
+.impp-fin small{font:400 13px var(--f-zh);color:var(--ink-3);animation:imppSwap .5s .3s var(--ease-out) both}

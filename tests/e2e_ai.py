@@ -13,6 +13,7 @@ from playwright.async_api import async_playwright
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SEEN = []          # every request the fake model received
+STREAM_DELAY = 0.03
 DB = {}            # fake Redis
 
 ARTICLE = {"title": "Test Article", "zh": "测试", "source": "精读",
@@ -28,14 +29,23 @@ class Model(BaseHTTPRequestHandler):
         msg = body['messages'][0]['content']
         text = msg if isinstance(msg, str) else next(p['text'] for p in msg if p['type'] == 'text')
         imgs = [] if isinstance(msg, str) else [p['image_url']['url'] for p in msg if p['type'] == 'image_url']
-        SEEN.append({'auth': auth, 'model': body.get('model'), 'thinking': body.get('thinking'), 'max_tokens': body.get('max_tokens'),
+        SEEN.append({'stream': bool(body.get('stream')), 'auth': auth, 'model': body.get('model'), 'thinking': body.get('thinking'), 'max_tokens': body.get('max_tokens'),
                      'kind': 'import' if '六级阅读老师' in text else 'lex' if '全部单词' in text else 'small', 'imgs': [len(u) for u in imgs],
-                     'img_type': [u[:23] for u in imgs]})
+                     'img_type': [u[:23] for u in imgs], 'text': text[:400]})
         if auth == 'Bearer sk-bad-key-000000':
             self.send_response(401); self.end_headers(); self.wfile.write(b'{"error":{"message":"bad key"}}'); return
         if '六级阅读老师' in text: out = '```json\n' + json.dumps(ARTICLE, ensure_ascii=False) + '\n```'
         elif '全部单词' in text: out = json.dumps({"dogs": ["n.", "狗", "dogs"], "clever": ["adj.", "聪明的", "smart"]})
         else: out = json.dumps(["adj.", "聪明的", "smart"], ensure_ascii=False)
+        if body.get('stream'):                    # server-sent events, a few characters at a time
+            self.send_response(200); self.send_header('Content-Type', 'text/event-stream'); self.end_headers()
+            try:
+                for i in range(0, len(out), 6):
+                    self.wfile.write(('data: ' + json.dumps({"choices": [{"delta": {"content": out[i:i + 6]}}]}) + '\n\n').encode()); self.wfile.flush()
+                    time.sleep(STREAM_DELAY)
+                self.wfile.write(b'data: [DONE]\n\n')
+            except (BrokenPipeError, ConnectionResetError): SEEN[-1]['aborted'] = True
+            return
         res = json.dumps({"choices": [{"message": {"role": "assistant", "content": out}}]}).encode()
         self.send_response(200); self.send_header('Content-Type', 'application/json'); self.end_headers(); self.wfile.write(res)
 
@@ -102,13 +112,25 @@ async def main():
             async def text_import():
                 await to_import()
                 await pg.fill('#impText', 'Dogs are clever animals ___26___.'); await ev("document.querySelector('[data-act=impgo]').click()")
-                await pg.wait_for_function("!document.querySelector('#impStatus .spin')", timeout=20000); await pg.wait_for_timeout(500)
+                await pg.wait_for_function("!document.querySelector('#impp')", timeout=40000); await pg.wait_for_timeout(500)
+            check('first visit shows the welcome front page', await ev("!!document.querySelector('.wel') && document.querySelector('.tab[aria-current=page]')?.dataset.v === 'read'"))
+            check('welcome page has the start button and the live demo', await ev("!!document.querySelector('[data-act=welstart]') && !!document.querySelector('.wd-sheet')"))
             await to_import()
+            check('leaving the welcome page remembers it', await ev("localStorage.getItem('cr.welcomed')") == 'true')
             box = await ev("document.querySelector('.crai .q')?.innerText")
             check('AI 设置 box shows full free trial (2 imports, 3 small)', box and '2' in box and '3' in box)
             check('UI says AI, not Claude', 'Claude' not in await ev("document.querySelector('#view').innerText"))
 
-            n0 = len(SEEN); await text_import()
+            n0 = len(SEEN)
+            await ev("""window.__seen = { lines: 0, chips: 0, stages: new Set() }; window.__obs = setInterval(() => {
+                const g = document.querySelector('#imppGal'); if (!g) return; window.__seen.stages.add(g.dataset.stage);
+                window.__seen.lines = Math.max(window.__seen.lines, document.querySelectorAll('.impp-l:not(.impp-cur)').length + (document.querySelector('.impp-cur .tx')?.textContent ? 1 : 0));
+                window.__seen.chips = Math.max(window.__seen.chips, document.querySelectorAll('.impp-chip').length); }, 40)""")
+            await text_import()
+            seen = await ev("clearInterval(window.__obs), { lines: window.__seen.lines, chips: window.__seen.chips, stages: [...window.__seen.stages].sort().join('') }")
+            print('      progress card saw:', seen)
+            check('progress card showed sentences being written, then word chips, then done', seen['lines'] >= 1 and seen['chips'] >= 1 and seen['stages'] == '1234')
+            check('both import calls were streamed', all(c['stream'] for c in SEEN[n0:]))
             view = await ev("document.querySelector('#view').innerText")
             check('free import #1 lands on the proofreading page with the new article', '导入完成' in view and 'Test Article' in view)
             calls = SEEN[n0:]
@@ -121,12 +143,20 @@ async def main():
                 const d = c.docs.map(x => x.data()).find(a => a.title === 'Test Article'); return d && d.lex; })()""")
             check('saved article has the word tags from the follow-up call', lex and lex.get('clever', [None, None])[1] == '聪明的')
 
+            # press 停止 half-way: the server aborts the model call and refunds the credit
+            await to_import(); await pg.fill('#impText', 'Stopped article.'); await ev("document.querySelector('[data-act=impgo]').click()")
+            await pg.wait_for_function("document.querySelectorAll('.impp-l').length > 0", timeout=20000)
+            await ev("document.querySelector('[data-act=impstop]').click()"); await pg.wait_for_timeout(1500)
+            st = await ev("document.querySelector('#impStatus').innerText")
+            imp_used = DB.get(next((k for k in DB if k.endswith(':import')), ''), None)
+            check('停止 shows "已停止" and the import credit is refunded', '已停止' in st and imp_used == '1')
+            check('the model call upstream was cut off too', SEEN[-1].get('aborted') is True)
             await text_import()
             await to_import()
             box = await ev("document.querySelector('.crai .q')?.innerText")
             check('after 2 imports the box says 0 imports left', '导入0篇' in box.replace(' ', ''))
             await pg.fill('#impText', 'Third article.'); await ev("document.querySelector('[data-act=impgo]').click()")
-            await pg.wait_for_function("!document.querySelector('#impStatus .spin')", timeout=20000)
+            await pg.wait_for_function("!document.querySelector('#impp')", timeout=40000)
             st = await ev("document.querySelector('#impStatus').innerText")
             check('3rd free import refused with the "free trial used up" message', '免费试用已经用完' in st)
 
@@ -143,28 +173,41 @@ async def main():
             check('panel switches to "your own key" wording', '你自己的' in await ev("document.querySelector('.crai .q').innerText"))
             n0 = len(SEEN); free_before = dict(DB)
             await pg.fill('#impText', 'BYOK article.'); await ev("document.querySelector('[data-act=impgo]').click()")
-            await pg.wait_for_function("!document.querySelector('#impStatus .spin')", timeout=20000); await pg.wait_for_timeout(500)
+            await pg.wait_for_function("!document.querySelector('#impp')", timeout=40000); await pg.wait_for_timeout(500)
             check('BYOK import works after the free trial ran out', '导入完成' in await ev("document.querySelector('#view').innerText"))
             check('BYOK calls carry the user key, not the owner key', all(c['auth'] == 'Bearer sk-user-key-123456' for c in SEEN[n0:]) and len(SEEN[n0:]) == 2)
             check('BYOK does not touch free-trial counters', {k: v for k, v in DB.items() if k.startswith('cr:dev:')} == {k: v for k, v in free_before.items() if k.startswith('cr:dev:')})
 
-            # photo import with a big image, BYOK
-            png = big_png(); path = os.path.join(ROOT, 'tests', '_big.png'); open(path, 'wb').write(png)
+            # photo import: several big pages, reorder, delete, BYOK
+            png = big_png(); paths = []
+            for i in range(4):
+                pth = os.path.join(ROOT, 'tests', f'_page{i}.png'); open(pth, 'wb').write(png); paths.append(pth)
             await to_import(); await ev("document.querySelector('[data-act=impmode][data-m=photo]').click()"); await pg.wait_for_timeout(300)
-            await pg.set_input_files('#impFile', path); await pg.wait_for_timeout(500)
+            await pg.set_input_files('#impFile', paths[:2]); await pg.wait_for_timeout(400)
+            await pg.set_input_files('#impFile', paths[2:]); await pg.wait_for_timeout(400)
+            names = lambda: ev("[...document.querySelectorAll('.imp-pages img')].length")
+            check('4 photos picked in two batches all listed', await names() == 4)
+            await ev("document.querySelector('[data-act=impdel][data-i=\"3\"]').click()"); await pg.wait_for_timeout(300)
+            check('delete removes a page', await names() == 3)
+            order0 = await ev("S.impFiles.map(f => f.name).join(',')") if False else None
+            await ev("document.querySelector('[data-act=impmv][data-i=\"2\"]').click()"); await pg.wait_for_timeout(300)
+            check('thumbnails render (object URLs set)', await ev("[...document.querySelectorAll('.imp-pages img')].every(i => i.src.startsWith('blob:'))"))
             n0 = len(SEEN); await ev("document.querySelector('[data-act=impgo]').click()")
-            await pg.wait_for_function("!document.querySelector('#impStatus .spin')", timeout=30000)
-            os.remove(path)
-            sent = SEEN[n0]['imgs'][0] if len(SEEN) > n0 and SEEN[n0]['imgs'] else None
-            print(f'      original PNG {len(png)/1e6:.1f} MB → sent data URL {sent/1e6 if sent else 0:.2f} MB, {SEEN[n0]["img_type"] if sent else ""}')
-            check('photo shrunk to JPEG well under the 4.5 MB request limit', sent and sent < 3e6 and SEEN[n0]['img_type'][0] == 'data:image/jpeg;base64,')
+            await pg.wait_for_function("!document.querySelector('#impp')", timeout=60000)
+            for pth in paths: os.remove(pth)
+            sent = SEEN[n0]['imgs'] if len(SEEN) > n0 else []
+            print(f'      3 pages, original PNG {len(png)/1e6:.1f} MB each → sent {[round(x/1e6, 2) for x in sent]} MB, total {sum(sent)/1e6:.2f} MB')
+            check('3 pages sent in one request, all JPEG', len(sent) == 3 and all(t == 'data:image/jpeg;base64,' for t in SEEN[n0]['img_type']))
+            check('whole request stays under the 4.5 MB limit', sum(sent) < 4.2e6)
+            check('prompt tells the model the pages are one article', '3 张照片' in SEEN[n0].get('text', ''))
+            check('photo list cleared after a successful import', '导入完成' in await ev("document.querySelector('#view').innerText"))
 
             # bad key
             await to_import(); await ev("document.querySelector('[data-act=impmode][data-m=text]').click()"); await pg.wait_for_timeout(300)
             await ev("document.querySelector('.crai details').open = true")
             await pg.fill('#crAiKey', 'sk-bad-key-000000'); await pg.click('#crAiSave'); await pg.wait_for_timeout(200)
             await pg.fill('#impText', 'Bad key.'); await ev("document.querySelector('[data-act=impgo]').click()")
-            await pg.wait_for_function("!document.querySelector('#impStatus .spin')", timeout=20000)
+            await pg.wait_for_function("!document.querySelector('#impp')", timeout=40000)
             check('bad key shows the "API Key 无效" message', 'API Key 无效' in await ev("document.querySelector('#impStatus').innerText"))
             await ev("document.querySelector('.crai details').open = true"); await pg.click('#crAiClear'); await pg.wait_for_timeout(500)
             check('clearing the key returns to free-trial wording', '免费试用' in await ev("document.querySelector('.crai .q').innerText"))

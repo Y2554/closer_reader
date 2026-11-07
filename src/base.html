@@ -325,6 +325,14 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
 .field textarea#impText{min-height:14rem}
 .drop{border:1.5px dashed var(--rule);border-radius:4px;padding:18px;text-align:center;font:400 .95rem/1.6 var(--f-zh);color:var(--ink-2);background:var(--sheet)}
 .drop img{display:block;max-height:220px;margin:10px auto 0;border:1px solid var(--rule)}
+.imp-pages{list-style:none;margin:0 0 14px;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;text-align:left}
+.imp-pages li{border:1px solid var(--rule);border-radius:4px;background:var(--paper);padding:4px}
+.imp-pages img{display:block;width:100%;height:120px;object-fit:cover;margin:0;border:0;border-radius:2px;background:var(--sheet)}
+.imp-pg{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:4px;font-size:.8rem;color:var(--ink-2)}
+.imp-pg .ibtn{min-width:28px;min-height:28px}
+.imp-add{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.imp-add input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
+.imp-full{margin:0;color:var(--ink-3)}
 .imp-status{margin-top:14px;font:400 .95rem/1.6 var(--f-zh);min-height:1.6em}
 .imp-status .err{color:var(--red)}
 .imp-status .done{color:var(--ok)}
@@ -359,7 +367,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-vis
     <section id="view" class="view"></section>
     <aside id="panel" class="panel" aria-live="polite"></aside>
   </main>
-  <footer class="foot">文章、作答进度和单词本保存在你的 claude.ai 账号里，换设备打开也在。</footer>
+  <footer class="foot">文章、作答进度和单词本保存在你的 claude.ai 账号里，换设备打开也在。<button class="foot-lnk" data-act="welcome">使用说明</button></footer>
 </div>
 <div id="toast" class="toast" hidden></div>
 
@@ -383,7 +391,7 @@ const S = {
   hideZh: LS.get('hideZh', false), vf: 'all', va: 'all', vshow: new Set(),
   notes: {}, dictAll: false, sheet: 'half',
   openZh: new Set(), unguard: new Set(), hint: false, confirmReset: false, confirmDel: null, selAt: 0,
-  impMode: 'text', impForm: { impTitle:'', impText:'', impBank:'', impAns:'' }, impFile: null, imp: null, impCtl: null, impDirty: true
+  impMode: 'text', impForm: { impTitle:'', impText:'', impBank:'', impAns:'' }, impFiles: [], imp: null, impCtl: null, impDirty: true
 };
 
 /* ---------- helpers on article data ---------- */
@@ -469,16 +477,49 @@ const speakBtn = w => canSpeak ? `<button class="ibtn" data-act="speak" data-w="
 function dateCN(t){ const d = new Date(t); return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`; }
 
 /* ---------- dictionary: Chinese senses from ECDICT (MIT); English senses, examples, IPA from Open English WordNet (CC BY 4.0) ---------- */
-const DICT = {}, DICT_P = {};
+/* Entries live in small sorted buckets (<dir>/b/NNN.json, ~40 KB gzipped) listed in <dir>/b/index.json,
+   built by tools/split_dict.py. One lookup fetches one bucket; a whole letter (the dictionary's A–Z
+   browser, prefix suggestions) fetches that letter's buckets in parallel. Slow phone networks: each
+   fetch times out after 15 s and is retried once. */
+async function getJSON(url){
+  for (let i = 0; ; i++) {
+    try {
+      const r = await fetch(url, typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? { signal: AbortSignal.timeout(15000) } : {});
+      if (!r.ok) throw new Error('http ' + r.status);
+      return await r.json();
+    } catch (e) { if (i >= 1) throw e; }
+  }
+}
+function bucketStore(dir){
+  let IX = null, IX_P = null; const B = {}, B_P = {}, L = {}, L_P = {};
+  const once = (cache, pend, k, make) => cache[k] ? Promise.resolve(cache[k])
+    : (pend[k] || (pend[k] = make().then(v => (cache[k] = v)).catch(e => { delete pend[k]; throw e; })));
+  const index = () => IX ? Promise.resolve(IX) : (IX_P || (IX_P = getJSON(`${dir}/b/index.json`).then(j => (IX = j.b)).catch(e => { IX_P = null; throw e; })));
+  const bucket = name => once(B, B_P, name, () => getJSON(`${dir}/b/${name}`));
+  function nameFor(ix, w){ let lo = 0, hi = ix.length - 1, at = -1; while (lo <= hi) { const m = (lo + hi) >> 1; if (ix[m][0] <= w) { at = m; lo = m + 1; } else hi = m - 1; } return at < 0 ? null : ix[at][1]; }
+  return {
+    letters: L,                                            // whole letters that are fully loaded
+    async get(w){
+      if (L[w[0]]) return L[w[0]][w];
+      const n = nameFor(await index(), w);
+      return n ? (await bucket(n))[w] : undefined;
+    },
+    letter(ch){
+      return once(L, L_P, ch, async () => {
+        const names = (await index()).filter(x => x[0][0] === ch).map(x => x[1]);
+        return Object.assign({}, ...(await Promise.all(names.map(bucket))));
+      });
+    }
+  };
+}
+const DICTS = bucketStore('dict');
+const DICT = DICTS.letters;                                // DICT[ch] is set once a whole letter is loaded
 function shard(ch){
   ch = (ch || '').toLowerCase();
   if (!/^[a-z]$/.test(ch)) return Promise.resolve({});
-  if (DICT[ch]) return Promise.resolve(DICT[ch]);
-  if (!DICT_P[ch]) DICT_P[ch] = fetch(`dict/${ch}.json`).then(r => { if (!r.ok) throw new Error('http'); return r.json(); })
-    .then(j => (DICT[ch] = j)).catch(e => { delete DICT_P[ch]; throw e; });
-  return DICT_P[ch];
+  return DICTS.letter(ch);
 }
-async function rawGet(w){ const s = await shard(w[0]); return s[w]; }
+async function rawGet(w){ return /^[a-z]/.test(w) ? DICTS.get(w) : undefined; }
 function stems(w){
   const c = [w.replace(/ies$/, 'y'), w.replace(/ied$/, 'y'), w.replace(/es$/, ''), w.replace(/s$/, ''), w.replace(/ed$/, ''), w.replace(/ed$/, 'e'),
     w.replace(/(.)\1ed$/, '$1'), w.replace(/ing$/, ''), w.replace(/ing$/, 'e'), w.replace(/(.)\1ing$/, '$1'), w.replace(/ier$/, 'y'), w.replace(/iest$/, 'y'), w.replace(/er$/, ''), w.replace(/est$/, ''), w.replace(/ly$/, '')];
@@ -568,25 +609,19 @@ function dictExtras(P){
 const DSRC = '<div class="dsrc">中文释义：ECDICT（MIT）<br>英英释义、例句、音标：Open English WordNet（CC BY 4.0，源自 Princeton WordNet）</div>';
 
 /* ---------- word details: etymology (GCIDE / Webster 1913), roots & near-synonyms (ECDICT), synonyms (WordNet), look-alikes ---------- */
-const MORE = {}, MORE_P = {}; let RESEMBLE = null, RESEMBLE_P = null;
-function moreShard(ch){
-  if (!/^[a-z]$/.test(ch)) return Promise.resolve({});
-  if (MORE[ch]) return Promise.resolve(MORE[ch]);
-  if (!MORE_P[ch]) MORE_P[ch] = fetch(`more/${ch}.json`).then(r => { if (!r.ok) throw new Error('http'); return r.json(); })
-    .then(j => (MORE[ch] = j)).catch(e => { delete MORE_P[ch]; throw e; });
-  return MORE_P[ch];
-}
+const MORES = bucketStore('more'); let RESEMBLE = null, RESEMBLE_P = null;
+const moreGet = w => /^[a-z]/.test(w) ? MORES.get(w) : Promise.resolve(undefined);
 function resemble(){
   if (RESEMBLE) return Promise.resolve(RESEMBLE);
-  if (!RESEMBLE_P) RESEMBLE_P = fetch('more/resemble.json').then(r => r.json()).then(j => (RESEMBLE = j)).catch(e => { RESEMBLE_P = null; throw e; });
+  if (!RESEMBLE_P) RESEMBLE_P = getJSON('more/resemble.json').then(j => (RESEMBLE = j)).catch(e => { RESEMBLE_P = null; throw e; });
   return RESEMBLE_P;
 }
 function loadMore(P){
   if (!P.dict || P.dict.state !== 'ok') { if (P.dict && P.dict.state !== 'loading') P.more = { state: 'none' }; return; }
   const lemma = P.dict.res.lemma;
   P.more = { state: 'loading', lemma };
-  moreShard(lemma[0]).then(async m => {
-    const e = m[lemma] || {};
+  moreGet(lemma).then(async found => {
+    const e = found || {};
     const groups = e.g ? (await resemble()).filter((_, i) => e.g.includes(i)) : [];
     P.more = { state: 'ok', lemma, e, groups };
   }).catch(() => { P.more = { state: 'err', lemma }; })
@@ -714,7 +749,7 @@ function renderView(){
   if (S.view === 'import') {
     if (S.impDirty || !v.querySelector('.imp')) {
       v.innerHTML = importHtml(); S.impDirty = false;
-      const img = $('#impPrev'); if (img && S.impFile) { try { img.src = URL.createObjectURL(S.impFile); } catch(err){} }
+      impThumbs();
     }
     else { const s = $('#impStatus'); if (s) s.innerHTML = impStatusHtml(); }
     return;
@@ -1008,9 +1043,12 @@ const SCHEMA = `{
   "keys": [ { "t": "a significant body of", "k": "phrase", "n": "大量的…" } ],
   "tips": [ "技巧小结" ]
 }`;
-function importPrompt(f, photo){
+function importPrompt(f, photos){   // photos: number of attached photos (0 = pasted text)
   return `你是一名资深的英语六级阅读老师，正在为学生整理一篇精读材料。
-${photo ? '附图是一页英语试卷或文章的照片。请准确识别其中的英文原文、题号和选项；照片可能是旋转的；学生的铅笔笔迹和划线不是原文，请忽略。' : '下面是学生粘贴的文章。'}
+${photos ? (photos > 1
+    ? `附图是同一篇英语试卷或文章的 ${photos} 张照片，按上传顺序是连续的页面（第 1 张在最前）。请把它们合成一篇完整的文章：跨页被截断的句子要接起来，相邻两张重复拍到的内容只保留一次，选项和答案可能在任意一页。`
+    : '附图是一页英语试卷或文章的照片。') + '请准确识别其中的英文原文、题号和选项；照片可能是旋转的；学生的铅笔笔迹和划线不是原文，请忽略。'
+  : '下面是学生粘贴的文章。'}
 请把它整理成下面这个 JSON 结构，只输出 JSON，不要任何其他文字：
 ${SCHEMA}
 要求：
@@ -1033,6 +1071,7 @@ ${plain}
 单词列表：
 ${words.join(', ')}`;
 }
+const IMP_MAX = 6;   // photos per import (one article spread over several pages)
 function importHtml(){
   if (!S.sample) return `<section class="imp"><div class="kicker">编辑部</div><h2 class="headline sm">导入新文章</h2>
     <p class="dek">${window.claude && window.claude.local ? '本地部署版还没有接入 Claude：启动 server/dev-server.mjs 并在 runtime/config.js 里设置 CLOSE_READER_SAMPLE_ENDPOINT 后即可拍照导入。也可以手动按 seeds/ 里的格式整理文章，从「单词本 → 备份」导入。' : '导入需要在 claude.ai 或 Claude App 里打开本页，并允许它调用 Claude。'}</p>
@@ -1043,7 +1082,10 @@ function importHtml(){
     <h2 class="headline sm">导入新文章</h2>
     <p class="dek">粘贴文章或上传试卷照片。Claude 会拆句翻译、逐词标词性、划出重点；如果是选词填空，还会写出每个空的解题思路。</p>
     <div class="seg" role="group" aria-label="导入方式"><button data-act="impmode" data-m="text" aria-pressed="${!photo}">粘贴文本</button><button data-act="impmode" data-m="photo" aria-pressed="${photo}">试卷照片</button></div>
-    ${photo ? `<div class="field"><label for="impFile">照片<span>JPG / PNG，尽量拍清楚整页</span></label><div class="drop"><input type="file" id="impFile" accept="image/jpeg,image/png,image/webp">${S.impFile ? `<div>${esc(S.impFile.name)}</div><img id="impPrev" alt="已选照片预览">` : ''}</div></div>`
+    ${photo ? `<div class="field"><label for="impFile">照片<span>一篇文章分在几页就拍几张，按页码顺序，最多 ${IMP_MAX} 张</span></label><div class="drop">
+        ${S.impFiles.length ? `<ol class="imp-pages">${S.impFiles.map((f, i) => `<li><img data-i="${i}" alt="第 ${i + 1} 张"><div class="imp-pg"><span>第 ${i + 1} 张</span><span>${i ? `<button class="ibtn" data-act="impmv" data-i="${i}" aria-label="把第 ${i + 1} 张往前移" title="往前移">←</button>` : ''}<button class="ibtn" data-act="impdel" data-i="${i}" aria-label="删掉第 ${i + 1} 张" title="删掉">✕</button></span></div></li>`).join('')}</ol>` : ''}
+        ${S.impFiles.length < IMP_MAX ? `<label class="pbtn ${S.impFiles.length ? 'ghost' : 'primary'} imp-add">${S.impFiles.length ? '再加一张' : '选择或拍摄照片'}<input type="file" id="impFile" accept="image/*" multiple></label>` : `<p class="imp-full">已经 ${IMP_MAX} 张了。</p>`}
+      </div></div>`
       : `<div class="field"><label for="impTitle">标题<span>可不填</span></label><input type="text" id="impTitle" value="${esc(F.impTitle)}"></div>
          <div class="field"><label for="impText">正文<span>空格写成 26 或 ___26___ 都可以</span></label><textarea id="impText" placeholder="Scientists recently examined studies on dog intelligence …">${esc(F.impText)}</textarea></div>
          <div class="field"><label for="impBank">选项<span>选词填空才需要</span></label><textarea id="impBank" placeholder="A) affirmed  B) approximately …">${esc(F.impBank)}</textarea></div>`}
@@ -1054,13 +1096,120 @@ function importHtml(){
     <div id="crAiBox"></div>
   </section>`;
 }
+function impThumbs(){
+  document.querySelectorAll('.imp-pages img[data-i]').forEach(img => {
+    const f = S.impFiles[+img.dataset.i]; if (!f) return;
+    try { const u = URL.createObjectURL(f); img.onload = img.onerror = () => URL.revokeObjectURL(u); img.src = u; } catch(err){}
+  });
+}
+function impAdd(input){
+  const picked = [...(input.files || [])].filter(f => /^image\//.test(f.type) || /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(f.name));
+  const room = IMP_MAX - S.impFiles.length;
+  S.impFiles = S.impFiles.concat(picked.slice(0, Math.max(0, room)));
+  input.value = '';
+  S.imp = picked.length > room ? { err: `最多 ${IMP_MAX} 张，多出来的 ${picked.length - room} 张没有加进去。` } : null;
+  S.impDirty = true; renderView();
+}
 function impStatusHtml(){
   const I = S.imp; if (!I) return '';
-  if (I.busy) return `<span class="spin"></span>${esc(I.msg)}${I.n ? ` · 已写 ${I.n} 字` : ''}`;
+  if (I.busy) return impProgHtml(I);
   if (I.err) return `<span class="err">${esc(I.err)}</span>`;
   if (I.done) return `<span class="done">${esc(I.done)}</span>`;
   return '';
 }
+
+/* ---------- import progress: the "正在排版" card ----------
+   Fed by the streamed model text (onText), so everything on it is real progress:
+   stage 1 reading → 2 sentences / translations / explanations (shown as they are written)
+   → 3 word-by-word tagging (counted against the known word list) → 4 done. */
+const IMP_STEPS = ['读取原文', '翻译 · 解析', '标注词性'];
+const mmss = ms => { const t = Math.max(0, Math.floor(ms / 1000)); return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`; };
+const unJson = s => { try { return JSON.parse('"' + s.replace(/\\$/, '') + '"'); } catch(e){ return s; } };
+const blankify = s => s.replace(/\{\{(\d+)\}\}/g, '（$1）____').replace(/\{\{?\d*$/, '');
+function impParse(I){
+  const t = I.text || '';
+  if (I.stage === 3) {
+    const tags = []; const re = /"([A-Za-z][A-Za-z'’-]*)"\s*:\s*\[\s*"((?:[^"\\]|\\.)*)"\s*,\s*"((?:[^"\\]|\\.)*)"/g; let m;
+    while ((m = re.exec(t))) tags.push([m[1], unJson(m[2]), unJson(m[3])]);
+    return { tags };
+  }
+  const lines = []; const re = /"en"\s*:\s*"((?:[^"\\]|\\.)*)"/g; let m, end = 0;
+  while ((m = re.exec(t))) { lines.push(blankify(unJson(m[1]))); end = re.lastIndex; }
+  const open = /"en"\s*:\s*"((?:[^"\\]|\\.)*)$/.exec(t.slice(end));
+  return { lines, cur: open ? blankify(unJson(open[1])) : '', why: (t.match(/"why"\s*:/g) || []).length, title: (/"title"\s*:\s*"((?:[^"\\]|\\.)*)"/.exec(t) || [])[1] };
+}
+function impPct(I){
+  const sec = (Date.now() - I.t0) / 1000;
+  if (I.stage >= 4) return 100;
+  if (I.stage === 3) return 72 + 26 * Math.min(1, (I.tagged || 0) / Math.max(1, I.total || 1));
+  const byText = I.text ? Math.min(1, I.text.length / I.expect) : 0;
+  const byTime = 1 - Math.exp(-sec / 80);                  // keeps moving even if nothing streams
+  return 3 + 66 * Math.max(byText, byTime * 0.8);
+}
+function impTip(I){
+  const sec = (Date.now() - I.t0) / 1000;
+  if (I.stage >= 4) return '排版完成，正在打开校对页…';
+  if (I.stage === 1) return sec < 25 ? (I.photo ? `AI 正在识别 ${I.photo > 1 ? I.photo + ' 张照片' : '照片'}里的文字` : 'AI 正在通读全文') : '原文比较长，AI 还在通读，马上开始排版';
+  if (sec > 150) return '文章比较长，还在继续。可以切到别的栏目，排好后会自动打开校对页；请不要关闭或刷新页面。';
+  if (sec > 60) return '长文章一般要 1–3 分钟。可以切到别的栏目，排好后会自动打开校对页。';
+  return I.stage === 3 ? '给每个词标上本文里的词性和释义，点词时就能直接看到' : '每写好一句就排进校样';
+}
+function impProgHtml(I){
+  return `<div class="impp" id="impp" role="status" aria-live="polite" aria-label="正在整理文章">
+    <div class="impp-hd"><span class="kicker">编辑部 · 正在排版</span><span class="impp-t" id="imppT">${mmss(Date.now() - I.t0)}</span></div>
+    <ol class="impp-steps">${IMP_STEPS.map((x, i) => `<li><i aria-hidden="true"></i><span>${x}</span></li>`).join('')}</ol>
+    <div class="impp-bar" aria-hidden="true"><b id="imppBar"></b></div>
+    <div class="impp-gal" id="imppGal" aria-hidden="true"></div>
+    <p class="impp-stat" id="imppStat"></p>
+    <p class="impp-tip" id="imppTip"></p>
+  </div>`;
+}
+let impRaf = 0;
+const impPaintSoon = () => { if (!impRaf) impRaf = requestAnimationFrame(() => { impRaf = 0; impPaint(); }); };
+function impPaint(){
+  const I = S.imp; if (!I || !I.busy) return;
+  const box = $('#impp');
+  if (!box) { const s = $('#impStatus'); if (s && S.view === 'import') { s.innerHTML = impStatusHtml(); if ($('#impp')) impPaint(); } return; }
+  $$('.impp-steps li', box).forEach((li, i) => { li.className = i + 1 < I.stage ? 'done' : i + 1 === I.stage ? 'on' : ''; });
+  $('#imppT').textContent = mmss(Date.now() - I.t0);
+  $('#imppBar').style.width = impPct(I).toFixed(1) + '%';
+  $('#imppTip').textContent = impTip(I);
+  const P = impParse(I), gal = $('#imppGal');
+  if (gal.dataset.stage !== String(I.stage)) { gal.dataset.stage = I.stage; gal.dataset.n = '0'; gal.innerHTML = ''; gal.className = 'impp-gal st' + I.stage; }
+  if (I.stage === 1) {
+    if (!gal.firstChild) gal.innerHTML = '<span class="impp-sk"></span><span class="impp-sk"></span><span class="impp-sk"></span>';
+    $('#imppStat').textContent = I.photo ? `${I.photo} 张照片已上传` : `正文 ${I.chars} 个字符已送达`;
+  } else if (I.stage === 2) {
+    let n = +gal.dataset.n;
+    for (; n < P.lines.length; n++) {
+      const p = document.createElement('p'); p.className = 'impp-l';
+      p.innerHTML = `<span class="ln">${String(n + 1).padStart(2, '0')}</span><span class="tx"></span>`; p.lastChild.textContent = P.lines[n];
+      const cur = gal.querySelector('.impp-cur'); gal.insertBefore(p, cur);
+    }
+    gal.dataset.n = n;
+    let cur = gal.querySelector('.impp-cur');
+    if (!cur) { cur = document.createElement('p'); cur.className = 'impp-l impp-cur'; cur.innerHTML = '<span class="ln"></span><span class="tx"></span>'; gal.appendChild(cur); }
+    cur.querySelector('.ln').textContent = String(n + 1).padStart(2, '0');
+    cur.querySelector('.tx').textContent = P.cur;
+    cur.hidden = !P.cur && n > 0 && P.why > 0;
+    $$('.impp-l:not(.impp-cur)', gal).slice(0, -3).forEach(x => x.remove());   // keep the last few lines
+    $('#imppStat').textContent = [P.lines.length ? `已排好 ${P.lines.length} 句` : '正在排第一句', P.why ? `${P.why} 个空写好解析` : '', `约 ${I.text.length.toLocaleString()} 字`].filter(Boolean).join(' · ');
+  } else if (I.stage === 3) {
+    let n = +gal.dataset.n;
+    for (; n < P.tags.length; n++) {
+      const [w, pos, zh] = P.tags[n]; const c = document.createElement('span'); c.className = 'impp-chip';
+      c.innerHTML = '<b></b><i></i><span></span>'; c.children[0].textContent = w; c.children[1].textContent = pos; c.children[2].textContent = zh;
+      gal.appendChild(c);
+    }
+    gal.dataset.n = n; I.tagged = P.tags.length;
+    $$('.impp-chip', gal).slice(0, -10).forEach(x => x.remove());
+    $('#imppStat').textContent = `${I.sents} 句、${I.why ? I.why + ' 个空的解析已完成 · ' : ''}已标注 ${Math.min(I.tagged, I.total)} / ${I.total} 个词`;
+  } else {
+    gal.innerHTML = '<p class="impp-fin"><span class="tick" aria-hidden="true">✓</span>排版完成</p>';
+    $('#imppStat').textContent = `${I.sents} 句 · ${I.total} 个词`;
+  }
+}
+
 function setImp(o){ S.imp = o; const s = $('#impStatus'); if (s) s.innerHTML = impStatusHtml(); const g = $('[data-act="impgo"]'); if (g) { S.impDirty = true; renderView(); } }
 function sampleErr(e){
   const c = e && e.code;
@@ -1095,35 +1244,44 @@ function normalize(d){
 }
 async function runImport(){
   const photo = S.impMode === 'photo';
-  if (photo && !S.impFile) { setImp({ err: '请先选一张照片。' }); return; }
+  if (photo && !S.impFiles.length) { setImp({ err: '请先选择照片。' }); return; }
   if (!photo && !S.impForm.impText.trim()) { setImp({ err: '请先粘贴文章正文。' }); return; }
   if (!S.db) { setImp({ err: '存档没有连上，导入的文章无法保存。' }); return; }
   const ctl = new AbortController(); S.impCtl = ctl;
-  setImp({ busy: true, msg: 'Claude 正在拆句、翻译、写解析', n: 0 });
+  const t0 = Date.now(), chars = S.impForm.impText.length;
+  // rough size of the model's reply, for the progress bar (the seeds run ~5× their input text)
+  const expect = photo ? 7000 + 2500 * (S.impFiles.length - 1) : Math.min(22000, Math.max(3500, chars * 5));
+  setImp({ busy: true, stage: 1, t0, text: '', expect, chars, photo: photo ? S.impFiles.length : 0 });
+  impPaint();
+  const tick = setInterval(() => { if (!S.imp || !S.imp.busy) return clearInterval(tick); impPaint(); }, 1000);
+  const feed = ({ text }) => { const I = S.imp; if (!I || !I.busy) return; I.text = text; if (I.stage === 1 && text) I.stage = 2; impPaintSoon(); };
   try {
-    const opts = { modelTier: 'complex', signal: ctl.signal, onText: ({ text }) => { if (S.imp && S.imp.busy) { S.imp.n = text.length; const s = $('#impStatus'); if (s) s.innerHTML = impStatusHtml(); } } };
-    if (photo) opts.images = [S.impFile];
-    const raw = await S.sample.json(importPrompt(S.impForm, photo), opts);
+    const opts = { modelTier: 'complex', signal: ctl.signal, onText: feed };
+    if (photo) opts.images = S.impFiles.slice();
+    const raw = await S.sample.json(importPrompt(S.impForm, photo ? S.impFiles.length : 0), opts);
     const art = normalize(raw);
     const id = (art.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'article') + '-' + Date.now().toString(36);
-    S.imp = { busy: true, msg: '结构完成，正在逐词标注词性', n: 0 }; const s1 = $('#impStatus'); if (s1) s1.innerHTML = impStatusHtml();
     const plain = art.paragraphs.map(p => p.sentences.map(s => s.en).join(' ')).join('\n\n');
     const words = [...new Set(plain.replace(/\{\{\d+\}\}/g, ' ').match(/[A-Za-z]+(?:['’][A-Za-z]+)*/g) || [])].map(w => w.toLowerCase());
+    const sents = art.paragraphs.reduce((n, p) => n + p.sentences.length, 0), why = Object.values(art.blanks || {}).filter(b => b && b.why).length;
+    S.imp = { busy: true, stage: 3, t0, text: '', total: new Set(words).size, tagged: 0, sents, why }; impPaint();
     let lex = {};
     try {
-      const L = await S.sample.json(lexPrompt(plain, [...new Set(words)]), { modelTier: 'default', signal: ctl.signal, onText: ({ text }) => { if (S.imp && S.imp.busy) { S.imp.n = text.length; const s = $('#impStatus'); if (s) s.innerHTML = impStatusHtml(); } } });
+      const L = await S.sample.json(lexPrompt(plain, [...new Set(words)]), { modelTier: 'default', signal: ctl.signal, onText: feed });
       if (L && typeof L === 'object') Object.entries(L).forEach(([k, v]) => { if (Array.isArray(v) && v.length >= 2) lex[k.toLowerCase()] = v[2] ? [String(v[0]), String(v[1]), String(v[2])] : [String(v[0]), String(v[1])]; });
     } catch(e){ if (e && e.code === 'cancelled') throw e; }
     const doc = { ...art, id, lex, createdAt: Date.now() };
     await S.db.doc('articles/' + id).set(doc);
-    S.impForm = { impTitle:'', impText:'', impBank:'', impAns:'' }; S.impFile = null;
+    S.imp = { busy: true, stage: 4, t0, sents, total: new Set(words).size }; impPaint();
+    await new Promise(r => setTimeout(r, matchMedia('(prefers-reduced-motion: reduce)').matches ? 150 : 900));
+    S.impForm = { impTitle:'', impText:'', impBank:'', impAns:'' }; S.impFiles = [];
     S.imp = { done: `已加入往期：${art.title}${Object.keys(lex).length ? '' : '（词性标注没完成，点单词时可以单独查）'}` };
     if (!S.articles.find(a => a.id === id)) S.articles = [{ ...doc }, ...S.articles];
     openArticle(id);
     toast('新文章已排版，开始精读吧');
   } catch(e){
     S.imp = { err: sampleErr(e) }; S.impDirty = true; renderView();
-  }
+  } finally { clearInterval(tick); }
 }
 
 /* ---------- actions ---------- */
@@ -1268,7 +1426,7 @@ document.addEventListener('input', e => {
 document.addEventListener('change', e => {
   if (e.target.id === 'vaSel') { S.va = e.target.value; renderView(); }
   if (e.target.id === 'impFile') {
-    S.impFile = e.target.files && e.target.files[0] || null; S.imp = null; S.impDirty = true; renderView();
+    impAdd(e.target);
   }
 });
 function onSelect(){

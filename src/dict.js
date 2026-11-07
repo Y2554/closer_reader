@@ -336,7 +336,7 @@ function afterDictRender(){
 function dkOpen(x, y, q){
   if (S.dk.open) return;
   const a = cur();
-  if (S.view === 'read' && a && inExam(a)) { toast('考试中先不查词典，交卷后再查'); return; }
+  if (S.view === 'read' && a && inExam(a)) { toast('考试中先不查词典。想边读边查，点上方的「精讲」'); return; }
   if (S.view === 'dict') { const i = $('#dkq'); if (i) { i.focus(); i.select(); } return; }
   closePop();
   S.dk.open = true; S.dk.closing = false;

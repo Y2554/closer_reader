@@ -31,6 +31,7 @@ loadLevel().then(() => {
     if (!S.cur) settle();
     renderChrome(); repairCtx();
     if (S.view === 'read' || S.view === 'archive') { renderView(); afterReadRender(); renderPanel(true); renderPop(true); }
+    else if (S.view === 'welcome') renderView();
   }, () => { S.dbState = 'err'; render(); });
   db.collection('progress').onSnapshot(snap => {
     let changed = false;
@@ -38,6 +39,13 @@ loadLevel().then(() => {
     if (!changed && S.progLoaded) return;
     S.progLoaded = true;
     if (!S.userChose) settle();
+    // first visit (nothing ever opened, welcome never dismissed): show the front page instead of an article
+    if (!S.welcomeChecked) {
+      S.welcomeChecked = true;
+      const fresh = !LS.get('welcomed', false) && !Object.values(S.prog).some(p => p && p.lastOpened);
+      if (!fresh) LS.set('welcomed', true);
+      else if (!S.userChose && S.view === 'read') { S.view = 'welcome'; S.enter = true; render(); return; }
+    }
     if (S.view === 'read' || S.view === 'archive') { renderChrome(); renderView(); afterReadRender(); if (S.panel) renderPanel(true); }
   }, () => {});
   db.collection('notes').onSnapshot(snap => {

@@ -37,7 +37,7 @@ document.addEventListener('click', e => {
   }
   if (!t) {
     if (wEl && Date.now() - S.selAt > 350) {
-      if (inExam(cur())) { wEl.classList.remove('nope'); void wEl.offsetWidth; wEl.classList.add('nope'); toast('考试中先不查词，交卷后再查'); }
+      if (inExam(cur())) { wEl.classList.remove('nope'); void wEl.offsetWidth; wEl.classList.add('nope'); toast('考试中先不查词。想边读边查，点上方的「精讲」'); }
       else openPop(wordPopFrom(wEl));
     }
     return;
@@ -47,7 +47,11 @@ document.addEventListener('click', e => {
   if (act === 'mcpick') { mcqPick(a, t.dataset.n, t.dataset.l); return; }
   if (/^tr[a-z]/.test(act)) { trAction(act, t, a); return; }
   switch (act) {
+    case 'welstart': { welcomeDone(); const id = welcomeStarter(); if (id) openArticle(id); else { S.view = 'import'; S.impDirty = true; S.enter = true; render(); } break; }
+    case 'welimport': welcomeDone(); S.view = 'import'; S.impDirty = true; S.enter = true; S.panel = null; S.pop = []; render(); window.scrollTo({ top: 0 }); break;
+    case 'welcome': if (S.view === 'read') examPause(); S.view = 'welcome'; S.enter = true; S.panel = null; S.pop = []; S.edit = null; render(); window.scrollTo({ top: 0 }); break;
     case 'view':
+      if (S.view === 'welcome') welcomeDone();
       if (S.view === 'read') examPause();
       S.enter = S.view !== t.dataset.v; S.view = t.dataset.v; S.panel = null; S.pop = []; S.confirmDel = null; S.confirmDelW = null; S.edit = null;
       if (S.view === 'import') S.impDirty = true;
@@ -216,6 +220,8 @@ document.addEventListener('click', e => {
     /* import */
     case 'impmode': S.impMode = t.dataset.m; S.imp = null; S.impDirty = true; renderView(); break;
     case 'impgo': runImport(); break;
+    case 'impdel': S.impFiles.splice(+t.dataset.i, 1); S.imp = null; S.impDirty = true; renderView(); break;
+    case 'impmv': { const i = +t.dataset.i, f = S.impFiles; if (i > 0 && i < f.length) [f[i - 1], f[i]] = [f[i], f[i - 1]]; S.impDirty = true; renderView(); break; }
     case 'impstop': if (S.impCtl) S.impCtl.abort(); break;
   }
 });
@@ -271,7 +277,7 @@ document.addEventListener('change', e => {
   else if (id === 'newLimit') { S.newLimit = +el.value; LS.set('newLimit', S.newLimit); renderChrome(); renderView(); }
   else if (id === 'dtScope') { S.dtScope = el.value; renderView(); }
   else if (id === 'imFile') { const f = el.files && el.files[0]; if (f) readBackup(f); }
-  else if (id === 'impFile') { S.impFile = el.files && el.files[0] || null; S.imp = null; S.impDirty = true; renderView(); }
+  else if (id === 'impFile') impAdd(el);
 });
 function onSelect(){
   const sel = getSelection(); if (!sel || sel.isCollapsed || !sel.rangeCount) return;

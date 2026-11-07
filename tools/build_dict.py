@@ -172,6 +172,10 @@ def main(src):
 
     tot = sum(os.path.getsize(os.path.join(out, x)) for x in os.listdir(out))
     print(f'core augmented: {n_aug} · ext entries: {len(ext)} (new words {n_new}) in {len(index)} buckets, {tot/1e6:.1f} MB · zh index: {len(zh)}')
+    # the page reads small buckets, not the letter files: re-cut them (see tools/split_dict.py)
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import split_dict
+    split_dict.split('dict'); split_dict.split('more')
 
 if __name__ == '__main__':
     if len(sys.argv) < 2: raise SystemExit(__doc__)

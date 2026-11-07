@@ -1,0 +1,57 @@
+/* ---------- welcome / 创刊词 (src/welcome.js) ---------- */
+.wel{max-width:70rem;padding-bottom:12px}
+.wel-mast,.wel-demo,.wel-feats li,.wel-note{animation:welIn .75s var(--ease-out) both;animation-delay:calc(var(--i,0) * 90ms)}
+@keyframes welIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.wel-top{display:grid;gap:30px;align-items:center}
+@media (min-width:880px){.wel-top{grid-template-columns:1.1fr 1fr;gap:56px}}
+.wel-mast{padding-top:4px}
+.wel-h{font:700 clamp(2.5rem,8vw,4rem)/1.04 var(--f-head);letter-spacing:-.012em;margin:.28em 0 .32em;text-wrap:balance}
+.wel-dek{font:400 1.08rem/1.8 var(--f-zh);color:var(--ink-2);max-width:31em;margin:0 0 24px}
+.wel-cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.wel-cta .pbtn{width:auto;flex:0 0 auto;padding-inline:22px}
+@media (max-width:520px){.wel-cta{flex-direction:column;align-items:stretch}.wel-cta .pbtn{width:100%}}
+.wel-sub{margin:14px 0 0;font:400 13px/1.6 var(--f-zh);color:var(--ink-3)}
+
+/* the clipping: a 9-second loop — tap a word, its card; fill blank 26, the explanation */
+.wel-demo{margin:0}
+.wd-sheet{position:relative;background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:18px 18px 16px;transform:rotate(-1.1deg);box-shadow:0 1px 0 var(--rule),0 22px 44px -26px rgba(20,24,27,.5)}
+.wd-sheet::before{content:'';position:absolute;top:-9px;left:50%;width:74px;height:18px;margin-left:-37px;background:var(--marker);opacity:.75;transform:rotate(2deg);border-radius:2px}
+.wd-kick{font:600 10.5px var(--f-mono);letter-spacing:.12em;color:var(--pencil);margin-bottom:10px}
+.wd-text{font:400 16.5px/1.8 var(--f-body);margin:0 0 14px;color:var(--ink)}
+.wd-w{position:relative;border-radius:2px;background:linear-gradient(var(--marker),var(--marker)) no-repeat 0 88%/0% 42%;animation:wdMark 9s infinite}
+.wd-w::after{content:'';position:absolute;left:50%;top:50%;width:36px;height:36px;margin:-18px 0 0 -18px;border-radius:50%;border:2px solid var(--pencil);opacity:0;pointer-events:none;animation:wdTap 9s infinite}
+.wd-blank{display:inline-flex;align-items:baseline;gap:6px;min-width:4.2em;padding:0 5px;border-bottom:1.5px solid var(--ink);border-radius:3px 3px 0 0;animation:wdBlank 9s infinite}
+.wd-num{font:600 11px var(--f-mono);color:var(--ink-3)}
+.wd-l{font:700 16px var(--f-body);color:var(--ok);opacity:0;display:inline-block;animation:wdL 9s infinite}
+.wd-slot{position:relative;height:96px}
+.wd-card,.wd-ans{position:absolute;left:0;right:0;top:0;border-radius:9px;opacity:0}
+.wd-card{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 9px;padding:11px 13px;background:var(--paper);border:1px solid var(--rule);box-shadow:0 12px 28px -16px rgba(20,24,27,.45);font:400 14px/1.5 var(--f-zh);animation:wdCard 9s infinite}
+.wd-card b{font:700 17px var(--f-body)}
+.wd-card i{font:600 10.5px var(--f-mono);font-style:normal;color:var(--pos-adj);border:1px solid currentColor;border-radius:4px;padding:0 4px}
+.wd-card em{margin-left:auto;font:600 10px var(--f-mono);font-style:normal;letter-spacing:.1em;color:var(--pencil)}
+.wd-ans{display:flex;gap:10px;padding:11px 13px;background:var(--ok-wash);border:1px solid color-mix(in srgb,var(--ok) 30%,transparent);font:400 14px/1.55 var(--f-zh);color:var(--ink);animation:wdAns 9s infinite}
+.wd-ans b{font:700 15px var(--f-body)}
+.wd-ans small{display:block;margin-top:3px;font-size:12.5px;line-height:1.55;color:var(--ink-2)}
+.wd-ok{flex:none;width:22px;height:22px;margin-top:1px;border-radius:50%;background:var(--ok);color:var(--sheet);display:grid;place-items:center;font-size:12px}
+.wel-demo figcaption{margin-top:14px;text-align:center;font:500 11.5px var(--f-mono);letter-spacing:.1em;color:var(--ink-3)}
+@keyframes wdTap{0%,8%{opacity:0;transform:scale(.4)}10%{opacity:.85;transform:scale(.55)}16%,100%{opacity:0;transform:scale(1.5)}}
+@keyframes wdMark{0%,9%{background-size:0% 42%}14%,46%{background-size:100% 42%}52%,100%{background-size:0% 42%}}
+@keyframes wdCard{0%,13%{opacity:0;transform:translateY(10px) scale(.96)}18%,44%{opacity:1;transform:none}49%,100%{opacity:0;transform:translateY(-4px)}}
+@keyframes wdBlank{0%,51%{background:transparent;border-color:var(--ink)}54%{background:var(--pencil-wash);border-color:var(--pencil)}60%,92%{background:var(--ok-wash);border-color:var(--ok)}97%,100%{background:transparent;border-color:var(--ink)}}
+@keyframes wdL{0%,55%{opacity:0;transform:translateY(-10px)}59%,92%{opacity:1;transform:none}97%,100%{opacity:0;transform:none}}
+@keyframes wdAns{0%,61%{opacity:0;transform:translateY(10px)}66%,92%{opacity:1;transform:none}97%,100%{opacity:0;transform:none}}
+
+.wel-feats{list-style:none;margin:44px 0 0;padding:30px 0 0;border-top:1px solid var(--rule);display:grid;gap:24px}
+@media (min-width:720px){.wel-feats{grid-template-columns:repeat(2,1fr);gap:28px 44px}}
+@media (min-width:1120px){.wel-feats{grid-template-columns:repeat(4,1fr);gap:28px}}
+.wel-feats li{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.wf-n{font:600 12px var(--f-mono);letter-spacing:.06em;color:var(--pencil);padding-top:4px}
+.wel-feats b{display:block;font:700 17px/1.4 var(--f-zh);margin-bottom:5px}
+.wel-feats p{margin:0;font:400 14.5px/1.75 var(--f-zh);color:var(--ink-2)}
+.wel-note{margin:34px 0 0;padding:12px 15px;border-left:3px solid var(--pencil);border-radius:0 6px 6px 0;background:var(--pencil-wash);font:400 13.5px/1.75 var(--f-zh);color:var(--ink-2)}
+.foot-lnk{appearance:none;border:0;background:none;padding:2px 4px;margin-left:4px;font:inherit;color:var(--pencil);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+@media (max-width:520px){.wd-sheet{transform:none}.wd-text{font-size:16px}.wd-slot{height:104px}}
+@media (prefers-reduced-motion:reduce){
+  .wel-mast,.wel-demo,.wel-feats li,.wel-note,.wd-w,.wd-w::after,.wd-blank,.wd-l,.wd-card,.wd-ans{animation:none!important}
+  .wd-w{background-size:100% 42%}.wd-l{opacity:1}.wd-blank{background:var(--ok-wash);border-color:var(--ok)}.wd-ans{opacity:1}
+}

@@ -1,3 +1,5 @@
+// These tests exercise the reader, not the first-visit front page (that is covered in e2e_ai.py).
+try { localStorage.setItem('cr.welcomed', 'true'); } catch (e) {}
 /* In-memory stand-in for the claude.ai artifact runtime (window.claude).
    Implements just the surface the page uses: db.doc(path).set/update/delete/onSnapshot,
    db.collection(path).onSnapshot, and downloads.save. 'sample' (Claude calls) is not

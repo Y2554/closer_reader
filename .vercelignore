@@ -6,5 +6,8 @@ server/
 src/
 docs/
 close-reader.html
+# per-letter dictionary sources: the page reads the small buckets in dict/b/ and more/b/ instead
+dict/[a-z].json
+more/[a-z].json
 *.md
 .gitignore

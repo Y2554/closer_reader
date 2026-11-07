@@ -74,6 +74,8 @@
 .blank.rvl{animation:flipin .6s var(--ease-out) both;animation-delay:calc(var(--i,0) * 85ms + 120ms)}
 @keyframes flipin{from{opacity:0;transform:perspective(420px) rotateX(-85deg)}}
 .blank{transition:background-color .2s,box-shadow .2s}
+/* phones: the blank's line is only ~14 px tall — give the finger a bigger target without moving the text */
+@media (pointer:coarse){ #body .blank{position:relative} #body .blank::after{content:'';position:absolute;left:-4px;right:-4px;top:-12px;bottom:-10px} }
 /* exam blanks */
 .blank.ex{border-bottom-style:dashed;border-bottom-color:var(--ink-3)}
 .blank.ex.filled{border-bottom-style:solid;border-bottom-color:var(--ink)}
@@ -256,3 +258,57 @@
 .dt-res{animation:fadeup .3s var(--ease-out) both}
 .dt-res.bad{animation:shake .45s}
 .rv-stat b{font-variant-numeric:tabular-nums}
+
+/* ---------- import progress: "编辑部 · 正在排版" (see impPaint in base.html) ---------- */
+.impp{padding:18px 18px 16px;background:var(--sheet);border:1px solid var(--rule);border-radius:8px;box-shadow:0 1px 0 var(--rule),0 10px 30px -18px rgba(20,24,27,.35)}
+.impp-hd{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:14px}
+.impp-t{font:500 13px var(--f-mono);color:var(--ink-2);font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.impp-steps{list-style:none;margin:0 0 14px;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;counter-reset:st}
+.impp-steps li{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:7px;font:500 12.5px/1.35 var(--f-zh);color:var(--ink-3);counter-increment:st;transition:color .3s}
+.impp-steps li i{position:relative;z-index:1;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--rule);background:var(--sheet);display:grid;place-items:center;font:600 11px var(--f-mono);font-style:normal;color:var(--ink-3);transition:background-color .35s,border-color .35s,color .35s}
+.impp-steps li i::before{content:counter(st)}
+.impp-steps li:not(:last-child)::after{content:'';position:absolute;top:12px;left:30px;right:2px;height:1.5px;background:linear-gradient(90deg,var(--pencil) 50%,var(--rule) 50%);background-size:200% 100%;background-position:100% 0;transition:background-position .7s var(--ease-out)}
+.impp-steps li.done{color:var(--ink-2)}
+.impp-steps li.done i{background:var(--pencil);border-color:var(--pencil);color:var(--sheet)}
+.impp-steps li.done i::before{content:'✓';font-size:12px}
+.impp-steps li.done::after{background-position:0 0}
+.impp-steps li.on{color:var(--ink)}
+.impp-steps li.on i{border-color:var(--pencil);color:var(--pencil)}
+.impp-steps li.on i::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:1.5px solid var(--pencil);animation:imppRing 1.8s var(--ease-out) infinite}
+@keyframes imppRing{0%{transform:scale(.65);opacity:.75}100%{transform:scale(1.25);opacity:0}}
+.impp-bar{height:4px;border-radius:4px;background:var(--paper-2);overflow:hidden;margin-bottom:14px}
+.impp-bar b{position:relative;display:block;height:100%;width:3%;border-radius:4px;background:var(--pencil);overflow:hidden;transition:width .8s var(--ease-out)}
+.impp-bar b::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent);transform:translateX(-100%);animation:imppSheen 1.9s ease-in-out infinite}
+@keyframes imppSheen{to{transform:translateX(100%)}}
+/* the galley: a proof sheet the sentences are set onto, newest at the bottom, older ones fading out */
+.impp-gal{position:relative;height:150px;display:flex;flex-direction:column;justify-content:flex-end;padding:10px 14px 12px;border-radius:5px;background:var(--paper);border:1px dashed var(--rule);font:400 15px/1.6 var(--f-body);color:var(--ink);overflow:hidden;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 34px);mask-image:linear-gradient(to bottom,transparent 0,#000 34px)}
+.impp-gal.st1{justify-content:center;-webkit-mask-image:none;mask-image:none}
+.impp-l{display:grid;grid-template-columns:2em 1fr;gap:.35em;margin:0 0 6px;animation:imppIn .5s var(--ease-out) both}
+.impp-l:last-child{margin-bottom:0}
+.impp-l .ln{font:500 11px/2.15 var(--f-mono);color:var(--ink-3);text-align:right;padding-right:4px;border-right:1px solid var(--rule)}
+.impp-cur .tx::after{content:'';display:inline-block;width:2px;height:1.05em;margin-left:2px;background:var(--pencil);vertical-align:-.17em;animation:imppBlink 1s steps(1) infinite}
+.impp-cur .ln{color:var(--pencil)}
+@keyframes imppBlink{50%{opacity:0}}
+@keyframes imppIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.impp-sk{display:block;height:9px;border-radius:3px;margin:9px 0;background:linear-gradient(90deg,var(--paper-2) 0%,var(--sheet) 45%,var(--paper-2) 90%);background-size:220% 100%;animation:imppSk 1.5s ease-in-out infinite}
+.impp-sk:nth-child(1){width:94%}.impp-sk:nth-child(2){width:80%;animation-delay:.15s}.impp-sk:nth-child(3){width:62%;animation-delay:.3s}
+@keyframes imppSk{from{background-position:120% 0}to{background-position:-120% 0}}
+.impp-gal.st3{flex-flow:row wrap;justify-content:flex-start;align-content:flex-end;gap:6px}
+.impp-chip{display:inline-flex;align-items:baseline;gap:5px;padding:3px 10px;border-radius:999px;background:var(--sheet);border:1px solid var(--rule);font:400 13px/1.5 var(--f-zh);animation:imppPop .45s var(--ease-spring) both}
+.impp-chip b{font:600 13.5px var(--f-body)}
+.impp-chip i{font:500 10.5px var(--f-mono);font-style:normal;color:var(--pencil)}
+.impp-chip span{color:var(--ink-2)}
+@keyframes imppPop{from{opacity:0;transform:translateY(6px) scale(.88)}to{opacity:1;transform:none}}
+.impp-gal.st4{align-items:center;justify-content:center;-webkit-mask-image:none;mask-image:none}
+.impp-fin{display:flex;align-items:center;gap:12px;margin:0;font:600 17px var(--f-zh);color:var(--ok)}
+.impp-fin .tick{width:36px;height:36px;border-radius:50%;background:var(--ok);color:var(--sheet);display:grid;place-items:center;font-size:19px;animation:imppPop .55s var(--ease-spring) both}
+.impp-stat{margin:12px 0 2px;font:500 13px/1.6 var(--f-zh);color:var(--ink-2);font-variant-numeric:tabular-nums}
+.impp-tip{margin:0;font:400 12.5px/1.6 var(--f-zh);color:var(--ink-3);min-height:1.6em}
+@media (max-width:520px){.impp{padding:15px 14px 14px}.impp-steps li{font-size:11.5px}.impp-gal{height:168px;font-size:14.5px}}
+@media (prefers-reduced-motion:reduce){.impp *,.impp *::before,.impp *::after{animation:none!important;transition:none!important}}
+
+/* phones: while the answer sheet is up, toasts drop in from the top instead of covering its options */
+@media (max-width:1039px){ body:has(#panel.open) .toast{top:calc(14px + env(safe-area-inset-top,0px));bottom:auto} }
+/* archive: the 删除 link was a 24-px target on touch screens */
+@media (pointer:coarse){ .hm-del{padding:9px 12px;font-size:12px;min-height:34px} }

@@ -159,10 +159,20 @@
   };
   let ticket = '';   // one-time pass so an import's follow-up word-tagging call isn't charged twice
 
-  // Phone photos are 3–10 MB; the server accepts 4.5 MB per request and the model scales big
-  // images down anyway. Shrink to ≤2000 px on the long side, JPEG, on a white background.
+  // Phone photos are 3–10 MB each; a request to Vercel may be at most 4.5 MB, and DeepSeek scales
+  // every image down to about 1300×1300 px anyway. So: ≤1600 px on the long side, JPEG, white
+  // background — and if several pages together still exceed ~3.6 MB, shrink them all further.
   const toDataURL = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(f); });
-  async function shrink(file, max = 2000, q = 0.85) {
+  async function shrinkAll(files) {
+    let max = 1600, q = 0.82, out = [];
+    for (let round = 0; round < 3; round++) {
+      out = await Promise.all(files.map(f => typeof f === 'string' ? f : shrink(f, max, q)));
+      if (out.reduce((n, u) => n + u.length, 0) <= 3.6e6) break;
+      max = Math.round(max * 0.8); q = Math.max(0.6, q - 0.1);
+    }
+    return out;
+  }
+  async function shrink(file, max, q) {
     const url = URL.createObjectURL(file);
     try {
       const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
@@ -190,15 +200,19 @@
   };
   const sample = EP ? {
     async json(prompt, opts = {}) {
-      const images = opts.images ? await Promise.all(opts.images.map(i => typeof i === 'string' ? i : shrink(i))) : [];
+      const images = opts.images ? await shrinkAll(opts.images) : [];
       const usedTicket = ticket;
+      // With opts.onText the reply is streamed: onText({ text }) gets the model's text so far,
+      // which the import page turns into live progress. See "Stream mode" in api/sample.js.
+      const stream = typeof opts.onText === 'function';
+      const gone = e => (e && e.name === 'AbortError') || (opts.signal && opts.signal.aborted) ? { code: 'cancelled' } : { code: 'network' };
       let r;
       try {
         r = await fetch(EP, {
           method: 'POST', headers: headersFor(), signal: opts.signal,
-          body: JSON.stringify({ prompt, images, modelTier: opts.modelTier || 'default' })
+          body: JSON.stringify({ prompt, images, modelTier: opts.modelTier || 'default', stream })
         });
-      } catch (e) { throw (e && e.name === 'AbortError') ? { code: 'cancelled' } : { code: 'network' }; }
+      } catch (e) { throw gone(e); }
       if (usedTicket && usedTicket === ticket) ticket = '';
       readQuota(r);
       if (r.headers.get('X-CR-Ticket')) ticket = r.headers.get('X-CR-Ticket');
@@ -206,7 +220,26 @@
         const body = await r.json().catch(() => ({}));
         throw { code: ERR[body && body.error] || (r.status === 413 ? 'prompt_too_large' : r.status === 429 ? 'rate_limited' : 'ai_unavailable') };
       }
-      try { return await r.json(); } catch (e) { throw { code: 'invalid_json' }; }
+      if (!/^text\/plain/.test(r.headers.get('Content-Type') || '')) {
+        try { return await r.json(); } catch (e) { throw { code: 'invalid_json' }; }
+      }
+      let all = '', last = 0;
+      try {
+        const rd = r.body.getReader(), dec = new TextDecoder();
+        for (;;) {
+          const { value, done } = await rd.read();
+          if (done) break;
+          all += dec.decode(value, { stream: true });
+          const k = all.indexOf('\u0001');
+          const text = k < 0 ? all : all.slice(0, k);
+          if (text.length !== last) { last = text.length; try { opts.onText({ text }); } catch (e) {} }
+        }
+      } catch (e) { throw gone(e); }
+      const k = all.indexOf('\u0001');
+      if (k < 0) throw { code: 'network' };                      // the connection dropped mid-way
+      let end; try { end = JSON.parse(all.slice(k + 1)); } catch (e) { throw { code: 'network' }; }
+      if (end.error) throw { code: ERR[end.error] || 'ai_unavailable' };
+      return end.value;
     }
   } : null;
 

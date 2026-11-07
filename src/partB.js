@@ -155,7 +155,7 @@ function renderChrome(){
   $('#ctVocab').textContent = due ? `${due} 待复习` : (Object.values(S.words).filter(w => w.status === 'new' || w.status === 'learning').length || '');
   const mo = Object.values(S.mistakes).filter(m => !m.resolved).length; $('#ctMis').textContent = mo || '';
   $$('.tab').forEach(t => t.toggleAttribute('aria-current', false));
-  const t = $(`.tab[data-v="${S.view === 'edit' ? 'read' : S.view}"]`); if (t) t.setAttribute('aria-current', 'page');
+  const t = $(`.tab[data-v="${S.view === 'edit' || S.view === 'welcome' ? 'read' : S.view}"]`); if (t) t.setAttribute('aria-current', 'page');
   moveTabInd();
   $('.layout').classList.toggle('has-rail', S.view === 'read' && !!cur());
 }
@@ -165,13 +165,14 @@ function renderView(){
   if (S.view === 'import') {
     if (S.impDirty || !v.querySelector('.imp')) {
       v.innerHTML = importHtml(); S.impDirty = false;
-      const img = $('#impPrev'); if (img && S.impFile) { try { img.src = URL.createObjectURL(S.impFile); } catch(err){} }
+      impThumbs();
       if (window.CR_AI && window.CR_AI.mount) window.CR_AI.mount($('#crAiBox'));   // standalone build: "AI 设置" box
     }
-    else { const s = $('#impStatus'); if (s) s.innerHTML = impStatusHtml(); }
+    else if (!(S.imp && S.imp.busy && $('#impp'))) { const s = $('#impStatus'); if (s) s.innerHTML = impStatusHtml(); }
+    if (S.imp && S.imp.busy) impPaint();                  // the live "正在排版" card keeps its own DOM
     return;
   }
-  v.innerHTML = S.view === 'read' ? readHtml() : S.view === 'archive' ? archiveHtml() : S.view === 'mistakes' ? mistakesHtml() : S.view === 'edit' ? editHtml() : S.view === 'dict' ? dictPageHtml() : vocabHtml();
+  v.innerHTML = S.view === 'welcome' ? welcomeHtml() : S.view === 'read' ? readHtml() : S.view === 'archive' ? archiveHtml() : S.view === 'mistakes' ? mistakesHtml() : S.view === 'edit' ? editHtml() : S.view === 'dict' ? dictPageHtml() : vocabHtml();
   if (S.view === 'vocab') afterVocabRender();
   if (S.view === 'edit') $$('.ed-ta', v).forEach(autosize);
   if (S.view === 'dict') afterDictRender();

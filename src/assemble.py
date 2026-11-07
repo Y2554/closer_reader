@@ -26,7 +26,7 @@ iAct = find(start=iA, pred=lambda x: x.startswith('/* ---------- actions'))
 iDrag = find(start=iA, pred=lambda x: x.startswith('/* ---------- bottom sheet drag'))
 iBoot = find(start=iA, pred=lambda x: x.startswith('/* ---------- boot'))
 head = lines(1, iA - 1); partA = lines(iA, iDC - 1); importSec = lines(iImp, iAct - 2); drag = lines(iDrag, iBoot - 2)
-B = open('src/partB.js', encoding='utf-8').read(); C = open('src/partC.js', encoding='utf-8').read().replace('/*@@TABS@@*/\n', open('src/tabs.js', encoding='utf-8').read()); D = open('src/partD.js', encoding='utf-8').read(); E = open('src/partE.js', encoding='utf-8').read() + '\n' + open('src/match.js', encoding='utf-8').read() + '\n' + open('src/mcq.js', encoding='utf-8').read() + '\n' + open('src/trans.js', encoding='utf-8').read() + '\n' + open('src/stand.js', encoding='utf-8').read() + '\n' + open('src/dict.js', encoding='utf-8').read()
+B = open('src/partB.js', encoding='utf-8').read() + '\n' + open('src/welcome.js', encoding='utf-8').read(); C = open('src/partC.js', encoding='utf-8').read().replace('/*@@TABS@@*/\n', open('src/tabs.js', encoding='utf-8').read()); D = open('src/partD.js', encoding='utf-8').read(); E = open('src/partE.js', encoding='utf-8').read() + '\n' + open('src/match.js', encoding='utf-8').read() + '\n' + open('src/mcq.js', encoding='utf-8').read() + '\n' + open('src/trans.js', encoding='utf-8').read() + '\n' + open('src/stand.js', encoding='utf-8').read() + '\n' + open('src/dict.js', encoding='utf-8').read()
 i0 = partA.index('const S = {'); i1 = partA.index('};', i0) + 2
 partA = partA[:i0] + """const S = {
   db: null, sample: null, dl: null, dbState: 'loading',
@@ -40,7 +40,7 @@ partA = partA[:i0] + """const S = {
   rv: null, dt: null, dtScope: 'learn', newLimit: LS.get('newLimit', 20), bk: null,
   notes: {}, dictAll: false, sheet: 'half',
   openZh: new Set(), unguard: new Set(), hint: false, confirmReset: false, confirmDel: null, selAt: 0,
-  impMode: 'text', impForm: { impTitle:'', impText:'', impBank:'', impAns:'' }, impFile: null, imp: null, impCtl: null, impDirty: true
+  impMode: 'text', impForm: { impTitle:'', impText:'', impBank:'', impAns:'' }, impFiles: [], imp: null, impCtl: null, impDirty: true
 };""" + partA[i1:]
 reps = [
  ("const vocabHas = (art, w) => S.vocab.find(v => v.art === art && v.w === w);\n", ""),
@@ -53,6 +53,7 @@ reps = [
 for a, b in reps:
     assert partA.count(a) == 1, a[:70]; partA = partA.replace(a, b)
 css_new = open('src/extra.css', encoding='utf-8').read() + '\n' + open('src/extra2.css', encoding='utf-8').read() + '\n' + open('src/match.css', encoding='utf-8').read() + '\n' + open('src/mcq.css', encoding='utf-8').read() + '\n' + open('src/trans.css', encoding='utf-8').read() + '\n' + open('src/stand.css', encoding='utf-8').read() + '\n' + open('src/tabs.css', encoding='utf-8').read() + '\n' + open('src/dict.css', encoding='utf-8').read()
+css_new += '\n' + open('src/welcome.css', encoding='utf-8').read()
 head = head.replace("@media (prefers-reduced-motion: reduce)", css_new + "\n@media (prefers-reduced-motion: reduce)")
 tok_l = "  --shadow:0 -10px 30px rgba(20,24,27,.14);\n"
 assert head.count(tok_l) == 1

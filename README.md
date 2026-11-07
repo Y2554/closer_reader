@@ -130,7 +130,13 @@ POST /api/sample
 响应    模型输出解析后的 JSON，HTTP 200；响应头 X-CR-Free: 剩余导入,剩余小功能
 错误    { "error": 代码 }：402 free_used_up / no_balance · 401 bad_key · 429 rate_limited / busy_today
         · 413 prompt_too_large · 422 invalid_json · 502 model_rejected / upstream_error · 503 ai_unavailable
+流式    请求体加 "stream": true（页面传了 onText 时自动加）：返回 text/plain，先是模型边写边发的原文，
+        最后是 "\u0001" + {"value": 解析后的 JSON} 或 "\u0001" + {"error": 代码}
 ```
+
+导入时页面用流式结果画「编辑部 · 正在排版」进度卡：读取原文 → 翻译 · 解析（每写好一句英文原句就排进校样）→ 标注词性（按已知词表计数）→ 排版完成。全部是真实进度，没有假动画；系统开启「减少动态效果」时动画全部关闭。用户点「停止」或关掉页面，服务器会中止对模型的调用并退回这次的免费额度。
+
+Vercel 免费版一次函数调用最长 300 秒。按示例文章估算，最长的一篇要输出约 7000 token；如果遇到超长文章超时，见第 19b 条的处理方案。
 
 ### 1.4 部署到线上
 
@@ -354,11 +360,13 @@ close-reader/
 ├── server/
 │   └── dev-server.mjs       ← 零依赖 Node 服务：静态文件 + /api/sample → Anthropic Messages API
 ├── level.json               ← 词汇等级表（36k 词形）
-├── dict/a.json … z.json     ← 核心词典分片（8.7 万词：ECDICT 中文 + WordNet 英英 + IPA + 词形变化 + 词频），共 18MB
+├── dict/a.json … z.json     ← 核心词典源数据（8.7 万词：ECDICT 中文 + WordNet 英英 + IPA + 词形变化 + 词频），共 18MB，不上线
+├── dict/b/                  ← 页面实际读取的核心词典：159 个约 120KB 的有序分卷 + index.json（tools/split_dict.py 生成）
 ├── dict/zh.json             ← 汉英反查索引（1.4 万个考试 / 常用词）
 ├── ext/000.json … 052.json  ← 扩展词库（60 万条：词组、专业词、新词），按字母顺序切成 53 个约 1MB 的分卷，共 42MB
 ├── ext/index.json           ← 分卷目录：[[起始两个字母, 文件名]…]
-├── more/a.json … z.json     ← 详解分片（词源、词根、近义词、形近词），共 8.7MB
+├── more/a.json … z.json     ← 详解源数据（词源、词根、近义词、形近词），共 8.7MB，不上线
+├── more/b/                  ← 页面实际读取的详解：83 个有序分卷 + index.json
 ├── more/resemble.json       ← 近义词辨析组（1331 组）
 ├── src/                     ← 唯一需要编辑的源码
 │   ├── assemble.py          ← 构建脚本：base.html + 各模块 → close-reader.html 和 index.html
@@ -468,7 +476,7 @@ match / stand / tabs ┼── assemble.py ───┤
 extra*.css ──────────┘                  └─► index.html ─ runtime/config.js + runtime/local-runtime.js
                                                           （IndexedDB / 下载 / /api/sample → server/dev-server.mjs）
 页面运行时：
-  ├─ fetch dict/x.json、more/x.json（按首字母懒加载）、level.json
+  ├─ fetch dict/b/index.json → dict/b/NNN.json、more/b/NNN.json（按词所在分卷懒加载）、level.json
   └─ window.claude.use('db' | 'sample' | 'downloads')   ← 唯一的外部接口，见 5.10
 ```
 
@@ -515,7 +523,9 @@ extra*.css ──────────┘                  └─► index.ht
 等级     → level.json（">lemma" 表示变形指向原形）
 ```
 
-分片按首字母懒加载，加载过的会缓存；加载失败时卡片里有「重试」按钮。
+查一个词只下载它所在的那一个分卷（约 120KB，压缩后约 40KB），加载过的会缓存；每次下载 15 秒超时并自动重试一次，仍失败时卡片里有「重试」按钮。词典页按字母浏览、联想补全时，才并行下载这个字母的全部分卷。
+
+> 以前是按首字母分片，`dict/s.json` 一个文件就有 2MB（压缩后约 700KB），查一个 s 开头的词要先下完它。在模拟的慢速手机网络（1.5Mbps、300ms 延迟）下，查一个新字母开头的词从 4.3 秒 / 715KB 降到 0.8 秒 / 41KB。
 
 ### 5.5 单词仓库
 
@@ -709,7 +719,7 @@ downloads.save({ filename, data }) → { status: 'saved' }
 
 单词本里已保存的词，显示的是当前等级表的结果，不是保存时记下的旧值。
 
-**重新生成**：`tools/build_dict.py` 的用法写在脚本开头，它负责从 ECDICT 生成 `ext/`、`dict/zh.json`，并给核心词典补上 `ex`、`fq`、`bn`。脚本可以重复运行。
+**重新生成**：改了 `dict/<字母>.json` 或 `more/<字母>.json` 之后，运行 `python3 tools/split_dict.py` 重新切分卷（`build_dict.py` 结束时会自动调用它）。`tools/build_dict.py` 的用法写在脚本开头，它负责从 ECDICT 生成 `ext/`、`dict/zh.json`，并给核心词典补上 `ex`、`fq`、`bn`。脚本可以重复运行。
 
 > ⚠️ 核心词典里的 WordNet 释义、音标，以及 `more/`、`level.json`，是在早期对话里一次性转换出来的，转换脚本没有保存。上面的字段说明足够重写。`build_dict.py` 只给这些文件补字段，不重建它们。
 
@@ -875,6 +885,10 @@ downloads.save({ filename, data }) → { status: 'saved' }
 17. **端口也算站点**：`localhost:8080` 和 `localhost:8000` 是两个不同的站点，数据互不相通。
 18. **缓存**：重新构建后如果页面没更新，强制刷新一次（Ctrl/Cmd + Shift + R）即可。`dev-server.mjs` 已经关闭了缓存。
 19. **AI 接口的防护**：免费试用靠设备编号 + IP + 全站三层计数，再加上模型平台的预充值余额兜底。设备编号清掉浏览器数据就会变，所以真正的上限是 IP、全站两层和余额。
+19b. **导入超时（300 秒）**：Vercel 免费版一次函数调用最长 300 秒，流式只让人看得见进度，不延长时限。如果遇到超长文章超时，按这个顺序处理：
+    1. **把一次调用拆成两次**：第一次只要原文、翻译、选项和答案（`paragraphs`、`options`、`blanks.ans`），第二次再写每个空的 `why / trap / tip`、`keys`、`tips`。每次各有 300 秒，单次输出减半。免费额度用现在的一次性通行证机制放行后续调用（把通行证改成可用 2 次），仍然只算一篇。
+    2. **超时自动续写**：模型已经写出的部分在前端是完整保留的（流式文本），超时后把"已写的 JSON 前半段"连同原题再发一次，让模型从断点接着写，前端拼接后再解析。
+    3. **兜底**：自带 Key 的用户不受 Vercel 时限影响的做法是浏览器直连模型平台（需要平台支持跨域），作为可选项。
 
 ### 词典
 
@@ -926,7 +940,8 @@ downloads.save({ filename, data }) → { status: 'saved' }
   - **原因**：Artifact 只能发布一个页面加若干静态文件，不能跑 npm；页面逻辑以「渲染 HTML 字符串 + 事件委托」为主，这样就够用了。
   - **代价**：`assemble.py` 用锚点打补丁，比较脆弱，见第 8 节。
   - **以后**：如果迁移到正式工程，可以把 `src/` 的各部分改成 ES 模块，再用 Vite 打包。数据层已经被适配层隔离开了，见 5.10。
-- **词典数据全部离线、按首字母分片**
+- **第一次打开有创刊词页**：介绍四个核心用法，带一段用真实文章做的循环演示（点词看释义 → 填空看解析）。页脚「使用说明」可以随时再打开。
+- **词典数据全部离线、按有序小分卷懒加载**
   - **原因**：查词要快、不依赖外部 API；分片后单个文件小于 1.5MB。
   - **范围**：中文释义用 ECDICT，英英释义用 WordNet。这两个是能找到的最权威、许可证最宽松的开源组合。
 - **语境义优先**
